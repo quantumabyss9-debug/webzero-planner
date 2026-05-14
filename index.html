@@ -1,0 +1,3155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WebZero Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#0c0d10; --surf:#13151a; --surf2:#1c1f27; --surf3:#22252f;
+      --bdr:#252830; --bdr2:#2e3240;
+      --acc:#00e5a0; --acc-dim:#00e5a018; --acc-glow:#00e5a040;
+      --txt:#e8eaf0; --txt2:#7a7f90; --txt3:#4a4f60;
+      --danger:#ff5a5a; --danger-dim:#ff5a5a18;
+      --hh:64px; --lw:220px; --tw:268px;
+    }
+    html,body{height:100%;background:var(--bg);color:var(--txt);font-family:'DM Sans',sans-serif;overflow:hidden;}
+
+    /* HEADER */
+    header{position:fixed;top:0;left:0;right:0;height:var(--hh);display:flex;align-items:stretch;background:var(--surf);border-bottom:1px solid var(--bdr);z-index:200;}
+    header::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(180deg,transparent 0,transparent 3px,rgba(255,255,255,.012) 3px,rgba(255,255,255,.012) 4px);}
+    .logo{flex:0 0 var(--lw);display:flex;align-items:center;gap:10px;padding:0 20px;border-right:1px solid var(--bdr);cursor:default;user-select:none;position:relative;text-decoration:none;}
+    .logo::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:3px;background:var(--acc);border-radius:0 2px 2px 0;box-shadow:0 0 10px var(--acc),0 0 24px var(--acc-glow);}
+    .logo-mark{width:30px;height:30px;flex-shrink:0;}
+    .logo-text{display:flex;flex-direction:column;line-height:1;}
+    .logo-text .w1{font-family:'Space Mono',monospace;font-weight:700;font-size:15px;letter-spacing:.04em;color:var(--acc);}
+    .logo-text .w2{font-family:'Space Mono',monospace;font-weight:400;font-size:10px;letter-spacing:.18em;color:var(--txt2);text-transform:uppercase;}
+    .nav-wrap{flex:1;min-width:0;position:relative;display:flex;align-items:center;}
+    .nav-wrap::after{content:'';position:absolute;top:0;right:0;bottom:0;width:36px;background:linear-gradient(90deg,transparent,var(--surf));pointer-events:none;z-index:2;}
+    nav{display:flex;align-items:center;gap:2px;overflow-x:auto;padding:0 16px 4px;height:100%;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;}
+    nav::-webkit-scrollbar{height:3px;}
+    nav::-webkit-scrollbar-track{background:transparent;margin:0 16px;}
+    nav::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:99px;transition:background .2s;}
+    nav::-webkit-scrollbar-thumb:hover{background:var(--acc);box-shadow:0 0 6px var(--acc-glow);}
+    .nav-btn{flex-shrink:0;display:flex;align-items:center;gap:7px;padding:6px 16px;border-radius:6px;font-size:13.5px;font-weight:500;color:var(--txt2);cursor:pointer;border:1px solid transparent;transition:color .18s,background .18s,border-color .18s;white-space:nowrap;background:none;font-family:'DM Sans',sans-serif;}
+    .nav-btn:hover{color:var(--txt);background:var(--surf2);border-color:var(--bdr);}
+    .nav-btn.active{color:var(--acc);background:var(--acc-dim);border-color:var(--acc-glow);}
+    .nav-btn svg{width:15px;height:15px;flex-shrink:0;opacity:.75;transition:opacity .18s;}
+    .nav-btn:hover svg,.nav-btn.active svg{opacity:1;}
+    .h-actions{flex:0 0 auto;display:flex;align-items:center;padding:0 16px;border-left:1px solid var(--bdr);}
+    .avatar{width:32px;height:32px;border-radius:50%;background:var(--surf2);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .18s;color:var(--txt2);}
+    .avatar:hover{border-color:var(--acc);color:var(--acc);}
+
+    /* VIEWS */
+    .view{display:none;position:fixed;top:var(--hh);left:0;right:0;bottom:0;}
+    .view.active{display:flex;}
+
+    /* DASHBOARD */
+    #vDash{flex-direction:column;overflow-y:auto;padding:40px 48px;gap:36px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;}
+    #vDash::-webkit-scrollbar{width:3px;}
+    #vDash::-webkit-scrollbar-track{background:transparent;}
+    #vDash::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:99px;}
+    #vDash::-webkit-scrollbar-thumb:hover{background:var(--acc);box-shadow:0 0 6px var(--acc-glow);}
+    .dash-hd h1{font-size:24px;font-weight:600;letter-spacing:-.02em;margin-bottom:6px;}
+    .dash-hd p{font-size:14px;color:var(--txt2);}
+    .stats-row{display:flex;gap:14px;flex-wrap:wrap;}
+    .stat{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:16px 22px;min-width:130px;}
+    .stat-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--txt3);margin-bottom:5px;}
+    .stat-val{font-family:'Space Mono',monospace;font-size:22px;}
+    .sec-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--txt3);padding-bottom:14px;border-bottom:1px solid var(--bdr);}
+    .feat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:14px;margin-top:16px;}
+    .feat-card{background:var(--surf);border:1px solid var(--bdr);border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:12px;cursor:pointer;transition:border-color .2s,transform .2s,background .2s;}
+    .feat-card:hover{border-color:var(--bdr2);background:var(--surf2);transform:translateY(-2px);}
+    .feat-ico{width:40px;height:40px;border-radius:9px;background:var(--acc-dim);border:1px solid var(--acc-glow);display:flex;align-items:center;justify-content:center;color:var(--acc);}
+    .feat-ico svg{width:18px;height:18px;}
+    .feat-card h3{font-size:14.5px;font-weight:600;letter-spacing:-.01em;}
+    .feat-card p{font-size:13px;color:var(--txt2);line-height:1.55;flex:1;}
+    .open-btn{align-self:flex-start;padding:5px 13px;border-radius:6px;background:var(--acc-dim);border:1px solid var(--acc-glow);color:var(--acc);font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .15s;}
+    .open-btn:hover{background:var(--acc-glow);}
+
+    /* SHARED SPLIT LAYOUT */
+    .split-view{flex-direction:row;}
+    .tree-panel{width:var(--tw);flex-shrink:0;background:var(--surf);border-right:1px solid var(--bdr);display:flex;flex-direction:column;}
+    .tree-toolbar{padding:9px 10px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:4px;}
+    .tree-tlbl{flex:1;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--txt3);padding-left:4px;}
+    .ico-btn{width:26px;height:26px;border-radius:5px;background:transparent;border:1px solid transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--txt2);transition:all .15s;}
+    .ico-btn:hover{background:var(--surf2);border-color:var(--bdr);color:var(--txt);}
+    .ico-btn svg{width:14px;height:14px;}
+    .tree-body{flex:1;overflow-y:auto;padding:6px 0;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;}
+    .tree-body::-webkit-scrollbar{width:3px;}
+    .tree-body::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:99px;}
+    .tree-body::-webkit-scrollbar-thumb:hover{background:var(--acc);box-shadow:0 0 6px var(--acc-glow);}
+    .t-row{display:flex;align-items:center;gap:3px;padding:3px 8px;cursor:pointer;border-radius:6px;margin:1px 6px;min-height:27px;font-size:13px;color:var(--txt2);transition:background .1s,color .1s;user-select:none;border:1px solid transparent;}
+    .t-row:hover{background:var(--surf2);color:var(--txt);}
+    .t-row.sel{background:var(--acc-dim);color:var(--acc);border-color:var(--acc-glow);}
+    .t-chev{width:14px;height:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--txt3);transition:transform .14s;}
+    .t-chev.open{transform:rotate(90deg);}
+    .t-chev svg{width:9px;height:9px;}
+    .t-chev-sp{width:14px;flex-shrink:0;}
+    .t-ico{width:15px;height:15px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+    .t-ico svg{width:13px;height:13px;}
+    .t-lbl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .t-acts{display:none;gap:1px;flex-shrink:0;}
+    .t-row:hover .t-acts{display:flex;}
+    .t-act{width:18px;height:18px;border-radius:3px;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--txt3);padding:0;transition:all .1s;}
+    .t-act:hover{background:var(--surf3);color:var(--txt);}
+    .t-act.del:hover{color:var(--danger);}
+    .t-act svg{width:10px;height:10px;}
+    .t-children{overflow:hidden;}
+    .t-hint{font-size:12px;color:var(--txt3);font-style:italic;padding:4px 12px;}
+    .content-panel{flex:1;min-width:0;background:var(--bg);display:flex;align-items:center;justify-content:center;}
+    .c-empty{text-align:center;opacity:.28;}
+    .c-empty .big{font-family:'Space Mono',monospace;font-size:44px;color:var(--acc);margin-bottom:10px;}
+    .c-empty p{font-size:12px;color:var(--txt2);letter-spacing:.08em;text-transform:uppercase;}
+
+    /* CONTEXT MENU */
+    .ctx{position:fixed;background:var(--surf2);border:1px solid var(--bdr2);border-radius:9px;padding:4px;min-width:185px;z-index:1000;box-shadow:0 10px 40px rgba(0,0,0,.55);animation:pop .12s cubic-bezier(.16,1,.3,1) both;}
+    .ctx.hidden{display:none;}
+    @keyframes pop{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+    .ctx-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;font-size:13px;color:var(--txt2);cursor:pointer;white-space:nowrap;transition:background .1s,color .1s;}
+    .ctx-item:hover{background:var(--surf3);color:var(--txt);}
+    .ctx-item.danger:hover{color:var(--danger);background:var(--danger-dim);}
+    .ctx-item svg{width:13px;height:13px;flex-shrink:0;opacity:.7;}
+    .ctx-sep{height:1px;background:var(--bdr);margin:3px 8px;}
+
+    /* MODAL */
+    .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:500;}
+    .modal-ov.hidden{display:none;}
+    .modal-box{background:var(--surf);border:1px solid var(--bdr2);border-radius:14px;padding:28px;width:370px;display:flex;flex-direction:column;gap:20px;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:mIn .2s cubic-bezier(.16,1,.3,1) both;}
+    @keyframes mIn{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+    .modal-title{font-size:16px;font-weight:600;letter-spacing:-.01em;}
+    .m-field{display:flex;flex-direction:column;gap:7px;}
+    .m-label{font-size:12px;color:var(--txt2);}
+    .m-input,.m-select{background:var(--surf2);border:1px solid var(--bdr2);border-radius:7px;padding:9px 12px;font-size:13.5px;color:var(--txt);font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s;width:100%;}
+    .m-input:focus,.m-select:focus{border-color:var(--acc);}
+    .m-select{appearance:none;cursor:pointer;}
+    .m-confirm-txt{font-size:13.5px;color:var(--txt2);line-height:1.55;}
+    .m-actions{display:flex;gap:8px;justify-content:flex-end;}
+    .btn{padding:8px 18px;border-radius:7px;font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid;transition:all .15s;}
+    .btn-ghost{background:transparent;border-color:var(--bdr2);color:var(--txt2);}
+    .btn-ghost:hover{border-color:var(--bdr);color:var(--txt);}
+    .btn-acc{background:var(--acc-dim);border-color:var(--acc-glow);color:var(--acc);}
+    .btn-acc:hover{background:var(--acc-glow);}
+    .btn-danger{background:var(--danger-dim);border-color:var(--danger);color:var(--danger);}
+    .btn-danger:hover{background:#ff5a5a30;}
+
+    /* ── USER SYSTEM ──────────────────────────────────────────── */
+    .login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+    .login-screen.hidden{display:none;}
+    .login-box{background:var(--surf);border:1px solid var(--bdr2);border-radius:16px;padding:40px;width:480px;display:flex;flex-direction:column;gap:22px;box-shadow:0 24px 64px rgba(0,0,0,.7);animation:mIn .3s cubic-bezier(.16,1,.3,1) both;}
+    .login-logo{font-family:'Space Mono',monospace;font-size:28px;font-weight:700;color:var(--acc);letter-spacing:.06em;text-align:center;}
+    .login-sub{font-size:13px;color:var(--txt2);text-align:center;line-height:1.6;}
+    .phrase-single{background:var(--surf2);border:1px solid var(--bdr2);border-radius:8px;padding:12px 14px;font-size:13px;font-family:'Space Mono',monospace;color:var(--txt);outline:none;transition:border-color .15s;width:100%;letter-spacing:.03em;}
+    .phrase-single:focus{border-color:var(--acc);}
+    .login-error{font-size:12px;color:var(--danger);text-align:center;min-height:18px;}
+    .login-btn{padding:11px;border-radius:8px;background:var(--acc-dim);border:1px solid var(--acc-glow);color:var(--acc);font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .15s;letter-spacing:.02em;}
+    .login-btn:hover{background:var(--acc-glow);}
+
+    .users-modal{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:600;}
+    .users-modal.hidden{display:none;}
+    .users-box{background:var(--surf);border:1px solid var(--bdr2);border-radius:14px;padding:28px;width:560px;max-height:82vh;display:flex;flex-direction:column;gap:18px;box-shadow:0 20px 60px rgba(0,0,0,.7);animation:mIn .2s cubic-bezier(.16,1,.3,1) both;}
+    .users-header{display:flex;align-items:center;justify-content:space-between;}
+    .users-title{font-size:16px;font-weight:600;letter-spacing:-.01em;}
+    .users-list{display:flex;flex-direction:column;overflow-y:auto;max-height:320px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;}
+    .user-row{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--bdr);}
+    .user-row:last-child{border-bottom:none;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:13.5px;font-weight:500;margin-bottom:3px;}
+    .user-phrase-preview{font-family:'Space Mono',monospace;font-size:10px;color:var(--txt3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .user-role-badge{font-family:'Space Mono',monospace;font-size:9px;color:var(--acc);background:var(--acc-dim);border:1px solid var(--acc-glow);padding:2px 8px;border-radius:99px;flex-shrink:0;letter-spacing:.06em;}
+    .copy-phrase-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:6px;background:var(--surf2);border:1px solid var(--bdr2);color:var(--txt2);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;flex-shrink:0;white-space:nowrap;}
+    .copy-phrase-btn:hover{border-color:var(--acc);color:var(--acc);}
+    .new-user-form{display:none;flex-direction:column;gap:10px;padding:14px;background:var(--surf2);border:1px solid var(--bdr);border-radius:8px;}
+    .gen-phrase-box{display:none;padding:14px;background:var(--acc-dim);border:1px solid var(--acc-glow);border-radius:8px;}
+    .gen-phrase-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--acc);margin-bottom:8px;}
+    .gen-phrase-txt{font-family:'Space Mono',monospace;font-size:12px;color:var(--txt);line-height:1.8;margin-bottom:10px;word-break:break-all;}
+    .user-badge-pill{padding:4px 12px;border-radius:99px;background:var(--surf2);border:1px solid var(--bdr2);font-size:11px;font-family:'Space Mono',monospace;color:var(--txt2);letter-spacing:.04em;white-space:nowrap;}
+    .users-icon-btn{width:32px;height:32px;border-radius:50%;background:var(--surf2);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .18s;color:var(--txt2);}
+    .users-icon-btn:hover{border-color:var(--acc);color:var(--acc);}
+
+    /* ── LANGUAGE BUILDER DETAIL PANELS ─────────────────────── */
+    #lContentPanel{flex-direction:column;align-items:stretch;justify-content:flex-start;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;}
+    #lContentPanel::-webkit-scrollbar{width:3px;}
+    #lContentPanel::-webkit-scrollbar-track{background:transparent;}
+    #lContentPanel::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:99px;}
+    #lContentPanel::-webkit-scrollbar-thumb:hover{background:var(--acc);box-shadow:0 0 6px var(--acc-glow);}
+
+    .word-detail{width:100%;max-width:900px;margin:0 auto;padding:32px 40px 60px;display:flex;flex-direction:column;gap:16px;flex-shrink:0;}
+
+    /* Header */
+    .wd-header{display:flex;align-items:center;gap:14px;padding-bottom:20px;border-bottom:1px solid var(--bdr);}
+    .wd-word-input{flex:1;background:transparent;border:none;outline:none;font-size:26px;font-weight:600;color:var(--txt);font-family:'DM Sans',sans-serif;letter-spacing:-.02em;min-width:0;}
+    .wd-word-input::placeholder{color:var(--txt3);}
+    .wd-lang-badge{flex-shrink:0;padding:4px 12px;border-radius:99px;background:var(--acc-dim);border:1px solid var(--acc-glow);color:var(--acc);font-size:11px;font-family:'Space Mono',monospace;letter-spacing:.06em;white-space:nowrap;}
+    .lang-badge-lg{font-size:10px;letter-spacing:.1em;text-transform:uppercase;}
+
+    /* Sections */
+    .wd-section{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;}
+    .wd-section-title{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--txt3);display:flex;align-items:center;gap:8px;}
+    .wd-section-title.wd-strong{color:#68d391;}
+    .wd-section-title.wd-weak{color:#fc8181;}
+    .vocab-count{margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;color:var(--acc);background:var(--acc-dim);border:1px solid var(--acc-glow);padding:2px 8px;border-radius:99px;letter-spacing:.04em;}
+
+    /* Two/three col layouts */
+    .wd-two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .wd-three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+    .wd-meta-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;}
+    @media(max-width:700px){.wd-two-col,.wd-three-col{grid-template-columns:1fr;}}
+
+    /* Fields */
+    .wd-fields{display:flex;flex-direction:column;gap:10px;}
+    .wd-field{display:flex;flex-direction:column;gap:5px;}
+    .wd-label{font-size:11px;color:var(--txt3);letter-spacing:.04em;text-transform:uppercase;}
+    .wd-input,.wd-textarea{background:var(--surf2);border:1px solid var(--bdr2);border-radius:6px;padding:8px 11px;font-size:13px;color:var(--txt);font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s;resize:vertical;}
+    .wd-input:focus,.wd-textarea:focus{border-color:var(--acc);}
+    .wd-input{height:36px;resize:none;}
+    .wd-textarea{min-height:72px;}
+    .wd-textarea-lg{min-height:110px;}
+    select.wd-input{appearance:none;cursor:pointer;height:36px;}
+
+    /* Word type picker */
+    .wd-type-grid{display:flex;flex-wrap:wrap;gap:6px;}
+    .wd-type-btn{padding:4px 11px;border-radius:99px;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;border:1px solid var(--bdr2);background:transparent;color:var(--txt2);cursor:pointer;transition:all .15s;}
+    .wd-type-btn:hover{border-color:var(--bdr);color:var(--txt);}
+    .wd-type-btn.active{background:var(--acc-dim);border-color:var(--acc-glow);color:var(--acc);}
+
+    /* Tag input */
+    .tag-wrap{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:36px;background:var(--surf2);border:1px solid var(--bdr2);border-radius:6px;padding:5px 8px;cursor:text;transition:border-color .15s;}
+    .tag-wrap:focus-within{border-color:var(--acc);}
+    .tag-chip{display:flex;align-items:center;gap:4px;background:var(--surf3);border:1px solid var(--bdr2);border-radius:99px;padding:2px 8px;font-size:12px;color:var(--txt2);}
+    .tag-x{background:none;border:none;cursor:pointer;color:var(--txt3);font-size:13px;line-height:1;padding:0 1px;transition:color .1s;}
+    .tag-x:hover{color:var(--danger);}
+    .tag-input{background:transparent;border:none;outline:none;font-size:12px;color:var(--txt);font-family:'DM Sans',sans-serif;min-width:80px;flex:1;}
+    .tag-input::placeholder{color:var(--txt3);}
+
+    /* Vocabulary table */
+    .vocab-table{display:flex;flex-direction:column;border:1px solid var(--bdr);border-radius:8px;overflow:hidden;}
+    .vocab-header{display:grid;grid-template-columns:1.2fr 1fr 2fr 32px;gap:12px;padding:8px 14px;background:var(--surf2);border-bottom:1px solid var(--bdr);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--txt3);}
+    .vocab-row{display:grid;grid-template-columns:1.2fr 1fr 2fr 32px;gap:12px;padding:9px 14px;border-bottom:1px solid var(--bdr);align-items:center;transition:background .1s;}
+    .vocab-row:last-child{border-bottom:none;}
+    .vocab-row:hover{background:var(--surf2);}
+    .vocab-word{font-size:13px;font-weight:500;color:var(--txt);}
+    .vocab-type{font-size:12px;color:var(--acc);font-family:'Space Mono',monospace;}
+    .vocab-def{font-size:12px;color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .vocab-link{background:var(--acc-dim);border:1px solid var(--acc-glow);color:var(--acc);border-radius:5px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:background .15s;flex-shrink:0;}
+    .vocab-link:hover{background:var(--acc-glow);}
+    /* ── SYSTEMS MAP ──────────────────────────────────────────── */
+    .smap-wrap{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden;}
+    .smap-toolbar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--surf);border-bottom:1px solid var(--bdr);gap:8px;flex-shrink:0;}
+    .smap-toolbar-left{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+    .smap-divider{width:1px;height:18px;background:var(--bdr2);margin:0 2px;}
+    .smap-tbtn{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;background:transparent;border:1px solid var(--bdr);color:var(--txt2);font-size:12.5px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;}
+    .smap-tbtn:hover{background:var(--surf2);color:var(--txt);border-color:var(--bdr2);}
+    .smap-tbtn.active{background:var(--acc-dim);border-color:var(--acc-glow);color:var(--acc);}
+    .smap-type-sel{background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;padding:5px 10px;font-size:12px;color:var(--txt2);font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;appearance:none;}
+    .smap-hint{font-size:11px;color:var(--txt3);white-space:nowrap;}
+    .smap-main{flex:1;display:flex;min-height:0;overflow:hidden;}
+    .smap-canvas-wrap{flex:1;min-width:0;position:relative;overflow:hidden;background:var(--bg);}
+    #smapCanvas{position:absolute;inset:0;cursor:grab;width:100%;height:100%;}
+    #smapCanvas:active{cursor:grabbing;}
+    .smap-panel{width:280px;flex-shrink:0;background:var(--surf);border-left:1px solid var(--bdr);display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;}
+    .smap-panel-empty{padding:24px 18px;font-size:13px;color:var(--txt3);line-height:1.7;}
+    .smap-panel-content{padding:18px;display:flex;flex-direction:column;gap:14px;flex:1;}
+    .smap-panel-badge{align-self:flex-start;padding:3px 10px;border-radius:99px;font-size:11px;font-family:'Space Mono',monospace;border:1px solid;letter-spacing:.04em;}
+    .smap-panel-title{font-size:13px;font-weight:600;color:var(--txt);letter-spacing:-.01em;}
+    .smap-stat-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr);font-size:13px;color:var(--txt2);}
+    .smap-stat-row span:last-child{font-family:'Space Mono',monospace;color:var(--acc);}
+    #vSystems{flex-direction:column;}
+    .smap-map-sel{background:var(--surf2);border:1px solid var(--acc-glow);border-radius:6px;padding:5px 10px;font-size:12px;color:var(--acc);font-family:'Space Mono',monospace;outline:none;cursor:pointer;appearance:none;max-width:160px;}
+    .smap-layers-panel{border-top:1px solid var(--bdr);display:flex;flex-direction:column;flex-shrink:0;}
+    .smap-layers-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--txt3);}
+    .smap-layers-hdr button{width:20px;height:20px;border-radius:4px;background:var(--surf2);border:1px solid var(--bdr);color:var(--txt2);cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+    .smap-layers-hdr button:hover{border-color:var(--acc);color:var(--acc);}
+    .smap-layer-list{display:flex;flex-direction:column;max-height:220px;overflow-y:auto;padding:0 10px 10px;gap:5px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;}
+    .smap-layer-row{display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:6px;background:var(--surf2);border:1px solid var(--bdr);}
+    .smap-layer-color{width:20px;height:20px;border-radius:4px;border:none;cursor:pointer;padding:0;flex-shrink:0;}
+    .smap-layer-name{flex:1;background:transparent;border:none;outline:none;font-size:12px;color:var(--txt);font-family:'DM Sans',sans-serif;min-width:0;}
+    .smap-layer-name:focus{color:var(--acc);}
+    .smap-layer-btns{display:flex;gap:2px;flex-shrink:0;}
+    .smap-layer-btn{width:18px;height:18px;border-radius:3px;background:transparent;border:none;color:var(--txt3);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .1s;padding:0;}
+    .smap-layer-btn:hover{background:var(--surf3);color:var(--txt);}
+    .smap-layer-btn.del:hover{color:var(--danger);}
+    .smap-props-section{flex:1;overflow-y:auto;min-height:0;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;}
+    /* ── Confirm modal ── */
+    .confirm-ov{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:9000;}
+    .confirm-ov.hidden{display:none;}
+    .confirm-box{background:var(--surf);border:1px solid var(--danger);border-radius:14px;padding:32px 28px;width:380px;display:flex;flex-direction:column;gap:20px;box-shadow:0 20px 60px rgba(0,0,0,.7);animation:mIn .18s cubic-bezier(.16,1,.3,1) both;}
+    .confirm-msg{font-size:14px;color:var(--txt);line-height:1.6;text-align:center;}
+    .confirm-actions{display:flex;gap:10px;justify-content:center;}
+    /* ── TOKENOMICS ─────────────────────────────────────────── */
+    .tok-wrap{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden;}
+    .tok-nav{display:flex;gap:2px;padding:10px 20px 0;background:var(--surf);border-bottom:1px solid var(--bdr);flex-shrink:0;}
+    .tok-tab{padding:8px 18px;border-radius:7px 7px 0 0;font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;border:1px solid transparent;border-bottom:none;cursor:pointer;color:var(--txt2);background:transparent;transition:all .15s;}
+    .tok-tab:hover{color:var(--txt);background:var(--surf2);}
+    .tok-tab.active{color:var(--acc);background:var(--bg);border-color:var(--bdr);border-bottom-color:var(--bg);}
+    .tok-body{flex:1;overflow-y:auto;padding:28px 32px;background:var(--bg);scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;}
+    .tok-h1{font-size:20px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px;}
+    .tok-sub{font-size:13px;color:var(--txt2);margin-bottom:24px;}
+    .tok-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:24px;}
+    .tok-card{background:var(--surf);border:1px solid var(--bdr);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:10px;}
+    .tok-card-hdr{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+    .tok-badge{font-family:'Space Mono',monospace;font-size:11px;padding:3px 9px;border-radius:99px;border:1px solid;letter-spacing:.04em;}
+    .tok-card-title{font-size:14px;font-weight:600;}
+    .tok-card-sub{font-size:12px;color:var(--txt2);}
+    .tok-field{display:flex;flex-direction:column;gap:4px;}
+    .tok-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--txt3);}
+    .tok-input,.tok-select,.tok-textarea{background:var(--surf2);border:1px solid var(--bdr2);border-radius:6px;padding:7px 10px;font-size:13px;color:var(--txt);font-family:'DM Sans',sans-serif;outline:none;transition:border-color .15s;width:100%;}
+    .tok-input:focus,.tok-select:focus,.tok-textarea:focus{border-color:var(--acc);}
+    .tok-select{appearance:none;cursor:pointer;}
+    .tok-textarea{resize:vertical;min-height:60px;}
+    .tok-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .tok-3col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+    .tok-section{margin-bottom:28px;}
+    .tok-section-title{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--txt3);padding-bottom:12px;border-bottom:1px solid var(--bdr);margin-bottom:16px;}
+    .tok-chart-wrap{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:16px;margin-bottom:20px;}
+    .tok-chart-title{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--txt3);margin-bottom:12px;}
+    .tok-phase-row{display:grid;grid-template-columns:1fr 100px 100px 80px 80px 32px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);}
+    .tok-phase-hdr{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);}
+    .tok-result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:16px;}
+    .tok-result-card{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px;text-align:center;}
+    .tok-result-val{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;margin-bottom:4px;}
+    .tok-result-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--txt3);}
+    .tok-result-card.green{border-color:#68d39140;background:#68d39108;}
+    .tok-result-card.yellow{border-color:#f0b42940;background:#f0b42908;}
+    .tok-result-card.red{border-color:#ff5a5a40;background:#ff5a5a08;}
+    .tok-slider{width:100%;accent-color:var(--acc);cursor:pointer;}
+    .tok-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:11px;font-family:'Space Mono',monospace;border:1px solid var(--bdr2);background:var(--surf2);color:var(--txt2);margin:2px;}
+    .tok-tag.on{border-color:var(--acc-glow);background:var(--acc-dim);color:var(--acc);}
+    .tok-tag-x{cursor:pointer;opacity:.6;}
+    .tok-add-btn{padding:5px 14px;border-radius:6px;background:var(--acc-dim);border:1px solid var(--acc-glow);color:var(--acc);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .15s;}
+    .tok-add-btn:hover{background:var(--acc-glow);}
+    .tok-del-btn{width:28px;height:28px;border-radius:5px;background:transparent;border:1px solid var(--bdr);color:var(--txt3);cursor:pointer;transition:all .1s;font-size:14px;}
+    .tok-del-btn:hover{border-color:var(--danger);color:var(--danger);}
+    .tok-chain-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+    .tok-risk{padding:6px 16px;border-radius:99px;font-size:12px;font-weight:600;font-family:'Space Mono',monospace;letter-spacing:.04em;display:inline-block;}
+    .tok-risk.low{background:#68d39118;border:1px solid #68d39140;color:#68d391;}
+    .tok-risk.medium{background:#f0b42918;border:1px solid #f0b42940;color:#f0b429;}
+    .tok-risk.high{background:#ff5a5a18;border:1px solid #ff5a5a40;color:#ff5a5a;}
+    .tok-risk.critical{background:#ff5a5a30;border:1px solid var(--danger);color:var(--danger);}
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="#">
+    <svg class="logo-mark" viewBox="0 0 30 30" fill="none">
+      <rect width="30" height="30" rx="6" fill="#00e5a010"/>
+      <rect width="30" height="30" rx="6" stroke="#00e5a040" stroke-width="1"/>
+      <polyline points="5,9 9,21 15,13 21,21 25,9" stroke="#00e5a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="15" cy="24" r="1.5" fill="#00e5a0"/>
+    </svg>
+    <div class="logo-text"><span class="w1">WebZero</span><span class="w2">Planner</span></div>
+  </a>
+  <div class="nav-wrap"><nav id="mainNav"></nav></div>
+  <div class="h-actions" style="gap:8px;">
+    <span class="user-badge-pill" id="userBadge"></span>
+    <div class="users-icon-btn" id="usersBtn" style="display:none" title="Manage Users" onclick="openUsersModal()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+        <circle cx="6" cy="5" r="2.5"/>
+        <path d="M1 14c0-2.5 2-4 5-4s5 1.5 5 4"/>
+        <path d="M13 7v4M11 9h4"/>
+      </svg>
+    </div>
+    <div class="avatar" title="Sign Out" onclick="logout()" style="cursor:pointer;">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+        <path d="M10 12l4-4-4-4M14 8H6"/><path d="M6 3H3a1 1 0 00-1 1v8a1 1 0 001 1h3"/>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<!-- DASHBOARD -->
+<div class="view" id="vDash">
+  <div style="width:100%;display:flex;flex-direction:column;gap:36px;padding:40px 48px;overflow-y:auto;">
+    <div class="dash-hd">
+      <h1>Dashboard</h1>
+      <p>Your WebZero planning workspace at a glance.</p>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-lbl">Features</div><div class="stat-val" id="statFeatures">—</div></div>
+      <div class="stat"><div class="stat-lbl">Project Files</div><div class="stat-val" id="statProjFiles">—</div></div>
+      <div class="stat"><div class="stat-lbl">Research Docs</div><div class="stat-val" id="statResFiles">—</div></div>
+    </div>
+    <div>
+      <div class="sec-lbl">Features</div>
+      <div class="feat-grid" id="featGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECT LAYOUT -->
+<div class="view split-view" id="vProject">
+  <div class="tree-panel">
+    <div class="tree-toolbar">
+      <span class="tree-tlbl">Explorer</span>
+      <button class="ico-btn" id="pBtnNF" title="New Folder">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 4.5A1.5 1.5 0 013.5 3h2.879a1.5 1.5 0 011.06.44l.622.621A1.5 1.5 0 009.121 4.5H12.5A1.5 1.5 0 0114 6v6a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12V4.5z"/>
+          <line x1="8" y1="7.5" x2="8" y2="11.5"/><line x1="6" y1="9.5" x2="10" y2="9.5"/>
+        </svg>
+      </button>
+      <button class="ico-btn" id="pBtnNFile" title="New File">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V5l-3-3z"/>
+          <path d="M10 2v3h3"/>
+          <line x1="8" y1="8.5" x2="8" y2="12.5"/><line x1="6" y1="10.5" x2="10" y2="10.5"/>
+        </svg>
+      </button>
+    </div>
+    <div class="tree-body" id="pTreeBody"></div>
+  </div>
+  <div class="content-panel">
+    <div class="c-empty"><div class="big">{ }</div><p>Select a file to view</p></div>
+  </div>
+</div>
+
+<!-- RESEARCH -->
+<div class="view split-view" id="vResearch">
+  <div class="tree-panel">
+    <div class="tree-toolbar">
+      <span class="tree-tlbl">Research Library</span>
+      <button class="ico-btn" id="rBtnNF" title="New Folder">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 4.5A1.5 1.5 0 013.5 3h2.879a1.5 1.5 0 011.06.44l.622.621A1.5 1.5 0 009.121 4.5H12.5A1.5 1.5 0 0114 6v6a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12V4.5z"/>
+          <line x1="8" y1="7.5" x2="8" y2="11.5"/><line x1="6" y1="9.5" x2="10" y2="9.5"/>
+        </svg>
+      </button>
+      <button class="ico-btn" id="rBtnNFile" title="New Document">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V5l-3-3z"/>
+          <path d="M10 2v3h3"/>
+          <line x1="8" y1="8.5" x2="8" y2="12.5"/><line x1="6" y1="10.5" x2="10" y2="10.5"/>
+        </svg>
+      </button>
+    </div>
+    <div class="tree-body" id="rTreeBody"></div>
+  </div>
+  <div class="content-panel">
+    <div class="c-empty"><div class="big">{ }</div><p>Select a document to view</p></div>
+  </div>
+</div>
+
+<!-- MODULES -->
+<div class="view split-view" id="vModules">
+  <div class="tree-panel">
+    <div class="tree-toolbar">
+      <span class="tree-tlbl">Modules</span>
+      <button class="ico-btn" id="mBtnNF" title="New Folder">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 4.5A1.5 1.5 0 013.5 3h2.879a1.5 1.5 0 011.06.44l.622.621A1.5 1.5 0 009.121 4.5H12.5A1.5 1.5 0 0114 6v6a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12V4.5z"/>
+          <line x1="8" y1="7.5" x2="8" y2="11.5"/><line x1="6" y1="9.5" x2="10" y2="9.5"/>
+        </svg>
+      </button>
+      <button class="ico-btn" id="mBtnNFile" title="New File">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V5l-3-3z"/>
+          <path d="M10 2v3h3"/>
+          <line x1="8" y1="8.5" x2="8" y2="12.5"/><line x1="6" y1="10.5" x2="10" y2="10.5"/>
+        </svg>
+      </button>
+    </div>
+    <div class="tree-body" id="mTreeBody"></div>
+  </div>
+  <div class="content-panel" id="mContentPanel" style="flex-direction:column;align-items:stretch;justify-content:flex-start;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;">
+    <div class="c-empty" style="margin:auto;align-self:center;"><div class="big">{ }</div><p>Select a file to view</p></div>
+  </div>
+</div>
+
+<!-- LANGUAGE BUILDER -->
+<div class="view split-view" id="vLanguage">
+  <div class="tree-panel">
+    <div class="tree-toolbar">
+      <span class="tree-tlbl">Language Library</span>
+      <button class="ico-btn" id="lBtnNF" title="New Folder">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 4.5A1.5 1.5 0 013.5 3h2.879a1.5 1.5 0 011.06.44l.622.621A1.5 1.5 0 009.121 4.5H12.5A1.5 1.5 0 0114 6v6a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12V4.5z"/>
+          <line x1="8" y1="7.5" x2="8" y2="11.5"/><line x1="6" y1="9.5" x2="10" y2="9.5"/>
+        </svg>
+      </button>
+      <button class="ico-btn" id="lBtnNFile" title="New Entry">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V5l-3-3z"/>
+          <path d="M10 2v3h3"/>
+          <line x1="8" y1="8.5" x2="8" y2="12.5"/><line x1="6" y1="10.5" x2="10" y2="10.5"/>
+        </svg>
+      </button>
+    </div>
+    <div class="tree-body" id="lTreeBody"></div>
+  </div>
+  <div class="content-panel" id="lContentPanel">
+    <div class="c-empty" style="margin:auto;align-self:center;"><div class="big">{ }</div><p>Select an entry to view</p></div>
+  </div>
+</div>
+
+<!-- TOKENOMICS -->
+<div class="view" id="vTokenomics">
+  <div class="tok-wrap">
+    <div class="tok-nav" id="tokNav">
+      <button class="tok-tab active" data-tab="overview">⬡ Token Overview</button>
+      <button class="tok-tab" data-tab="emission">📈 Emission Schedule</button>
+      <button class="tok-tab" data-tab="stress">⚡ Stress Test</button>
+      <button class="tok-tab" data-tab="nodes">◈ Node Rewards</button>
+    </div>
+    <div class="tok-body" id="tokBody"></div>
+  </div>
+</div>
+
+<!-- SYSTEMS MAP -->
+<div class="view" id="vSystems">
+  <div class="smap-wrap">
+    <div class="smap-toolbar">
+      <div class="smap-toolbar-left">
+        <select class="smap-map-sel" id="smapMapSel" onchange="smapSwitchMap(this.value)" title="Switch map"></select>
+        <button class="smap-tbtn" onclick="smapNewMap()">+ Map</button>
+        <button class="smap-tbtn" onclick="smapRenameMap()" title="Rename current map">✎</button>
+        <button class="smap-tbtn" onclick="smapDeleteMap()" title="Delete current map" style="color:var(--danger);border-color:var(--danger-dim);">✕ Map</button>
+        <div class="smap-divider"></div>
+        <button class="smap-tbtn" onclick="smapAddNode()">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="12" height="12"><circle cx="7" cy="7" r="5"/><line x1="7" y1="4" x2="7" y2="10"/><line x1="4" y1="7" x2="10" y2="7"/></svg>
+          Add Node
+        </button>
+        <select class="smap-type-sel" id="smapNodeTypeSel">
+          <option value="service">Service</option>
+          <option value="database">Database</option>
+          <option value="api">API</option>
+          <option value="queue">Queue</option>
+          <option value="cache">Cache</option>
+          <option value="client">Client</option>
+          <option value="server">Server</option>
+          <option value="module">Module</option>
+          <option value="external">External</option>
+        </select>
+        <div class="smap-divider"></div>
+        <button class="smap-tbtn" id="smapConnBtn" onclick="smapToggleConnect()">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="12" height="12"><circle cx="2.5" cy="7" r="1.5"/><circle cx="11.5" cy="7" r="1.5"/><line x1="4" y1="7" x2="10" y2="7"/></svg>
+          Connect
+        </button>
+        <div class="smap-divider"></div>
+        <button class="smap-tbtn" onclick="smapReset()">⟲ Reset</button>
+        <button class="smap-tbtn" onclick="smapTopView()">⊙ Top View</button>
+      </div>
+      <span class="smap-hint">Left drag — rotate &nbsp;·&nbsp; Right drag — pan &nbsp;·&nbsp; Scroll — zoom &nbsp;·&nbsp; Drag node — move it</span>
+    </div>
+    <div class="smap-main">
+      <div class="smap-canvas-wrap" id="smapCanvasWrap">
+        <canvas id="smapCanvas"></canvas>
+      </div>
+      <div class="smap-panel" id="smapPanel">
+        <div class="smap-props-section" id="smapPropsSection">
+          <div class="smap-panel-empty">Click a node to see its properties.</div>
+        </div>
+        <div class="smap-layers-panel">
+          <div class="smap-layers-hdr">
+            <span>Layers</span>
+            <button onclick="smapAddLayer()" title="Add layer">+</button>
+          </div>
+          <div class="smap-layer-list" id="smapLayerList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SHARED CONTEXT MENU -->
+<div class="ctx hidden" id="ctxMenu">
+  <div class="ctx-item" id="ctxNewFolder">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4.5A1.5 1.5 0 013.5 3h2.879a1.5 1.5 0 011.06.44l.622.621A1.5 1.5 0 009.121 4.5H12.5A1.5 1.5 0 0114 6v6a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12V4.5z"/></svg>
+    New Folder
+  </div>
+  <div class="ctx-item" id="ctxNewFile">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V5l-3-3z"/><path d="M10 2v3h3"/></svg>
+    <span id="ctxFileLabel">New File</span>
+  </div>
+  <div class="ctx-sep" id="ctxSep"></div>
+  <div class="ctx-item" id="ctxRename">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 2.5l2 2-8 8H3.5v-2l8-8z"/></svg>
+    Rename
+  </div>
+  <div class="ctx-item danger" id="ctxDelete">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 4 13 4"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1M6 7v5M10 7v5"/><path d="M4 4l1 9a1 1 0 001 1h4a1 1 0 001-1l1-9"/></svg>
+    Delete
+  </div>
+</div>
+
+<!-- SHARED MODAL -->
+<div class="modal-ov hidden" id="modal">
+  <div class="modal-box">
+    <div class="modal-title" id="mTitle"></div>
+    <div class="m-field" id="mfName">
+      <label class="m-label">Name</label>
+      <input class="m-input" id="mInput" type="text" autocomplete="off" spellcheck="false" placeholder="Enter name…"/>
+    </div>
+    <div class="m-field" id="mfType" style="display:none">
+      <label class="m-label" id="mTypeLabel">File Type</label>
+      <select class="m-select" id="mSelect"></select>
+    </div>
+    <div class="m-field" id="mfConfirm" style="display:none">
+      <p class="m-confirm-txt" id="mConfirmTxt"></p>
+    </div>
+    <div class="m-actions">
+      <button class="btn btn-ghost" id="mCancel">Cancel</button>
+      <button class="btn btn-acc"   id="mConfirm">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">WEBZERO</div>
+    <div class="login-sub">Paste or type your 12-word phrase to sign in.</div>
+    <input class="phrase-single" id="phraseInput" type="text" autocomplete="off" spellcheck="false" placeholder="word1 word2 word3 word4 word5 word6 word7 word8 word9 word10 word11 word12"/>
+    <div class="login-error" id="loginError"></div>
+    <button class="login-btn" onclick="attemptLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- USERS MODAL -->
+<div class="users-modal hidden" id="usersModal">
+  <div class="users-box">
+    <div class="users-header">
+      <div class="users-title">Team Members</div>
+      <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px;" onclick="closeUsersModal()">Close</button>
+    </div>
+    <div class="users-list" id="usersList"></div>
+    <div class="new-user-form" id="newUserForm">
+      <label class="m-label">Display Name</label>
+      <input class="m-input" id="newUserName" type="text" placeholder="e.g. Alex, Design Team…" autocomplete="off"/>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-acc" style="flex:1;" onclick="createNewUser()">Generate Phrase &amp; Create</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('newUserForm').style.display='none'">Cancel</button>
+      </div>
+    </div>
+    <div class="gen-phrase-box" id="generatedPhrase">
+      <div class="gen-phrase-lbl">New User Phrase — copy and share privately</div>
+      <div class="gen-phrase-txt" id="generatedPhraseText"></div>
+      <button class="copy-phrase-btn" id="copyGenBtn" onclick="copyGeneratedPhrase()" style="width:100%;justify-content:center;">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M2 10V3a1 1 0 011-1h7"/></svg>
+        Copy Phrase
+      </button>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;border-top:1px solid var(--bdr);padding-top:14px;">
+      <button class="btn btn-acc" onclick="showNewUserForm()">+ New User</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   FEATURE REGISTRY — add new features here, everything auto-updates
+================================================================ */
+const FEATURES = [
+  {
+    id:'dashboard', label:'Dashboard', showCard:false, viewId:'vDash',
+    icon:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>`,
+  },
+  {
+    id:'project', label:'Project Layout', showCard:true, viewId:'vProject',
+    desc:'Organise your project with infinitely nested folders and files. Supports .md, .txt, .json, .csv, .html, .js, .ts, .css, .yaml and more.',
+    icon:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4.5A1.5 1.5 0 013.5 3h2.879a1.5 1.5 0 011.06.44l.622.621A1.5 1.5 0 009.121 4.5H12.5A1.5 1.5 0 0114 6v6a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12V4.5z"/></svg>`,
+  },
+  {
+    id:'research', label:'Research', showCard:true, viewId:'vResearch',
+    desc:'Document and organise research into current systems, tools, and processes. Build a structured knowledge library with nested folders and notes.',
+    icon:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6.5" cy="6.5" r="4"/><line x1="9.5" y1="9.5" x2="14" y2="14"/><line x1="5" y1="6.5" x2="8" y2="6.5"/><line x1="6.5" y1="5" x2="6.5" y2="8"/></svg>`,
+  },
+  {
+    id:'language', label:'Language Builder', showCard:true, viewId:'vLanguage',
+    desc:'Build and organise a custom language library — vocabulary, grammar rules, phonetics, scripts, and more. Structure entries with nested folders.',
+    icon:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 4h8M2 8h6M2 12h4"/>
+            <path d="M10 8l2-4 2 4M10.6 6.5h2.8"/>
+            <line x1="14" y1="8" x2="14" y2="13"/>
+            <path d="M11 13c0-1.1 3-1.1 3 0"/>
+          </svg>`,
+  },
+  {
+    id:'modules', label:'Modules', showCard:true, viewId:'vModules',
+    desc:'Organise and document your modules, packages, and dependencies. Structure with nested folders and files.',
+    icon:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="1" width="6" height="6" rx="1.5"/>
+            <rect x="9" y="1" width="6" height="6" rx="1.5"/>
+            <rect x="1" y="9" width="6" height="6" rx="1.5"/>
+            <path d="M9 12h6M12 9v6"/>
+          </svg>`,
+  },
+  {
+    id:'systems', label:'Systems Map', showCard:true, viewId:'vSystems',
+    desc:'Interactive 3D architecture canvas. Map your system components across layers, connect them, and document each node with properties and notes.',
+    icon:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="3" cy="8" r="1.5"/><circle cx="8" cy="3" r="1.5"/><circle cx="13" cy="8" r="1.5"/><circle cx="8" cy="13" r="1.5"/>
+            <line x1="4.5" y1="7.2" x2="6.5" y2="4.2"/><line x1="9.5" y1="4.2" x2="11.5" y2="7.2"/>
+            <line x1="11.5" y1="8.8" x2="9.5" y2="11.8"/><line x1="6.5" y1="11.8" x2="4.5" y2="8.8"/>
+          </svg>`,
+  },
+  {
+    id:'tokenomics', label:'Tokenomics', showCard:true, viewId:'vTokenomics',
+    desc:'Model token economics for QST, wQST and stablecoins. Plan emission schedules, run stablecoin stress tests, and calculate node rewards.',
+    icon:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="8" cy="8" r="5.5"/><path d="M8 5.5v2.5l2 1.2"/><path d="M5 13.5C3.2 12.7 2 10.9 2 8.8"/>
+    </svg>`,
+  },
+  // ── ADD NEW FEATURES BELOW ──
+];
+
+/* ================================================================
+   FILE TYPE LISTS  (each tree has its own contextual list)
+================================================================ */
+const PROJECT_TYPES = [
+  {val:'md',   label:'Markdown (.md)'},
+  {val:'txt',  label:'Plain Text (.txt)'},
+  {val:'json', label:'JSON (.json)'},
+  {val:'csv',  label:'CSV (.csv)'},
+  {val:'html', label:'HTML (.html)'},
+  {val:'js',   label:'JavaScript (.js)'},
+  {val:'ts',   label:'TypeScript (.ts)'},
+  {val:'css',  label:'Stylesheet (.css)'},
+  {val:'yaml', label:'YAML (.yaml)'},
+  {val:'xml',  label:'XML (.xml)'},
+];
+
+const RESEARCH_TYPES = [
+  {val:'md',   label:'Markdown Note (.md)'},
+  {val:'txt',  label:'Plain Text (.txt)'},
+  {val:'pdf',  label:'PDF Reference (.pdf)'},
+  {val:'csv',  label:'Data Table (.csv)'},
+  {val:'json', label:'JSON Data (.json)'},
+  {val:'yaml', label:'YAML Config (.yaml)'},
+  {val:'xml',  label:'XML (.xml)'},
+  {val:'html', label:'HTML Page (.html)'},
+];
+
+const LANG_TYPES = [
+  {val:'langmd', label:'Language Overview (.md)'},
+  {val:'cmdmd',  label:'Command Entry (.md)'},
+  {val:'md',     label:'Markdown (.md)'},
+  {val:'txt',    label:'Plain Text (.txt)'},
+  {val:'json',   label:'JSON Data (.json)'},
+  {val:'csv',    label:'Data Table (.csv)'},
+  {val:'yaml',   label:'YAML Config (.yaml)'},
+  {val:'xml',    label:'XML (.xml)'},
+];
+
+const MODULE_TYPES = [
+  {val:'modmd', label:'Module Overview (.md)'},
+  {val:'md',    label:'Markdown (.md)'},
+  {val:'txt',   label:'Plain Text (.txt)'},
+  {val:'json',  label:'JSON (.json)'},
+  {val:'yaml',  label:'YAML (.yaml)'},
+  {val:'js',    label:'JavaScript (.js)'},
+  {val:'ts',    label:'TypeScript (.ts)'},
+  {val:'xml',   label:'XML (.xml)'},
+];
+
+const EXT_COLOR = {
+  folder:'#f0b429',
+  langmd:'#00e5a0', cmdmd:'#63b3ed', modmd:'#d6bcfa',
+  md:'#63b3ed', txt:'#a0aec0', json:'#68d391',
+  csv:'#fc8181', html:'#f6ad55', js:'#fbd38d', ts:'#90cdf4',
+  css:'#76e4f7', yaml:'#d6bcfa', xml:'#b794f4', pdf:'#fc8181',
+};
+const col = ext => EXT_COLOR[ext] || '#a0aec0';
+
+const svgFolder = c => `<svg viewBox="0 0 16 16" fill="none" stroke="${c}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4.5A1.5 1.5 0 013.5 3h2.879a1.5 1.5 0 011.06.44l.622.621A1.5 1.5 0 009.121 4.5H12.5A1.5 1.5 0 0114 6v6a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12V4.5z"/></svg>`;
+const svgFile   = c => `<svg viewBox="0 0 16 16" fill="none" stroke="${c}" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V5l-3-3z"/><path d="M10 2v3h3"/></svg>`;
+
+/* ================================================================
+   TREE STATE — two independent datasets
+================================================================ */
+let globalUid = 1;
+let activeTree = null; // which tree triggered the current modal/ctx
+
+const TREES = {
+  project: {
+    data:[], sel:null,
+    bodyId:'pTreeBody', btnNF:'pBtnNF', btnNFile:'pBtnNFile',
+    fileTypes: PROJECT_TYPES, fileLabel:'File',
+    hint:'Right-click or use the buttons above to add folders and files.',
+  },
+  research: {
+    data:[], sel:null,
+    bodyId:'rTreeBody', btnNF:'rBtnNF', btnNFile:'rBtnNFile',
+    fileTypes: RESEARCH_TYPES, fileLabel:'Document',
+    hint:'Right-click or use the buttons above to add research folders and documents.',
+  },
+  language: {
+    data:[], sel:null,
+    bodyId:'lTreeBody', btnNF:'lBtnNF', btnNFile:'lBtnNFile',
+    fileTypes: LANG_TYPES, fileLabel:'Entry',
+    hint:'Right-click or use the buttons above to add language folders and entries.',
+  },
+  modules: {
+    data:[], sel:null,
+    bodyId:'mTreeBody', btnNF:'mBtnNF', btnNFile:'mBtnNFile',
+    fileTypes: MODULE_TYPES, fileLabel:'File',
+    hint:'Right-click or use the buttons above to add module folders and files.',
+  },
+};
+
+/* ================================================================
+   NAV + VIEW SWITCHING
+================================================================ */
+let activeFId = 'dashboard';
+
+function buildNav() {
+  const nav = document.getElementById('mainNav');
+  nav.innerHTML = '';
+  FEATURES.forEach(f => {
+    const b = document.createElement('button');
+    b.className = 'nav-btn' + (f.id === activeFId ? ' active' : '');
+    b.dataset.id = f.id;
+    b.innerHTML  = f.icon + `<span>${f.label}</span>`;
+    b.addEventListener('click', () => gotoView(f.id));
+    nav.appendChild(b);
+  });
+}
+
+function gotoView(id) {
+  activeFId = id;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.id === id));
+  const feat = FEATURES.find(f => f.id === id);
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === feat?.viewId));
+  if (id === 'dashboard') refreshDash();
+  if (id === 'systems') setTimeout(() => { if (window._smapOnShow) window._smapOnShow(); }, 20);
+  if (id === 'tokenomics') setTimeout(() => { if (window._tokOnShow) window._tokOnShow(); }, 20);
+}
+
+/* ================================================================
+   DASHBOARD
+================================================================ */
+function refreshDash() {
+  const cards = FEATURES.filter(f => f.showCard);
+  document.getElementById('statFeatures').textContent  = cards.length;
+  document.getElementById('statProjFiles').textContent = countNodes(TREES.project.data).files;
+  document.getElementById('statResFiles').textContent  = countNodes(TREES.research.data).files;
+
+  document.getElementById('featGrid').innerHTML = cards.map(f => `
+    <div class="feat-card" onclick="gotoView('${f.id}')">
+      <div class="feat-ico">${f.icon}</div>
+      <h3>${f.label}</h3>
+      <p>${f.desc}</p>
+      <button class="open-btn" onclick="event.stopPropagation();gotoView('${f.id}')">Open →</button>
+    </div>
+  `).join('');
+}
+
+function countNodes(nodes) {
+  let files=0, folders=0;
+  for (const n of nodes) {
+    if (n.type==='folder') { folders++; const s=countNodes(n.children); files+=s.files; folders+=s.folders; }
+    else files++;
+  }
+  return {files, folders};
+}
+
+/* ================================================================
+   TREE RENDER  (generic — pass in any tree state object)
+================================================================ */
+function renderTree(tree) {
+  const body = document.getElementById(tree.bodyId);
+  if (tree.data.length === 0) {
+    body.innerHTML = `<div class="t-hint" style="padding:12px 14px;">${tree.hint}</div>`;
+    return;
+  }
+  body.innerHTML = '';
+  tree.data.forEach(n => body.appendChild(buildRow(n, 0, tree)));
+}
+
+function buildRow(node, depth, tree) {
+  const isDir = node.type === 'folder';
+  const c     = col(isDir ? 'folder' : node.ext);
+  const wrap  = document.createElement('div');
+  const row   = document.createElement('div');
+  row.className = 't-row' + (tree.sel === node.id ? ' sel' : '');
+
+  if (depth > 0) {
+    const sp = document.createElement('div');
+    sp.style.cssText = `width:${depth*14}px;flex-shrink:0`;
+    row.appendChild(sp);
+  }
+
+  const chev = document.createElement('div');
+  if (isDir) {
+    chev.className = 't-chev' + (node.open ? ' open' : '');
+    chev.innerHTML = `<svg viewBox="0 0 9 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 1.5l5 3-5 3"/></svg>`;
+  } else { chev.className = 't-chev-sp'; }
+  row.appendChild(chev);
+
+  const ico = document.createElement('div');
+  ico.className = 't-ico';
+  ico.innerHTML = isDir ? svgFolder(c) : svgFile(c);
+  row.appendChild(ico);
+
+  const lbl = document.createElement('div');
+  lbl.className   = 't-lbl';
+  const dispExt = (node.ext === 'langmd' || node.ext === 'cmdmd' || node.ext === 'modmd') ? 'md' : node.ext;
+  lbl.textContent = node.name + (isDir ? '' : '.'+dispExt);
+  row.appendChild(lbl);
+
+  const acts = document.createElement('div');
+  acts.className = 't-acts';
+  if (isDir) {
+    acts.appendChild(mkAct(
+      `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3A1 1 0 012 2h2.5l.75.75A1 1 0 006 3.25H10a1 1 0 011 1V9a1 1 0 01-1 1H2a1 1 0 01-1-1V3z"/><line x1="6" y1="5" x2="6" y2="8.5"/><line x1="4.25" y1="6.75" x2="7.75" y2="6.75"/></svg>`,
+      'New folder inside', '', e=>{ e.stopPropagation(); openModal('folder',node.id,tree); }
+    ));
+    acts.appendChild(mkAct(
+      `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1H3a1 1 0 00-1 1v8a1 1 0 001 1h6a1 1 0 001-1V4L7 1z"/><path d="M7 1v3h3"/><line x1="6" y1="5.5" x2="6" y2="8.5"/><line x1="4.5" y1="7" x2="7.5" y2="7"/></svg>`,
+      'New file inside', '', e=>{ e.stopPropagation(); openModal('file',node.id,tree); }
+    ));
+  }
+  acts.appendChild(mkAct(
+    `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8.5 1.5l2 2-6 6H2.5v-2l6-6z"/></svg>`,
+    'Rename','', e=>{ e.stopPropagation(); openModal('rename',node.id,tree); }
+  ));
+  acts.appendChild(mkAct(
+    `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="2" y1="3" x2="10" y2="3"/><path d="M4 3V2h4v1M3 3l.75 7h4.5L9 3"/></svg>`,
+    'Delete','del', e=>{ e.stopPropagation(); openModal('delete',node.id,tree); }
+  ));
+  row.appendChild(acts);
+
+  row.addEventListener('click', () => {
+    if (isDir) node.open = !node.open;
+    tree.sel = node.id;
+    renderTree(tree);
+    if (tree.onSelect) tree.onSelect(node, isDir, tree);
+  });
+  row.addEventListener('contextmenu', e => {
+    e.preventDefault(); activeTree = tree;
+    showCtx(e.clientX, e.clientY, node.id, isDir, tree);
+  });
+  wrap.appendChild(row);
+
+  if (isDir && node.open) {
+    const kids = document.createElement('div');
+    kids.className = 't-children';
+    if (node.children.length === 0) {
+      const h = document.createElement('div');
+      h.className = 't-hint';
+      h.style.paddingLeft = ((depth+1)*14+36)+'px';
+      h.textContent = 'Empty folder';
+      kids.appendChild(h);
+    } else {
+      node.children.forEach(ch => kids.appendChild(buildRow(ch, depth+1, tree)));
+    }
+    wrap.appendChild(kids);
+  }
+  return wrap;
+}
+
+function mkAct(svg, title, cls, handler) {
+  const b = document.createElement('button');
+  b.className = 't-act '+cls; b.title = title; b.innerHTML = svg;
+  b.addEventListener('click', handler);
+  return b;
+}
+
+/* Tree helpers */
+function findNode(arr, id) {
+  for (const n of arr) {
+    if (n.id===id) return n;
+    if (n.type==='folder') { const f=findNode(n.children,id); if(f) return f; }
+  }
+  return null;
+}
+function findParentArr(arr, id) {
+  for (let i=0;i<arr.length;i++) {
+    if (arr[i].id===id) return arr;
+    if (arr[i].type==='folder') { const f=findParentArr(arr[i].children,id); if(f) return f; }
+  }
+  return null;
+}
+function insertNode(tree, node, parentId) {
+  if (parentId) { const p=findNode(tree.data,parentId); if(p){p.children.push(node);p.open=true;return;} }
+  tree.data.push(node);
+}
+function removeNode(tree, id) {
+  const arr=findParentArr(tree.data,id);
+  if(arr){const i=arr.findIndex(n=>n.id===id);if(i>-1)arr.splice(i,1);}
+}
+
+/* ================================================================
+   CONTEXT MENU
+================================================================ */
+let ctxNodeId = null;
+
+function showCtx(x, y, nodeId, isDir, tree) {
+  ctxNodeId=nodeId; activeTree=tree;
+  const $=id=>document.getElementById(id);
+  const v=(id,show)=>{ $(id).style.display=show?'flex':'none'; };
+  $('ctxFileLabel').textContent = tree.fileLabel;
+  v('ctxNewFolder',isDir); v('ctxNewFile',isDir);
+  $('ctxSep').style.display = isDir?'block':'none';
+  v('ctxRename',true); v('ctxDelete',true);
+  posCtx(x, y);
+}
+function showCtxRoot(x, y, tree) {
+  ctxNodeId=null; activeTree=tree;
+  const $=id=>document.getElementById(id);
+  const v=(id,show)=>{ $(id).style.display=show?'flex':'none'; };
+  $('ctxFileLabel').textContent = tree.fileLabel;
+  v('ctxNewFolder',true); v('ctxNewFile',true);
+  $('ctxSep').style.display='none';
+  v('ctxRename',false); v('ctxDelete',false);
+  posCtx(x, y);
+}
+function posCtx(x, y) {
+  const m=document.getElementById('ctxMenu');
+  m.classList.remove('hidden');
+  m.style.left = Math.min(x, innerWidth-195)+'px';
+  m.style.top  = Math.min(y, innerHeight-160)+'px';
+}
+function hideCtx() { document.getElementById('ctxMenu').classList.add('hidden'); ctxNodeId=null; }
+
+document.getElementById('ctxNewFolder').addEventListener('click',()=>{ const t=activeTree,id=ctxNodeId; hideCtx(); openModal('folder',id,t); });
+document.getElementById('ctxNewFile')  .addEventListener('click',()=>{ const t=activeTree,id=ctxNodeId; hideCtx(); openModal('file',  id,t); });
+document.getElementById('ctxRename')   .addEventListener('click',()=>{ const t=activeTree,id=ctxNodeId; hideCtx(); openModal('rename',id,t); });
+document.getElementById('ctxDelete')   .addEventListener('click',()=>{ const t=activeTree,id=ctxNodeId; hideCtx(); openModal('delete',id,t); });
+
+Object.values(TREES).forEach(tree => {
+  document.getElementById(tree.bodyId).addEventListener('contextmenu', e => {
+    if (e.target.closest('.t-row')) return;
+    e.preventDefault();
+    showCtxRoot(e.clientX, e.clientY, tree);
+  });
+});
+
+document.addEventListener('click', hideCtx);
+document.addEventListener('keydown', e => { if(e.key==='Escape'){hideCtx();closeModal();} });
+
+/* ================================================================
+   MODAL  (shared, context-aware via activeTree)
+================================================================ */
+let mMode=null, mTargetId=null;
+
+function openModal(mode, targetId, tree) {
+  mMode=mode; mTargetId=targetId; activeTree=tree;
+  const $=id=>document.getElementById(id);
+  $('mfName').style.display='flex'; $('mfType').style.display='none'; $('mfConfirm').style.display='none';
+  $('mConfirm').className='btn btn-acc';
+
+  // Populate type dropdown with this tree's file types
+  $('mSelect').innerHTML = tree.fileTypes.map(t=>`<option value="${t.val}">${t.label}</option>`).join('');
+  $('mTypeLabel').textContent = tree.fileLabel+' Type';
+
+  if (mode==='folder') {
+    $('mTitle').textContent=$('mInput').value=''; $('mInput').placeholder='Folder name…';
+    $('mTitle').textContent = targetId?'New Folder Inside':'New Folder';
+    $('mConfirm').textContent='Create';
+  } else if (mode==='file') {
+    $('mTitle').textContent='New '+tree.fileLabel;
+    $('mInput').value=''; $('mInput').placeholder='Name (no extension)…';
+    $('mfType').style.display='flex'; $('mConfirm').textContent='Create';
+  } else if (mode==='rename') {
+    const node=findNode(tree.data,targetId);
+    $('mTitle').textContent='Rename'; $('mInput').value=node?node.name:'';
+    $('mInput').placeholder='New name…'; $('mConfirm').textContent='Rename';
+  } else if (mode==='delete') {
+    const node=findNode(tree.data,targetId);
+    $('mTitle').textContent='Delete'; $('mfName').style.display='none'; $('mfConfirm').style.display='flex';
+    $('mConfirmTxt').textContent=`Delete "${node?.name}"? This cannot be undone.`;
+    $('mConfirm').textContent='Delete'; $('mConfirm').className='btn btn-danger';
+  }
+
+  $('modal').classList.remove('hidden');
+  if (mode!=='delete') setTimeout(()=>$('mInput').focus(),60);
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.add('hidden');
+  mMode=null; mTargetId=null;
+}
+
+document.getElementById('mCancel').addEventListener('click', closeModal);
+document.getElementById('modal').addEventListener('click', e=>{ if(e.target===document.getElementById('modal')) closeModal(); });
+document.getElementById('mInput').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('mConfirm').click(); });
+
+document.getElementById('mConfirm').addEventListener('click', () => {
+  const tree=activeTree; if(!tree) return;
+  const name=document.getElementById('mInput').value.trim();
+  const ext =document.getElementById('mSelect').value;
+  let newNode = null;
+
+  if      (mMode==='folder') { if(!name) return; newNode={id:globalUid++,type:'folder',name,open:true,children:[]}; insertNode(tree,newNode,mTargetId); }
+  else if (mMode==='file')   { if(!name) return; newNode={id:globalUid++,type:'file',name,ext}; insertNode(tree,newNode,mTargetId); }
+  else if (mMode==='rename') { if(!name) return; const n=findNode(tree.data,mTargetId); if(n) n.name=name; }
+  else if (mMode==='delete') { if(tree.sel===mTargetId) tree.sel=null; removeNode(tree,mTargetId); }
+
+  // Auto-select and open the new node if one was created
+  if (newNode) {
+    tree.sel = newNode.id;
+    renderTree(tree);
+    if (tree.onSelect) tree.onSelect(newNode, newNode.type==='folder', tree);
+  } else {
+    renderTree(tree);
+  }
+  closeModal();
+});
+
+/* ================================================================
+   TOOLBAR BUTTONS
+================================================================ */
+Object.values(TREES).forEach(tree => {
+  document.getElementById(tree.btnNF).addEventListener('click', () => {
+    const s = tree.sel ? findNode(tree.data,tree.sel) : null;
+    openModal('folder', s?.type==='folder' ? tree.sel : null, tree);
+  });
+  document.getElementById(tree.btnNFile).addEventListener('click', () => {
+    const s = tree.sel ? findNode(tree.data,tree.sel) : null;
+    openModal('file', s?.type==='folder' ? tree.sel : null, tree);
+  });
+});
+
+/* ================================================================
+   INIT
+================================================================ */
+/* ================================================================
+   LANGUAGE BUILDER — data stores
+================================================================ */
+const wordData = {}; // keyed by node id
+const langData = {}; // keyed by node id
+
+function getWordData(id) {
+  if (!wordData[id]) wordData[id] = {
+    word:'', language:'', types:[],
+    etymology:'', morphology:'', phonetics:'', semantics:'', syntax:'', pragmatics:'',
+    definition:'', purpose:'',
+    relatedWords:[], synonyms:[], antonyms:[],
+    strongPoints:'', weakPoints:'',
+    notes:'', tags:[],
+  };
+  return wordData[id];
+}
+function getLangData(id) {
+  if (!langData[id]) langData[id] = {
+    name:'', paradigm:'', typeSystem:'', executionModel:'', fileExtension:'',
+    primaryUseCase:'', author:'', version:'', status:'active',
+    description:'', designGoals:'', influences:'',
+    runtime:'', memoryModel:'', concurrencyModel:'', performanceProfile:'',
+    statementStructure:'', scopingRules:'', typeSystemDetail:'', controlFlow:'', compilationModel:'',
+    commandStructure:'', syntaxPattern:'', commandHierarchy:'', errorHandling:'',
+    keyFeatures:'', examples:'',
+    strongPoints:'', weakPoints:'',
+    notes:'', tags:[],
+  };
+  return langData[id];
+}
+
+const WORD_TYPES = [
+  'Declaration','Assignment','Function','Method','Loop',
+  'Condition','Return','Import','Expression','Operator',
+  'Statement','Modifier','Accessor','Constructor','Destructor',
+  'Exception','Type Definition','Annotation','Macro','Call',
+];
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function findParentFolder(nodes, childId) {
+  for (const n of nodes) {
+    if (n.type==='folder') {
+      if (n.children.some(c=>c.id===childId)) return n;
+      const f = findParentFolder(n.children, childId);
+      if (f) return f;
+    }
+  }
+  return null;
+}
+function collectWords(nodes) {
+  const out = [];
+  for (const n of nodes) {
+    if (n.type==='file') out.push(n);
+    else if (n.type==='folder') out.push(...collectWords(n.children));
+  }
+  return out;
+}
+function collectByExt(nodes, ext) {
+  const out = [];
+  for (const n of nodes) {
+    if (n.type==='file' && n.ext===ext) out.push(n);
+    else if (n.type==='folder') out.push(...collectByExt(n.children, ext));
+  }
+  return out;
+}
+
+/* ── Command Type Picker ── */
+function initTypePicker(containerId, selected, onChange) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = '';
+  WORD_TYPES.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'wd-type-btn' + (selected.includes(t) ? ' active' : '');
+    b.textContent = t;
+    b.addEventListener('click', () => {
+      const i = selected.indexOf(t);
+      if (i > -1) selected.splice(i, 1); else selected.push(t);
+      b.classList.toggle('active', selected.includes(t));
+      onChange(selected);
+    });
+    el.appendChild(b);
+  });
+}
+
+/* ── Tag Input ── */
+function initTagInput(containerId, tagsArr, onChange) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const render = () => {
+    container.innerHTML = '';
+    tagsArr.forEach((tag, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'tag-chip';
+      chip.innerHTML = `<span>${esc(tag)}</span><button class="tag-x">×</button>`;
+      chip.querySelector('.tag-x').addEventListener('click', e => {
+        e.stopPropagation();
+        tagsArr.splice(i, 1);
+        onChange(tagsArr); render();
+      });
+      container.appendChild(chip);
+    });
+    const inp = document.createElement('input');
+    inp.className = 'tag-input';
+    inp.placeholder = tagsArr.length === 0 ? 'Type and press Enter…' : '+';
+    inp.addEventListener('keydown', e => {
+      if ((e.key==='Enter'||e.key===',') && inp.value.trim()) {
+        e.preventDefault();
+        tagsArr.push(inp.value.trim().replace(/,$/,''));
+        onChange(tagsArr); render();
+        setTimeout(()=>container.querySelector('.tag-input')?.focus(), 0);
+      } else if (e.key==='Backspace' && !inp.value && tagsArr.length) {
+        tagsArr.pop(); onChange(tagsArr); render();
+      }
+    });
+    container.appendChild(inp);
+    container.addEventListener('click', () => container.querySelector('.tag-input')?.focus());
+  };
+  render();
+}
+
+/* ── Field builder helpers ── */
+function wdField(label, id, value, type, placeholder) {
+  if (type==='textarea')
+    return `<div class="wd-field"><div class="wd-label">${label}</div><textarea class="wd-textarea" id="${id}" placeholder="${esc(placeholder)}">${esc(value)}</textarea></div>`;
+  return `<div class="wd-field"><div class="wd-label">${label}</div><input class="wd-input" id="${id}" type="text" value="${esc(value)}" placeholder="${esc(placeholder)}"/></div>`;
+}
+function loField(label, id, value, placeholder) {
+  return `<div class="wd-field"><div class="wd-label">${label}</div><input class="wd-input" id="${id}" type="text" value="${esc(value||'')}" placeholder="${esc(placeholder)}"/></div>`;
+}
+function bindField(id, obj, key) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', () => { obj[key] = el.value; });
+}
+
+/* ── Word Detail Panel ── */
+function renderWordDetail(node, tree) {
+  const panel = document.getElementById('lContentPanel');
+  if (!panel) return;
+  const d = getWordData(node.id);
+  const parentFolder = findParentFolder(tree.data, node.id);
+  if (!d.language && parentFolder) d.language = parentFolder.name;
+
+  panel.innerHTML = `<div class="word-detail">
+
+    <div class="wd-header">
+      <input class="wd-word-input" id="wdWord" value="${esc(d.word||node.name)}" placeholder="Enter word…"/>
+      <div class="wd-lang-badge">${esc(d.language || parentFolder?.name || 'Unknown Language')}</div>
+    </div>
+
+    <div class="wd-section">
+      <div class="wd-section-title">Command Types</div>
+      <div class="wd-type-grid" id="wdTypes"></div>
+    </div>
+
+    <div class="wd-section">
+      <div class="wd-section-title">Kernel Layer Analysis</div>
+      <div class="wd-fields">
+        ${wdField('Etymology / Root',       'wdEtym', d.etymology,  'textarea', 'Where does this word originate? Root language, original form…')}
+        ${wdField('Morphological Structure','wdMorph', d.morphology, 'textarea', 'Prefixes, root, suffixes — how the word is physically formed…')}
+        ${wdField('Phonetics / IPA',        'wdPhon', d.phonetics,  'input',    'e.g. /wɜːd/')}
+        ${wdField('Semantic Core',          'wdSem',  d.semantics,  'textarea', 'Deep meaning — what concept or idea does this word encode?')}
+        ${wdField('Syntactic Behaviour',    'wdSyn',  d.syntax,     'textarea', 'How does this word function grammatically in a sentence?')}
+        ${wdField('Pragmatic Use',          'wdPrag', d.pragmatics, 'textarea', 'How is it actually used? Register, tone, social context…')}
+      </div>
+    </div>
+
+    <div class="wd-two-col">
+      <div class="wd-section">
+        <div class="wd-section-title">Primary Definition</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="wdDef" placeholder="What does this word mean?">${esc(d.definition)}</textarea>
+      </div>
+      <div class="wd-section">
+        <div class="wd-section-title">Purpose in Language</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="wdPurp" placeholder="Why does this word exist? What role does it serve?">${esc(d.purpose)}</textarea>
+      </div>
+    </div>
+
+    <div class="wd-section">
+      <div class="wd-section-title">Word Relationships</div>
+      <div class="wd-three-col">
+        <div class="wd-field"><div class="wd-label">Related Words</div><div class="tag-wrap" id="wdRelated"></div></div>
+        <div class="wd-field"><div class="wd-label">Synonyms</div><div class="tag-wrap" id="wdSynonyms"></div></div>
+        <div class="wd-field"><div class="wd-label">Antonyms</div><div class="tag-wrap" id="wdAntonyms"></div></div>
+      </div>
+    </div>
+
+    <div class="wd-two-col">
+      <div class="wd-section">
+        <div class="wd-section-title wd-strong">▲ Strong Points</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="wdStrong" placeholder="Expressiveness, precision, flexibility, elegance…">${esc(d.strongPoints)}</textarea>
+      </div>
+      <div class="wd-section">
+        <div class="wd-section-title wd-weak">▼ Weak Points</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="wdWeak" placeholder="Ambiguities, irregularities, limitations, difficulty…">${esc(d.weakPoints)}</textarea>
+      </div>
+    </div>
+
+    <div class="wd-section">
+      <div class="wd-section-title">Notes</div>
+      <textarea class="wd-textarea wd-textarea-lg" id="wdNotes" placeholder="Examples, observations, usage patterns, references…">${esc(d.notes)}</textarea>
+    </div>
+
+    <div class="wd-section">
+      <div class="wd-section-title">Tags</div>
+      <div class="tag-wrap" id="wdTags"></div>
+    </div>
+
+  </div>`;
+
+  initTypePicker('wdTypes', d.types, v => { d.types = v; });
+  initTagInput('wdRelated',  d.relatedWords, v => { d.relatedWords = v; });
+  initTagInput('wdSynonyms', d.synonyms,     v => { d.synonyms = v; });
+  initTagInput('wdAntonyms', d.antonyms,     v => { d.antonyms = v; });
+  initTagInput('wdTags',     d.tags,         v => { d.tags = v; });
+
+  [['wdWord','word'],['wdEtym','etymology'],['wdMorph','morphology'],
+   ['wdPhon','phonetics'],['wdSem','semantics'],['wdSyn','syntax'],
+   ['wdPrag','pragmatics'],['wdDef','definition'],['wdPurp','purpose'],
+   ['wdStrong','strongPoints'],['wdWeak','weakPoints'],['wdNotes','notes'],
+  ].forEach(([id, key]) => bindField(id, d, key));
+}
+
+/* ── Language Overview Panel ── */
+function renderLangOverview(node, tree) {
+  const panel = document.getElementById('lContentPanel');
+  if (!panel) return;
+  const d = getLangData(node.id);
+  // Collect command entries from the same parent folder's subtree
+  const parentFolder = findParentFolder(tree.data, node.id);
+  const cmdFiles = parentFolder
+    ? collectByExt(parentFolder.children, 'cmdmd')
+    : collectByExt(tree.data, 'cmdmd').filter(n => n.id !== node.id);
+  const vocabRows = cmdFiles.map(w => {
+    const wd = wordData[w.id] || {};
+    const types = (wd.types||[]).join(', ') || '—';
+    const def   = wd.definition ? wd.definition.slice(0,55)+(wd.definition.length>55?'…':'') : '—';
+    return `<div class="vocab-row">
+      <span class="vocab-word">${esc(wd.word||w.name)}</span>
+      <span class="vocab-type">${esc(types)}</span>
+      <span class="vocab-def">${esc(def)}</span>
+      <button class="vocab-link" data-wid="${w.id}">→</button>
+    </div>`;
+  }).join('');
+
+  panel.innerHTML = `<div class="word-detail">
+
+    <div class="wd-header">
+      <input class="wd-word-input" id="loName" value="${esc(d.name||node.name)}" placeholder="Language name…"/>
+      <div class="wd-lang-badge lang-badge-lg">Language Overview</div>
+    </div>
+
+    <!-- Identity -->
+    <div class="wd-section">
+      <div class="wd-section-title">Identity</div>
+      <div class="wd-meta-grid">
+        ${loField('Paradigm',        'loParadigm',  d.paradigm,       'e.g. Object-Oriented, Functional, Procedural, Declarative…')}
+        ${loField('Type System',     'loTypeSystem',d.typeSystem,     'e.g. Static, Dynamic, Strong, Weak, Duck typed…')}
+        ${loField('Execution Model', 'loExecModel', d.executionModel, 'e.g. Compiled, Interpreted, JIT, Transpiled, AOT…')}
+        ${loField('File Extension',  'loFileExt',   d.fileExtension,  'e.g. .py, .js, .rs, .go, .custom…')}
+        ${loField('Primary Use Case','loPrimary',   d.primaryUseCase, 'e.g. Systems, Web, Data Science, Scripting, AI/ML, Embedded…')}
+        ${loField('Author / Origin', 'loAuthor',    d.author,         'e.g. Guido van Rossum, personal project, team name…')}
+        ${loField('Version',         'loVersion',   d.version,        'e.g. 1.0.0, alpha, draft…')}
+        <div class="wd-field">
+          <div class="wd-label">Status</div>
+          <select class="wd-input" id="loStatus">
+            ${['Active Development','Stable','Experimental','Deprecated','Abandoned','In Development'].map(s=>`<option value="${s.toLowerCase()}" ${d.status===s.toLowerCase()?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description & Goals -->
+    <div class="wd-two-col">
+      <div class="wd-section">
+        <div class="wd-section-title">Overview</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="loDesc" placeholder="Describe this language — its purpose, history, and context…">${esc(d.description)}</textarea>
+      </div>
+      <div class="wd-section">
+        <div class="wd-section-title">Design Goals</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="loGoals" placeholder="What problems does this language solve? What was it designed to do?">${esc(d.designGoals)}</textarea>
+      </div>
+    </div>
+
+    <div class="wd-section">
+      <div class="wd-section-title">Influences</div>
+      <textarea class="wd-textarea" id="loInfluences" placeholder="What languages, systems, or paradigms influenced this language's design?">${esc(d.influences)}</textarea>
+    </div>
+
+    <!-- Runtime & Environment -->
+    <div class="wd-section">
+      <div class="wd-section-title">Runtime &amp; Environment</div>
+      <div class="wd-fields">
+        ${wdField('Runtime / VM',         'loRuntime',     d.runtime,           'textarea', 'e.g. JVM, Node.js, V8, bare metal, WASM, custom runtime…')}
+        ${wdField('Memory Management',    'loMemory',      d.memoryModel,       'textarea', 'e.g. Garbage collected, manual, ownership/borrow checker, reference counting…')}
+        ${wdField('Concurrency Model',    'loConcurrency', d.concurrencyModel,  'textarea', 'e.g. async/await, threads, coroutines, actors, event loop…')}
+        ${wdField('Performance Profile',  'loPerf',        d.performanceProfile,'textarea', 'e.g. high performance compiled, scripting speed, interpreted overhead, real-time…')}
+      </div>
+    </div>
+
+    <!-- Syntax & Type System -->
+    <div class="wd-section">
+      <div class="wd-section-title">Syntax &amp; Type System</div>
+      <div class="wd-fields">
+        ${wdField('Statement Structure', 'loStmtStruct',  d.statementStructure,'textarea', 'How are statements formed? Semicolons, newlines, indentation-sensitive…')}
+        ${wdField('Scoping Rules',       'loScoping',     d.scopingRules,      'textarea', 'e.g. Lexical, dynamic, block-scoped, function-scoped, closures…')}
+        ${wdField('Type System Detail',  'loTypeDetail',  d.typeSystemDetail,  'textarea', 'How does the type system work? Inference, generics, union types, interfaces…')}
+        ${wdField('Control Flow',        'loControl',     d.controlFlow,       'textarea', 'Loops, conditionals, pattern matching, guards, short-circuit evaluation…')}
+        ${wdField('Compilation Model',   'loCompile',     d.compilationModel,  'textarea', 'How does the code get from source to execution? Build steps, linking, modules…')}
+      </div>
+    </div>
+
+    <!-- Command Structure -->
+    <div class="wd-section">
+      <div class="wd-section-title">Command Structure</div>
+      <div class="wd-fields">
+        ${wdField('Command Structure',   'loCmdStruct',  d.commandStructure,  'textarea', 'How are commands structured in this language? Overall pattern…')}
+        ${wdField('Syntax Pattern',      'loSynPat',     d.syntaxPattern,     'textarea', 'What does a typical command or expression look like?')}
+        ${wdField('Command Hierarchy',   'loCmdHier',    d.commandHierarchy,  'textarea', 'How are commands prioritised or nested? Precedence rules…')}
+        ${wdField('Error Handling',      'loErrors',     d.errorHandling,     'textarea', 'How does the language handle errors, exceptions, or invalid input?')}
+      </div>
+    </div>
+
+    <!-- Key Features & Examples -->
+    <div class="wd-two-col">
+      <div class="wd-section">
+        <div class="wd-section-title">Key Features</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="loFeatures" placeholder="What makes this language distinctive? Standout capabilities…">${esc(d.keyFeatures)}</textarea>
+      </div>
+      <div class="wd-section">
+        <div class="wd-section-title">Examples</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="loExamples" placeholder="Example commands, expressions, or sentences in this language…">${esc(d.examples)}</textarea>
+      </div>
+    </div>
+
+    <!-- Strong / Weak Points -->
+    <div class="wd-two-col">
+      <div class="wd-section">
+        <div class="wd-section-title wd-strong">▲ Strong Points</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="loStrong" placeholder="What does this language do particularly well?">${esc(d.strongPoints)}</textarea>
+      </div>
+      <div class="wd-section">
+        <div class="wd-section-title wd-weak">▼ Weak Points</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="loWeak" placeholder="Current limitations, rough edges, or areas needing work…">${esc(d.weakPoints)}</textarea>
+      </div>
+    </div>
+
+    <!-- Notes & Tags -->
+    <div class="wd-section">
+      <div class="wd-section-title">Notes</div>
+      <textarea class="wd-textarea wd-textarea-lg" id="loNotes" placeholder="Anything else — references, ideas, open questions…">${esc(d.notes)}</textarea>
+    </div>
+
+    <div class="wd-section">
+      <div class="wd-section-title">Tags</div>
+      <div class="tag-wrap" id="loTags"></div>
+    </div>
+
+    <!-- Vocabulary Index -->
+    <div class="wd-section">
+      <div class="wd-section-title">
+        Command Index
+        <span class="vocab-count">${cmdFiles.length} command${cmdFiles.length!==1?'s':''}</span>
+      </div>
+      ${cmdFiles.length===0
+        ? `<div class="t-hint" style="padding:12px 4px;font-size:13px;">No command entries yet — add Command Entry (.md) files inside this language folder.</div>`
+        : `<div class="vocab-table">
+            <div class="vocab-header"><span>Word</span><span>Command(s)</span><span>Definition</span><span></span></div>
+            ${vocabRows}
+          </div>`
+      }
+    </div>
+
+  </div>`;
+
+  [['loName','name'],['loParadigm','paradigm'],['loTypeSystem','typeSystem'],
+   ['loExecModel','executionModel'],['loFileExt','fileExtension'],
+   ['loPrimary','primaryUseCase'],['loAuthor','author'],
+   ['loVersion','version'],['loStatus','status'],
+   ['loDesc','description'],['loGoals','designGoals'],['loInfluences','influences'],
+   ['loRuntime','runtime'],['loMemory','memoryModel'],
+   ['loConcurrency','concurrencyModel'],['loPerf','performanceProfile'],
+   ['loStmtStruct','statementStructure'],['loScoping','scopingRules'],
+   ['loTypeDetail','typeSystemDetail'],['loControl','controlFlow'],['loCompile','compilationModel'],
+   ['loCmdStruct','commandStructure'],['loSynPat','syntaxPattern'],
+   ['loCmdHier','commandHierarchy'],['loErrors','errorHandling'],
+   ['loFeatures','keyFeatures'],['loExamples','examples'],
+   ['loStrong','strongPoints'],['loWeak','weakPoints'],['loNotes','notes'],
+  ].forEach(([id, key]) => bindField(id, d, key));
+
+  initTagInput('loTags', d.tags, v => { d.tags = v; });
+
+  panel.querySelectorAll('.vocab-link').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const wid = parseInt(btn.dataset.wid);
+      const wordNode = findNode(tree.data, wid);
+      if (wordNode) { tree.sel = wid; renderTree(tree); renderWordDetail(wordNode, tree); }
+    });
+  });
+}
+
+/* ── Wire up the language tree's onSelect ── */
+TREES.language.onSelect = (node, isDir, tree) => {
+  if (isDir) {
+    // Folders just expand/collapse — reset right panel to empty state
+    document.getElementById('lContentPanel').innerHTML =
+      '<div class="c-empty" style="margin:auto;align-self:center;"><div class="big">{ }</div><p>Select a file to view</p></div>';
+    return;
+  }
+  if (node.ext === 'langmd') renderLangOverview(node, tree);
+  else renderWordDetail(node, tree);
+};
+
+/* ================================================================
+   MODULES — data store + render
+================================================================ */
+const modData = {};
+
+function getModData(id) {
+  if (!modData[id]) modData[id] = {
+    name:'', creatorId:'', ownerTeam:'', version:'', status:'planning', repo:'',
+    description:'', useCase:'',
+    howItWorks:'', coreComponents:'', dataFlow:'',
+    endpoints:'', inputParams:'', outputValues:'', eventsEmitted:'',
+    internalDeps:[], externalDeps:[], externalServices:[],
+    techStack:'', storage:'', caching:'', performance:'', security:'',
+    integration:'', config:'', example:'',
+    strongPoints:'', weakPoints:'',
+    notes:'', tags:[],
+  };
+  return modData[id];
+}
+
+function renderModuleDetail(node, tree) {
+  const panel = document.getElementById('mContentPanel');
+  if (!panel) return;
+  const d = getModData(node.id);
+  const statusOpts = ['Planning','In Development','Testing','Stable','Deprecated','On Hold'];
+
+  panel.innerHTML = `<div class="word-detail">
+
+    <div class="wd-header">
+      <input class="wd-word-input" id="mdName" value="${esc(d.name||node.name)}" placeholder="Module name…"/>
+      <div class="wd-lang-badge lang-badge-lg">Module Overview</div>
+    </div>
+
+    <!-- Identity -->
+    <div class="wd-section">
+      <div class="wd-section-title">Identity</div>
+      <div class="wd-meta-grid">
+        ${loField('Version',      'mdVersion', d.version, 'e.g. 1.0.0, alpha…')}
+        <div class="wd-field">
+          <div class="wd-label">Creator</div>
+          <select class="wd-input" id="mdCreator">
+            <option value="">— Select creator —</option>
+            ${users.map(u=>`<option value="${u.id}" ${d.creatorId===u.id?'selected':''}>${esc(u.displayName)}</option>`).join('')}
+          </select>
+        </div>
+        ${loField('Owner / Team','mdOwnerTeam',d.ownerTeam,'Team, department, or group responsible for this module…')}
+        ${loField('Repository',   'mdRepo',    d.repo,    'e.g. /src/modules/messaging, github.com/…')}
+        <div class="wd-field">
+          <div class="wd-label">Status</div>
+          <select class="wd-input" id="mdStatus">
+            ${statusOpts.map(s=>`<option value="${s.toLowerCase()}" ${d.status===s.toLowerCase()?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div class="wd-two-col">
+      <div class="wd-section">
+        <div class="wd-section-title">Description</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="mdDesc" placeholder="What does this module do? Give a clear overview…">${esc(d.description)}</textarea>
+      </div>
+      <div class="wd-section">
+        <div class="wd-section-title">Use Case</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="mdUseCase" placeholder="When and why would you use this module? What problem does it solve?">${esc(d.useCase)}</textarea>
+      </div>
+    </div>
+
+    <!-- Architecture -->
+    <div class="wd-section">
+      <div class="wd-section-title">Architecture</div>
+      <div class="wd-fields">
+        ${wdField('How It Works',     'mdHowItWorks',    d.howItWorks,    'textarea', 'Explain the high-level flow — what happens from input to output?')}
+        ${wdField('Core Components',  'mdCoreComponents',d.coreComponents,'textarea', 'What are the key parts that make up this module? List and describe each.')}
+        ${wdField('Data Flow',        'mdDataFlow',      d.dataFlow,      'textarea', 'How does data move through this module? Entry points, transformations, outputs…')}
+      </div>
+    </div>
+
+    <!-- API & Interface -->
+    <div class="wd-section">
+      <div class="wd-section-title">API &amp; Interface</div>
+      <div class="wd-fields">
+        ${wdField('Exposed Functions / Endpoints','mdEndpoints',   d.endpoints,    'textarea', 'List all functions, routes, or endpoints this module exposes…')}
+        ${wdField('Input Parameters',             'mdInputParams', d.inputParams,  'textarea', 'What inputs does this module accept? Types, formats, validation…')}
+        ${wdField('Output / Return Values',        'mdOutputValues',d.outputValues, 'textarea', 'What does this module return or emit? Shape, type, format…')}
+        ${wdField('Events Emitted',               'mdEvents',      d.eventsEmitted,'textarea', 'What events does this module fire? Names, payloads, when they trigger…')}
+      </div>
+    </div>
+
+    <!-- Dependencies -->
+    <div class="wd-section">
+      <div class="wd-section-title">Dependencies</div>
+      <div class="wd-three-col">
+        <div class="wd-field"><div class="wd-label">Internal Modules</div><div class="tag-wrap" id="mdIntDeps"></div></div>
+        <div class="wd-field"><div class="wd-label">External Packages</div><div class="tag-wrap" id="mdExtDeps"></div></div>
+        <div class="wd-field"><div class="wd-label">External Services</div><div class="tag-wrap" id="mdServices"></div></div>
+      </div>
+    </div>
+
+    <!-- Technical Details -->
+    <div class="wd-section">
+      <div class="wd-section-title">Technical Details</div>
+      <div class="wd-fields">
+        ${wdField('Tech Stack',              'mdTechStack',  d.techStack,  'textarea', 'Languages, frameworks, libraries used within this module…')}
+        ${wdField('Storage / Database',      'mdStorage',    d.storage,    'textarea', 'What storage does this module use? Schema, collections, tables…')}
+        ${wdField('Caching Strategy',        'mdCaching',    d.caching,    'textarea', 'Is anything cached? What, where, and for how long?')}
+        ${wdField('Performance Notes',       'mdPerformance',d.performance,'textarea', 'Throughput, latency targets, bottlenecks, optimisations…')}
+        ${wdField('Security Considerations', 'mdSecurity',   d.security,   'textarea', 'Auth, permissions, input sanitisation, rate limiting, encryption…')}
+      </div>
+    </div>
+
+    <!-- Integration -->
+    <div class="wd-section">
+      <div class="wd-section-title">Integration</div>
+      <div class="wd-fields">
+        ${wdField('How to Integrate',     'mdIntegration', d.integration, 'textarea', 'Step-by-step on how to plug this module into a project…')}
+        ${wdField('Configuration',        'mdConfig',      d.config,      'textarea', 'Required env vars, config keys, setup options…')}
+        ${wdField('Example Usage',        'mdExample',     d.example,     'textarea', 'Show a working code example of this module in use…')}
+      </div>
+    </div>
+
+    <!-- Strong / Weak -->
+    <div class="wd-two-col">
+      <div class="wd-section">
+        <div class="wd-section-title wd-strong">▲ Strong Points</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="mdStrong" placeholder="What does this module do particularly well?">${esc(d.strongPoints)}</textarea>
+      </div>
+      <div class="wd-section">
+        <div class="wd-section-title wd-weak">▼ Weak Points</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="mdWeak" placeholder="Current limitations, known issues, areas needing work…">${esc(d.weakPoints)}</textarea>
+      </div>
+    </div>
+
+    <!-- Notes & Tags -->
+    <div class="wd-section">
+      <div class="wd-section-title">Notes</div>
+      <textarea class="wd-textarea wd-textarea-lg" id="mdNotes" placeholder="Anything else — open questions, future plans, references…">${esc(d.notes)}</textarea>
+    </div>
+    <div class="wd-section">
+      <div class="wd-section-title">Tags</div>
+      <div class="tag-wrap" id="mdTags"></div>
+    </div>
+
+  </div>`;
+
+  initTagInput('mdIntDeps',  d.internalDeps,    v => { d.internalDeps = v; });
+  initTagInput('mdExtDeps',  d.externalDeps,    v => { d.externalDeps = v; });
+  initTagInput('mdServices', d.externalServices,v => { d.externalServices = v; });
+  initTagInput('mdTags',     d.tags,            v => { d.tags = v; });
+
+  [['mdName','name'],['mdVersion','version'],['mdCreator','creatorId'],
+   ['mdOwnerTeam','ownerTeam'],
+   ['mdRepo','repo'],['mdStatus','status'],['mdDesc','description'],
+   ['mdUseCase','useCase'],['mdHowItWorks','howItWorks'],
+   ['mdCoreComponents','coreComponents'],['mdDataFlow','dataFlow'],
+   ['mdEndpoints','endpoints'],['mdInputParams','inputParams'],
+   ['mdOutputValues','outputValues'],['mdEvents','eventsEmitted'],
+   ['mdTechStack','techStack'],['mdStorage','storage'],['mdCaching','caching'],
+   ['mdPerformance','performance'],['mdSecurity','security'],
+   ['mdIntegration','integration'],['mdConfig','config'],['mdExample','example'],
+   ['mdStrong','strongPoints'],['mdWeak','weakPoints'],['mdNotes','notes'],
+  ].forEach(([id, key]) => bindField(id, d, key));
+}
+
+/* ── Wire up the modules tree's onSelect ── */
+TREES.modules.onSelect = (node, isDir, tree) => {
+  if (isDir) {
+    document.getElementById('mContentPanel').innerHTML =
+      '<div class="c-empty" style="margin:auto;align-self:center;"><div class="big">{ }</div><p>Select a file to view</p></div>';
+    return;
+  }
+  if (node.ext === 'modmd') renderModuleDetail(node, tree);
+  else {
+    document.getElementById('mContentPanel').innerHTML =
+      '<div class="c-empty" style="margin:auto;align-self:center;"><div class="big">{ }</div><p>Select a file to view</p></div>';
+  }
+};
+
+/* ================================================================
+   USER SYSTEM
+================================================================ */
+const WZ_USERS_KEY = 'wz_users';
+const WZ_SESSION_KEY = 'wz_session';
+
+const FATHOM_PHRASE = 'anchor beacon cipher delta ember forge glacier harvest iron jade kernel lattice';
+
+const PHRASE_WORDS = [
+  'able','acid','aged','apex','arch','area','atom','base','beam','bell',
+  'bind','bold','bolt','bond','burn','cage','calm','cape','card','cast',
+  'cave','cell','chin','chip','clad','clay','clip','coal','code','coil',
+  'cord','core','corn','cost','crew','crop','cure','dark','dart','data',
+  'dawn','dead','deal','deck','deep','dial','dice','disk','dome','draw',
+  'drop','drum','dual','dusk','dust','echo','edge','epic','exit','face',
+  'fade','fall','farm','fast','file','fill','film','find','firm','flag',
+  'flat','flux','foam','fold','font','ford','fork','form','fort','free',
+  'fuel','fuse','gate','glad','glow','gold','grab','grid','grip','grow',
+  'gulf','half','hall','hard','hash','head','heal','heat','high','hill',
+  'hold','hole','hook','hope','horn','hull','hunt','icon','iron','isle',
+  'item','join','jump','keep','kind','king','knot','land','lane','lead',
+  'lean','left','lens','life','lift','link','list','lock','loft','loop',
+  'loud','make','mark','mast','maze','mesh','mind','mine','mode','moon',
+  'move','nail','navy','near','need','nest','next','node','norm','note',
+  'null','open','over','pace','page','pair','palm','park','pass','path',
+  'peak','pile','pine','pipe','plan','play','plot','plug','pole','port',
+  'post','pour','pull','pump','pure','push','race','rail','rank','read',
+  'reef','rest','ring','rise','road','rock','role','root','rope','rule',
+  'rush','safe','sail','salt','sand','save','scan','seal','seed','self',
+  'send','ship','side','sign','sink','site','size','skip','slot','slow',
+  'snap','soil','span','spin','spot','stem','step','stop','sync','take',
+  'talk','tape','task','tell','term','test','text','tide','tile','tone',
+  'tool','town','trim','true','tube','tune','turn','twin','type','unit',
+  'vast','view','void','volt','wake','wall','ward','wave','well','wide',
+  'will','wind','wire','work','wrap','yard','year','zero','zone','blaze',
+  'bloom','brave','brook','brush','burst','cairn','carve','churn','claim',
+  'clash','clear','climb','cling','craft','crane','crest','crisp','cross',
+  'crown','crush','delta','depth','digit','draft','drain','dream','drift',
+  'drone','ember','epoch','fault','feast','fetch','flame','flank','flint',
+  'flood','force','forge','frame','frost','gleam','glide','glint','grant',
+  'grasp','grove','guard','guide','haven','hawk','hinge','hover','husk',
+  'inlet','jewel','joint','knoll','latch','layer','ledge','lodge','lunar',
+  'march','marsh','merge','merit','metal','might','mount','nexus','north',
+  'notch','novel','oasis','orbit','order','oxide','patch','pause','pilot',
+  'plain','plank','plume','polar','power','press','prime','prism','proof',
+  'prose','prowl','pulse','quest','quick','raven','reach','realm','relay',
+  'reign','ridge','rivet','rover','rune','sable','scale','scout','shaft',
+  'shard','shell','shift','shore','shunt','siege','sigma','slate','slice',
+  'slope','solar','solid','solve','sonic','spark','spire','split','spoke',
+  'sprint','spur','stain','stake','stalk','stamp','stand','stark','state',
+  'steel','stern','stock','stoic','stone','storm','stout','surge','swift',
+  'torch','trace','track','trade','trail','trial','tribe','trove','trust',
+  'umbra','union','valve','vapor','vault','vigor','viral','vortex','warden',
+  'watch','wedge','weigh','whirl','xenon','yield','zeal',
+];
+
+function generatePhrase() {
+  const pool = [...PHRASE_WORDS];
+  const words = [];
+  for (let i = 0; i < 12; i++) {
+    const idx = Math.floor(Math.random() * pool.length);
+    words.push(pool.splice(idx, 1)[0]);
+  }
+  return words.join(' ');
+}
+
+function generateUserId() { return 'u_' + Math.random().toString(36).slice(2,10); }
+
+function loadUsers() {
+  try {
+    const r = localStorage.getItem(WZ_USERS_KEY);
+    if (r) return JSON.parse(r);
+  } catch(e) {}
+  const initial = [{ id:'fathom', displayName:'FATHOM', phrase:FATHOM_PHRASE, role:'master', createdAt:Date.now() }];
+  try { localStorage.setItem(WZ_USERS_KEY, JSON.stringify(initial)); } catch(e) {}
+  return initial;
+}
+function saveUsers() { try { localStorage.setItem(WZ_USERS_KEY, JSON.stringify(users)); } catch(e) {} }
+function getUserById(id) { return users.find(u => u.id === id) || null; }
+function getUserByPhrase(phrase) {
+  const n = phrase.trim().toLowerCase().replace(/\s+/g,' ');
+  return users.find(u => u.phrase.trim().toLowerCase().replace(/\s+/g,' ') === n) || null;
+}
+
+let users = loadUsers();
+let currentUser = null;
+
+function isMaster() { return currentUser?.role === 'master'; }
+
+/* ── Login screen ── */
+document.getElementById('phraseInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); attemptLogin(); }
+});
+
+function attemptLogin() {
+  try {
+    const el = document.getElementById('phraseInput');
+    const errEl = document.getElementById('loginError');
+    if (!el) return;
+    const phrase = el.value.trim().toLowerCase().replace(/\s+/g,' ');
+    if (!phrase) { if (errEl) errEl.textContent = 'Please enter your phrase.'; return; }
+    const user = getUserByPhrase(phrase);
+    if (user) {
+      currentUser = user;
+      try { localStorage.setItem(WZ_SESSION_KEY, user.id); } catch(e) {}
+      document.getElementById('loginScreen').classList.add('hidden');
+      el.value = '';
+      if (errEl) errEl.textContent = '';
+      onLogin();
+    } else {
+      if (errEl) errEl.textContent = 'Phrase not recognised — check your words and try again.';
+    }
+  } catch(err) {
+    const errEl = document.getElementById('loginError');
+    if (errEl) errEl.textContent = 'Error: ' + err.message;
+  }
+}
+
+function logout() {
+  localStorage.removeItem(WZ_SESSION_KEY);
+  currentUser = null;
+  document.getElementById('phraseInput').value = '';
+  document.getElementById('loginError').textContent = '';
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+
+function onLogin() {
+  document.getElementById('userBadge').textContent = currentUser.displayName;
+  document.getElementById('usersBtn').style.display = isMaster() ? 'flex' : 'none';
+  refreshDash();
+}
+
+/* ── Users modal ── */
+function openUsersModal() {
+  renderUsersList();
+  document.getElementById('generatedPhrase').style.display = 'none';
+  document.getElementById('newUserForm').style.display = 'none';
+  document.getElementById('usersModal').classList.remove('hidden');
+}
+function closeUsersModal() { document.getElementById('usersModal').classList.add('hidden'); }
+
+function renderUsersList() {
+  document.getElementById('usersList').innerHTML = users.map(u => `
+    <div class="user-row">
+      <div class="user-info">
+        <div class="user-name">${esc(u.displayName)}</div>
+        <div class="user-phrase-preview">${esc(u.phrase)}</div>
+      </div>
+      ${u.role==='master' ? '<span class="user-role-badge">MASTER</span>' : ''}
+      <button class="copy-phrase-btn" onclick="copyPhrase('${u.id}')">
+        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M2 10V3a1 1 0 011-1h7"/></svg>
+        Copy
+      </button>
+    </div>
+  `).join('');
+}
+
+function copyPhrase(userId) {
+  const u = getUserById(userId);
+  if (!u) return;
+  navigator.clipboard.writeText(u.phrase).then(() => {
+    const btns = document.querySelectorAll(`[onclick="copyPhrase('${userId}')"]`);
+    btns.forEach(b => { b.textContent = 'Copied!'; setTimeout(() => { b.innerHTML = `<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M2 10V3a1 1 0 011-1h7"/></svg> Copy`; }, 2000); });
+  });
+}
+
+function showNewUserForm() {
+  document.getElementById('generatedPhrase').style.display = 'none';
+  document.getElementById('newUserForm').style.display = 'flex';
+  document.getElementById('newUserName').value = '';
+  document.getElementById('newUserName').focus();
+}
+
+function createNewUser() {
+  const name = document.getElementById('newUserName').value.trim();
+  if (!name) return;
+  const phrase = generatePhrase();
+  users.push({ id:generateUserId(), displayName:name, phrase, role:'user', createdAt:Date.now() });
+  saveUsers();
+  renderUsersList();
+  document.getElementById('newUserForm').style.display = 'none';
+  document.getElementById('generatedPhraseText').textContent = phrase;
+  document.getElementById('generatedPhrase').style.display = 'block';
+  document.getElementById('copyGenBtn').textContent = 'Copy Phrase';
+}
+
+function copyGeneratedPhrase() {
+  const phrase = document.getElementById('generatedPhraseText').textContent;
+  navigator.clipboard.writeText(phrase).then(() => {
+    document.getElementById('copyGenBtn').textContent = 'Copied!';
+    setTimeout(() => { document.getElementById('copyGenBtn').textContent = 'Copy Phrase'; }, 2000);
+  });
+}
+
+/* ── Auto-login from session ── */
+(function initSession() {
+  const sid = localStorage.getItem(WZ_SESSION_KEY);
+  if (sid) {
+    const user = getUserById(sid);
+    if (user) { currentUser = user; document.getElementById('loginScreen').classList.add('hidden'); onLogin(); return; }
+  }
+  document.getElementById('loginScreen').classList.remove('hidden');
+})();
+
+/* ================================================================
+   SYSTEMS MAP — 3D ENGINE
+================================================================ */
+(function initSmapEngine() {
+  const NODE_TYPES = {
+    service:  { label:'Service',  color:'#00e5a0' },
+    database: { label:'Database', color:'#63b3ed' },
+    api:      { label:'API',      color:'#f0b429' },
+    queue:    { label:'Queue',    color:'#d6bcfa' },
+    cache:    { label:'Cache',    color:'#76e4f7' },
+    client:   { label:'Client',   color:'#a0aec0' },
+    server:   { label:'Server',   color:'#f6ad55' },
+    module:   { label:'Module',   color:'#68d391' },
+    external: { label:'External', color:'#fc8181' },
+  };
+
+  let smapUid = 1;
+
+  // ── Multi-map state ──────────────────────────────────────
+  const smapMaps = [];
+  let smap = null; // always points to current map
+
+  function createMap(name) {
+    const m = {
+      id: 'map_'+smapUid++, name,
+      nodes:[], connections:[], layers:[],
+      view:{ rotX:-0.38, rotY:0.2, zoom:0.72, panX:0, panY:20 },
+      selected:null, selectType:null, connectMode:false, connectFirst:null,
+    };
+    smapMaps.push(m);
+    return m;
+  }
+
+  function smapSwitchMap(id) {
+    const m = smapMaps.find(m=>m.id===id);
+    if (!m) return;
+    smap = m;
+    updateMapSel();
+    renderSmapPanel();
+    renderLayersPanel();
+    draw();
+  }
+  window.smapSwitchMap = smapSwitchMap;
+
+  function updateMapSel() {
+    const sel = document.getElementById('smapMapSel');
+    if (!sel) return;
+    sel.innerHTML = smapMaps.map(m=>
+      `<option value="${m.id}" ${m.id===smap.id?'selected':''}>${esc(m.name)}</option>`
+    ).join('');
+  }
+
+  window.smapNewMap = function() {
+    const name = prompt('Map name:', 'New Map');
+    if (!name) return;
+    const m = createMap(name);
+    smap = m;
+    updateMapSel();
+    renderSmapPanel();
+    renderLayersPanel();
+    draw();
+  };
+
+  window.smapRenameMap = function() {
+    const name = prompt('Rename map:', smap.name);
+    if (!name) return;
+    smap.name = name;
+    updateMapSel();
+  };
+
+  // Initialise with one empty map
+  smap = createMap('Map 1');
+
+  const LAYER_GAP = 300, LAYER_SZ = 480, FOV = 6000;
+
+  function layerY(lid) {
+    const i = smap.layers.findIndex(l => l.id === lid);
+    return (smap.layers.length / 2 - (i < 0 ? 0 : i)) * LAYER_GAP;
+  }
+
+  // Returns the vertical midpoint of all current layers so we orbit around scene centre
+  function orbitCentreY() {
+    if (!smap.layers.length) return 0;
+    const top = layerY(smap.layers[0].id);
+    const bot = layerY(smap.layers[smap.layers.length - 1].id);
+    return (top + bot) / 2;
+  }
+
+  function proj(x, y, z) {
+    // Orbit around vertical centre so no layer is astronomically far from the pivot
+    y = y - orbitCentreY();
+    const { rotX, rotY, zoom, panX, panY } = smap.view;
+    const cY = Math.cos(rotY), sY = Math.sin(rotY);
+    const cX = Math.cos(rotX), sX = Math.sin(rotX);
+    const x1 = x*cY - z*sY, z1 = x*sY + z*cY;
+    const y2 = y*cX - z1*sX, z2 = y*sX + z1*cX;
+    const s = FOV / Math.max(FOV + z2, 100);
+    const cv = document.getElementById('smapCanvas');
+    const W = cv ? cv.width : 900, H = cv ? cv.height : 600;
+    return { x: x1*s*zoom + panX + W/2, y: y2*s*zoom + panY + H/2, s: s*zoom, z2 };
+  }
+
+  function nodeProj(n) { return proj(n.x, layerY(n.layerId), n.z); }
+  function nSize(s) { return { w: Math.max(60, 100*s), h: Math.max(26, 42*s) }; }
+
+  /* ── Incremental drag: project unit vectors to get screen→world mapping ── */
+  function screenToWorldDelta(node, sdx, sdy) {
+    const ly = layerY(node.layerId);
+    const p0 = proj(node.x,     ly, node.z);
+    const px = proj(node.x + 1, ly, node.z);
+    const pz = proj(node.x,     ly, node.z + 1);
+    const uxX = px.x - p0.x, uxY = px.y - p0.y; // screen direction for +worldX
+    const uzX = pz.x - p0.x, uzY = pz.y - p0.y; // screen direction for +worldZ
+    const det = uxX*uzY - uxY*uzX;
+    if (Math.abs(det) < 0.0001) return { dx:0, dz:0 };
+    return {
+      dx: (sdx*uzY - sdy*uzX) / det,
+      dz: (uxX*sdy - uxY*sdx) / det,
+    };
+  }
+
+  /* ── Drawing ── */
+  function draw() {
+    const canvas = document.getElementById('smapCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    if (!W || !H) return;
+    ctx.clearRect(0, 0, W, H);
+
+    const sortedL = [...smap.layers].sort((a,b) =>
+      proj(0,layerY(b.id),0).z2 - proj(0,layerY(a.id),0).z2);
+    sortedL.forEach(l => drawLayer(ctx, l));
+    smap.connections.forEach(c => drawConn(ctx, c));
+    const sortedN = [...smap.nodes].sort((a,b) => nodeProj(b).z2 - nodeProj(a).z2);
+    sortedN.forEach(n => drawNode(ctx, n));
+  }
+
+  function drawLayer(ctx, layer) {
+    const ly = layerY(layer.id), hs = LAYER_SZ / 2;
+    const corners = [[-hs,ly,-hs],[hs,ly,-hs],[hs,ly,hs],[-hs,ly,hs]].map(([x,y,z])=>proj(x,y,z));
+    ctx.beginPath();
+    ctx.moveTo(corners[0].x, corners[0].y);
+    corners.forEach(c => ctx.lineTo(c.x, c.y));
+    ctx.closePath();
+    ctx.fillStyle = layer.color + '12'; ctx.fill();
+    ctx.strokeStyle = layer.color + '55'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.strokeStyle = layer.color + '1a'; ctx.lineWidth = 0.5;
+    for (let v = -hs; v <= hs; v += 80) {
+      let a=proj(v,ly,-hs), b=proj(v,ly,hs);
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+      a=proj(-hs,ly,v); b=proj(hs,ly,v);
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+    }
+    const lp = proj(-hs-16, ly, -hs);
+    ctx.fillStyle = layer.color + 'cc';
+    ctx.font = `bold ${Math.max(10,13*lp.s)}px DM Sans,sans-serif`;
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    ctx.fillText(layer.name, lp.x, lp.y);
+  }
+
+  function drawNode(ctx, node) {
+    const p = nodeProj(node);
+    const type = NODE_TYPES[node.type] || NODE_TYPES.service;
+    const { w, h } = nSize(p.s);
+    const sel = smap.selected === node.id || smap.connectFirst === node.id;
+    const x = p.x - w/2, y = p.y - h/2, r = Math.max(3, 5*p.s);
+    ctx.shadowColor = type.color; ctx.shadowBlur = sel ? 20 : 6;
+    ctx.beginPath(); roundRect(ctx, x, y, w, h, r);
+    ctx.fillStyle = '#1c1f27'; ctx.fill();
+    ctx.strokeStyle = sel ? type.color : type.color + '75';
+    ctx.lineWidth = sel ? 2 : 1; ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.save(); ctx.beginPath(); roundRect(ctx, x, y, Math.max(3,4*p.s), h, r);
+    ctx.clip(); ctx.fillStyle = type.color; ctx.fillRect(x, y, 5*p.s, h); ctx.restore();
+    ctx.fillStyle = type.color + 'aa';
+    ctx.font = `${Math.max(6,8*p.s)}px Space Mono,monospace`;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.fillText(type.label.toUpperCase(), x+8*p.s, y+5*p.s);
+    ctx.fillStyle = '#e8eaf0';
+    ctx.font = `600 ${Math.max(8,11*p.s)}px DM Sans,sans-serif`;
+    ctx.textBaseline = 'bottom';
+    let name = node.name;
+    const maxW = w - 14*p.s;
+    while (ctx.measureText(name).width > maxW && name.length > 3) name = name.slice(0,-1);
+    if (name !== node.name) name += '…';
+    ctx.fillText(name, x+8*p.s, y+h-5*p.s);
+  }
+
+  function drawConn(ctx, conn) {
+    const fn = smap.nodes.find(n=>n.id===conn.from), tn = smap.nodes.find(n=>n.id===conn.to);
+    if (!fn||!tn) return;
+    const fp=nodeProj(fn), tp=nodeProj(tn), sel=smap.selected===conn.id;
+    const cx=(fp.x+tp.x)/2, cy=Math.min(fp.y,tp.y)-36;
+    ctx.beginPath(); ctx.moveTo(fp.x,fp.y); ctx.quadraticCurveTo(cx,cy,tp.x,tp.y);
+    ctx.strokeStyle = sel?'#00e5a0':'#00e5a050'; ctx.lineWidth=sel?2:1.5; ctx.stroke();
+    const ang=Math.atan2(tp.y-cy,tp.x-cx);
+    ctx.beginPath(); ctx.moveTo(tp.x,tp.y);
+    ctx.lineTo(tp.x-9*Math.cos(ang-.35),tp.y-9*Math.sin(ang-.35));
+    ctx.lineTo(tp.x-9*Math.cos(ang+.35),tp.y-9*Math.sin(ang+.35));
+    ctx.closePath(); ctx.fillStyle=sel?'#00e5a0':'#00e5a095'; ctx.fill();
+    if (conn.label) {
+      ctx.fillStyle='#7a7f90'; ctx.font='11px DM Sans,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(conn.label,cx,cy-10);
+    }
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    r = Math.min(r, w/2, h/2);
+    ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+r,y,r);
+  }
+
+  function hitNode(mx, my) {
+    for (const n of [...smap.nodes].reverse()) {
+      const p=nodeProj(n); const {w,h}=nSize(p.s);
+      if (mx>=p.x-w/2&&mx<=p.x+w/2&&my>=p.y-h/2&&my<=p.y+h/2) return n;
+    }
+    return null;
+  }
+
+  /* ── Canvas resize ── */
+  function resize() {
+    const canvas=document.getElementById('smapCanvas');
+    const wrap=document.getElementById('smapCanvasWrap');
+    if (!canvas||!wrap) return;
+    canvas.width  = wrap.offsetWidth  || 900;
+    canvas.height = wrap.offsetHeight || 600;
+    draw();
+  }
+
+  /* ── Interaction ── */
+  let dragging=false, dragMode=null, dragNode=null, prevMouse=null;
+
+  function onMouseDown(e) {
+    const canvas=document.getElementById('smapCanvas');
+    const r=canvas.getBoundingClientRect();
+    const mx=e.clientX-r.left, my=e.clientY-r.top;
+    prevMouse={x:mx,y:my};
+    dragging=true;
+
+    // Right click = pan
+    if (e.button===2) { dragMode='pan'; e.preventDefault(); return; }
+
+    const hit=hitNode(mx,my);
+
+    if (smap.connectMode) {
+      if (hit) {
+        if (!smap.connectFirst) { smap.connectFirst=hit.id; }
+        else if (smap.connectFirst!==hit.id) {
+          const c={id:'sc'+smapUid++,from:smap.connectFirst,to:hit.id,label:''};
+          smap.connections.push(c); smap.connectFirst=null;
+          smap.selected=c.id; smap.selectType='conn';
+          renderSmapPanel();
+        }
+      }
+      dragging=false; draw(); return;
+    }
+
+    if (hit) {
+      if (smap.selected!==hit.id) { smap.selected=hit.id; smap.selectType='node'; renderSmapPanel(); }
+      dragNode=hit; dragMode='node';
+    } else {
+      dragNode=null; dragMode='rotate';
+      if (smap.selected) { smap.selected=null; smap.selectType=null; renderSmapPanel(); }
+    }
+    draw(); e.preventDefault();
+  }
+
+  function onMouseMove(e) {
+    if (!dragging||!prevMouse) return;
+    const canvas=document.getElementById('smapCanvas');
+    const r=canvas.getBoundingClientRect();
+    const mx=e.clientX-r.left, my=e.clientY-r.top;
+    const sdx=mx-prevMouse.x, sdy=my-prevMouse.y;
+
+    if (dragMode==='node' && dragNode) {
+      const delta=screenToWorldDelta(dragNode, sdx, sdy);
+      dragNode.x+=delta.dx; dragNode.z+=delta.dz;
+    } else if (dragMode==='rotate') {
+      smap.view.rotY += sdx * 0.006;
+      smap.view.rotX += sdy * 0.012;
+    } else if (dragMode==='pan') {
+      smap.view.panX += sdx;
+      smap.view.panY += sdy;
+    }
+    prevMouse={x:mx,y:my};
+    draw();
+  }
+
+  function onMouseUp() { dragging=false; dragNode=null; dragMode=null; }
+
+  function onWheel(e) {
+    e.preventDefault();
+    smap.view.zoom *= e.deltaY<0 ? 1.1 : 0.9;
+    smap.view.zoom = Math.max(0.05, Math.min(8, smap.view.zoom));
+    draw();
+  }
+
+  function setupEvents() {
+    const canvas=document.getElementById('smapCanvas');
+    if (!canvas||canvas._smapReady) return;
+    canvas._smapReady=true;
+    canvas.addEventListener('mousedown', onMouseDown);
+    canvas.addEventListener('contextmenu', e=>e.preventDefault());
+    // mousemove and mouseup on window so drag continues outside the canvas
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup',   onMouseUp);
+    canvas.addEventListener('wheel', onWheel, {passive:false});
+    new ResizeObserver(resize).observe(document.getElementById('smapCanvasWrap'));
+    resize();
+  }
+
+  /* ── Properties panel ── */
+  function renderSmapPanel() {
+    const panel=document.getElementById('smapPropsSection');
+    if (!panel) return;
+    if (!smap.selected) {
+      panel.innerHTML=`<div class="smap-panel-empty">
+        Click a node to see its properties.<br><br>
+        <span style="color:var(--txt3);font-size:12px;">
+          Drag nodes to reposition.<br>
+          Drag the background to orbit the view.<br>
+          Scroll to zoom.
+        </span><br><br>
+        <div class="smap-stat-row"><span>Nodes</span><span>${smap.nodes.length}</span></div>
+        <div class="smap-stat-row"><span>Connections</span><span>${smap.connections.length}</span></div>
+        <div class="smap-stat-row"><span>Layers</span><span>${smap.layers.length}</span></div>
+      </div>`;
+      return;
+    }
+    if (smap.selectType==='conn') {
+      const conn=smap.connections.find(c=>c.id===smap.selected);
+      if (!conn) return;
+      panel.innerHTML=`<div class="smap-panel-content">
+        <div class="smap-panel-title">Connection</div>
+        <div class="m-field"><label class="m-label">Label</label>
+          <input class="m-input" id="spConnLabel" value="${esc(conn.label)}" placeholder="e.g. HTTP, gRPC, Event…"/></div>
+        <button class="btn btn-danger" style="margin-top:auto;" onclick="smapDeleteSelected()">Delete Connection</button>
+      </div>`;
+      document.getElementById('spConnLabel')?.addEventListener('input',e=>{conn.label=e.target.value;draw();});
+      return;
+    }
+    const node=smap.nodes.find(n=>n.id===smap.selected);
+    if (!node) return;
+    const type=NODE_TYPES[node.type]||NODE_TYPES.service;
+    panel.innerHTML=`<div class="smap-panel-content">
+      <div class="smap-panel-badge" style="background:${type.color}22;border-color:${type.color}66;color:${type.color};">${type.label}</div>
+      <div class="m-field"><label class="m-label">Name</label>
+        <input class="m-input" id="spName" value="${esc(node.name)}"/></div>
+      <div class="m-field"><label class="m-label">Type</label>
+        <select class="m-select" id="spType">
+          ${Object.entries(NODE_TYPES).map(([k,v])=>`<option value="${k}" ${node.type===k?'selected':''}>${v.label}</option>`).join('')}
+        </select></div>
+      <div class="m-field"><label class="m-label">Layer</label>
+        <select class="m-select" id="spLayer">
+          ${smap.layers.map(l=>`<option value="${l.id}" ${node.layerId===l.id?'selected':''}>${l.name}</option>`).join('')}
+        </select></div>
+      <div class="m-field"><label class="m-label">Status</label>
+        <select class="m-select" id="spStatus">
+          ${['Active','In Development','Planned','Deprecated','Experimental'].map(s=>`<option value="${s.toLowerCase()}" ${(node.info.status||'active')===s.toLowerCase()?'selected':''}>${s}</option>`).join('')}
+        </select></div>
+      <div class="m-field"><label class="m-label">Description</label>
+        <textarea class="m-input" id="spDesc" style="height:68px;resize:vertical;">${esc(node.info.description||'')}</textarea></div>
+      <div class="m-field"><label class="m-label">Tech / Stack</label>
+        <input class="m-input" id="spTech" value="${esc(node.info.tech||'')}" placeholder="e.g. Node.js, Redis…"/></div>
+      <div class="m-field"><label class="m-label">Notes</label>
+        <textarea class="m-input" id="spNotes" style="height:68px;resize:vertical;">${esc(node.info.notes||'')}</textarea></div>
+      <button class="btn btn-danger" onclick="smapDeleteSelected()">Delete Node</button>
+    </div>`;
+    document.getElementById('spName')?.addEventListener('input',e=>{node.name=e.target.value;draw();});
+    document.getElementById('spType')?.addEventListener('change',e=>{node.type=e.target.value;renderSmapPanel();draw();});
+    document.getElementById('spLayer')?.addEventListener('change',e=>{node.layerId=e.target.value;draw();});
+    document.getElementById('spStatus')?.addEventListener('change',e=>{node.info.status=e.target.value;});
+    document.getElementById('spDesc')?.addEventListener('input',e=>{node.info.description=e.target.value;});
+    document.getElementById('spTech')?.addEventListener('input',e=>{node.info.tech=e.target.value;});
+    document.getElementById('spNotes')?.addEventListener('input',e=>{node.info.notes=e.target.value;});
+  }
+
+  /* ── Global toolbar API ── */
+  window.smapAddNode = function() {
+    const sel=document.getElementById('smapNodeTypeSel');
+    const type=sel?sel.value:'service';
+    if (!smap.layers.length) {
+      smap.layers.push({id:'sl'+smapUid++,name:'Layer 1',color:'#00e5a0'});
+    }
+    const node={
+      id:'sn'+smapUid++, name:NODE_TYPES[type]?.label||'Node', type,
+      layerId:smap.layers[0]?.id,
+      x:(Math.random()-.5)*260, z:(Math.random()-.5)*260,
+      info:{description:'',status:'active',tech:'',notes:''},
+    };
+    smap.nodes.push(node);
+    smap.selected=node.id; smap.selectType='node';
+    renderSmapPanel(); draw();
+  };
+
+  window.smapAddLayer=function(){
+    const cols=['#63b3ed','#00e5a0','#f0b429','#d6bcfa','#fc8181','#f6ad55','#76e4f7'];
+    smap.layers.push({id:'sl'+smapUid++,name:'New Layer',color:cols[smap.layers.length%cols.length]});
+    renderLayersPanel(); draw();
+  };
+
+  window.smapToggleConnect=function(){
+    smap.connectMode=!smap.connectMode; smap.connectFirst=null;
+    document.getElementById('smapConnBtn')?.classList.toggle('active',smap.connectMode);
+    draw();
+  };
+
+  window.smapTopView=function(){
+    const canvas=document.getElementById('smapCanvas');
+    const W=canvas?canvas.width:900, H=canvas?canvas.height:600;
+    const sceneSz = Math.max(LAYER_SZ, smap.layers.length * LAYER_GAP) * 0.7;
+    const zoom = Math.min(W,H) * 0.75 / sceneSz;
+    smap.view={rotX:-1.50, rotY:0, zoom:Math.max(0.05,zoom), panX:0, panY:0};
+    draw();
+  };
+
+  window.smapReset=function(){
+    smap.view={rotX:-0.38,rotY:0.2,zoom:0.72,panX:0,panY:20};
+    draw();
+  };
+
+  window.smapDeleteMap=function(){
+    if (smapMaps.length <= 1) { smapConfirm('Delete this map? It is your only map and cannot be recovered.', () => {
+      smap.nodes=[]; smap.connections=[]; smap.layers=[]; smap.selected=null;
+      renderSmapPanel(); renderLayersPanel(); draw();
+    }); return; }
+    smapConfirm(`Delete map "${smap.name}"? This cannot be undone.`, () => {
+      const idx = smapMaps.findIndex(m=>m.id===smap.id);
+      smapMaps.splice(idx,1);
+      smap = smapMaps[Math.max(0,idx-1)];
+      updateMapSel(); renderSmapPanel(); renderLayersPanel(); draw();
+    });
+  };
+
+  window.smapDeleteSelected=function(){
+    if (!smap.selected) return;
+    const label = smap.selectType==='node'
+      ? `Delete node "${smap.nodes.find(n=>n.id===smap.selected)?.name||'this node'}"?`
+      : 'Delete this connection?';
+    smapConfirm(label+' This cannot be undone.', () => {
+      if (smap.selectType==='node') {
+        smap.nodes=smap.nodes.filter(n=>n.id!==smap.selected);
+        smap.connections=smap.connections.filter(c=>c.from!==smap.selected&&c.to!==smap.selected);
+      } else {
+        smap.connections=smap.connections.filter(c=>c.id!==smap.selected);
+      }
+      smap.selected=null; renderSmapPanel(); draw();
+    });
+  };
+
+  /* ── Layers panel ── */
+  function renderLayersPanel() {
+    const list = document.getElementById('smapLayerList');
+    if (!list) return;
+    if (!smap.layers.length) {
+      list.innerHTML = `<div style="padding:4px 6px;font-size:12px;color:var(--txt3);font-style:italic;">No layers yet. Click + to add one.</div>`;
+      return;
+    }
+    list.innerHTML = '';
+    smap.layers.forEach((layer, i) => {
+      const row = document.createElement('div');
+      row.className = 'smap-layer-row';
+      row.innerHTML = `
+        <input type="color" class="smap-layer-color" value="${layer.color}" title="Pick colour"/>
+        <input class="smap-layer-name" value="${esc(layer.name)}" placeholder="Layer name…"/>
+        <div class="smap-layer-btns">
+          <button class="smap-layer-btn" title="Move up" ${i===0?'disabled':''}>↑</button>
+          <button class="smap-layer-btn" title="Move down" ${i===smap.layers.length-1?'disabled':''}>↓</button>
+          <button class="smap-layer-btn del" title="Delete layer">×</button>
+        </div>`;
+      const [colorInp, nameInp] = row.querySelectorAll('input');
+      const [upBtn, downBtn, delBtn] = row.querySelectorAll('button');
+      colorInp.addEventListener('input', e => { layer.color = e.target.value; draw(); });
+      nameInp.addEventListener('input', e => { layer.name = e.target.value; draw(); });
+      upBtn.addEventListener('click', () => {
+        if (i > 0) { [smap.layers[i-1], smap.layers[i]] = [smap.layers[i], smap.layers[i-1]]; renderLayersPanel(); draw(); }
+      });
+      downBtn.addEventListener('click', () => {
+        if (i < smap.layers.length-1) { [smap.layers[i], smap.layers[i+1]] = [smap.layers[i+1], smap.layers[i]]; renderLayersPanel(); draw(); }
+      });
+      delBtn.addEventListener('click', () => {
+        smapConfirm(`Delete layer "${layer.name}"? Nodes on this layer will move to the next available layer.`, () => {
+          smap.layers.splice(i, 1);
+          if (smap.layers.length) smap.nodes.forEach(n => { if (!smap.layers.find(l=>l.id===n.layerId)) n.layerId = smap.layers[0].id; });
+          renderLayersPanel(); renderSmapPanel(); draw();
+        });
+      });
+      list.appendChild(row);
+    });
+  }
+
+  /* ── Confirm helper — shows centred modal, calls cb on confirm ── */
+  function smapConfirm(msg, cb) {
+    const ov  = document.getElementById('confirmOv');
+    const msgEl = document.getElementById('confirmMsg');
+    const okBtn = document.getElementById('confirmOk');
+    const cancelBtn = document.getElementById('confirmCancel');
+    if (!ov) { if (confirm(msg)) cb(); return; }
+    msgEl.textContent = msg;
+    ov.classList.remove('hidden');
+    const close = () => { ov.classList.add('hidden'); okBtn.onclick = null; cancelBtn.onclick = null; };
+    okBtn.onclick = () => { close(); cb(); };
+    cancelBtn.onclick = close;
+    ov.onclick = e => { if (e.target === ov) close(); };
+  }
+
+  /* ── Expose show hook called by gotoView ── */
+  window._smapOnShow = function() { setupEvents(); updateMapSel(); renderLayersPanel(); resize(); };
+
+  window._smapGetState = function() {
+    return { maps: smapMaps.map(m=>({...m})), activeId: smap?.id, uid: smapUid };
+  };
+  window._smapLoadState = function(saved) {
+    if (!saved?.maps?.length) return;
+    smapMaps.length = 0;
+    saved.maps.forEach(m => smapMaps.push(m));
+    smapUid = saved.uid || smapUid;
+    smap = smapMaps.find(m=>m.id===saved.activeId) || smapMaps[0];
+  };
+
+  /* Init immediately so events work on first visit */
+  setupEvents();
+})();
+
+/* ================================================================
+   TOKENOMICS ENGINE
+================================================================ */
+(function() {
+  const CHAINS = []; // user-managed — add your own chains
+  const tok = {
+    QST:{ totalSupply:0, circulatingSupply:0, locked:0, priceUSD:0, description:'', utility:'', notes:'' },
+    wQST:{ chains:[], totalBridged:0, notes:'' },
+    stables: [],
+    emission:{ phases:[] },
+    stress:{ coin:'', scenario:'custom', reserveRatio:100, redemptionPct:0, cascadePct:0, shockPct:0 },
+    nodes:{ type:'Validator', stake:0, uptime:0, rewardPool:0, totalNodes:0, qstPrice:0 },
+    phaseUid:1, stableUid:1,
+  };
+
+  let currentTab = 'overview';
+
+  /* ── Tab switching ── */
+  function tokSwitchTab(name) {
+    currentTab = name;
+    document.querySelectorAll('.tok-tab').forEach(b => b.classList.toggle('active', b.dataset.tab===name));
+    renderTab();
+  }
+  window.tokSwitchTab = tokSwitchTab;
+
+  /* ── Main render dispatcher ── */
+  function renderTab() {
+    const body = document.getElementById('tokBody');
+    if (!body) return;
+    if (currentTab==='overview')  body.innerHTML = buildOverview();
+    if (currentTab==='emission')  body.innerHTML = buildEmission();
+    if (currentTab==='stress')    body.innerHTML = buildStress();
+    if (currentTab==='nodes')     body.innerHTML = buildNodes();
+    wireEvents();
+  }
+
+  /* ── Wire events after innerHTML ── */
+  function wireEvents() {
+    // Generic: bind all [data-tok] inputs
+    document.querySelectorAll('[data-tok]').forEach(el => {
+      el.addEventListener('change', handleTokChange);
+      el.addEventListener('input',  handleTokChange);
+    });
+    // Tab buttons
+    document.querySelectorAll('.tok-tab').forEach(b =>
+      b.addEventListener('click', () => tokSwitchTab(b.dataset.tab))
+    );
+    // Specific wiring
+    if (currentTab==='emission') wireEmission();
+    if (currentTab==='stress')   wireStress();
+    if (currentTab==='nodes')    wireNodes();
+    if (currentTab==='overview') wireOverview();
+  }
+
+  function handleTokChange(e) {
+    const key = e.target.dataset.tok;
+    const val = e.target.type==='number' ? parseFloat(e.target.value)||0 : e.target.value;
+    // dot-path setter
+    const parts = key.split('.');
+    let obj = tok;
+    for (let i=0;i<parts.length-1;i++) obj = obj[parts[i]];
+    obj[parts[parts.length-1]] = val;
+  }
+
+  /* ═══════════════════════════════════════════════════
+     TAB 1: TOKEN OVERVIEW
+  ═══════════════════════════════════════════════════ */
+  function buildOverview() {
+    return `
+    <div class="tok-h1">Token Overview</div>
+    <div class="tok-sub">Configure QST, wQST and all stablecoin parameters.</div>
+
+    <div class="tok-section">
+      <div class="tok-section-title">Quantum Settlement Token — QST</div>
+      <div class="tok-grid">
+        <div class="tok-card">
+          <div class="tok-card-hdr">
+            <span class="tok-badge" style="color:var(--acc);border-color:var(--acc-glow);background:var(--acc-dim);">QST</span>
+            <span class="tok-card-title">Quantum Settlement Token</span>
+          </div>
+          <div class="tok-2col">
+            ${tf('Total Supply','QST.totalSupply',tok.QST.totalSupply,'number','1,000,000,000')}
+            ${tf('Circulating Supply','QST.circulatingSupply',tok.QST.circulatingSupply,'number','0')}
+          </div>
+          <div class="tok-2col">
+            ${tf('Locked / Vesting','QST.locked',tok.QST.locked,'number','0')}
+            ${tf('Price (USD)','QST.priceUSD',tok.QST.priceUSD,'number','0.10')}
+          </div>
+          ${tf('Utility / Purpose','QST.utility',tok.QST.utility,'text','Settlement, governance, staking…')}
+          ${tf('Description','QST.description',tok.QST.description,'textarea','Overview of QST…')}
+        </div>
+        <div class="tok-card">
+          <div class="tok-card-hdr">
+            <span class="tok-badge" style="color:#d6bcfa;border-color:#d6bcfa40;background:#d6bcfa10;">wQST</span>
+            <span class="tok-card-title">Wrapped QST</span>
+          </div>
+          <div class="tok-card-sub">Multi-chain deployment</div>
+          <div class="tok-label" style="margin-top:4px;">Active Chains</div>
+          <div class="tok-chain-grid" id="wqstChains">${buildChainToggles()}</div>
+          <div class="tok-2col" style="margin-top:8px;">
+            ${tf('Total Bridged','wQST.totalBridged',tok.wQST.totalBridged,'number','0')}
+          </div>
+          ${tf('Notes','wQST.notes',tok.wQST.notes,'textarea','Bridge contracts, security audits…')}
+        </div>
+      </div>
+    </div>
+
+    <div class="tok-section">
+      <div class="tok-section-title" style="display:flex;align-items:center;justify-content:space-between;">
+        Stablecoins
+        <button class="tok-add-btn" onclick="tokAddStable()">+ Add Stablecoin</button>
+      </div>
+      ${tok.stables.length===0
+        ? `<div style="padding:24px;text-align:center;color:var(--txt3);font-size:13px;border:1px dashed var(--bdr2);border-radius:10px;">No stablecoins added yet. Click <strong style="color:var(--acc);">+ Add Stablecoin</strong> to create one.</div>`
+        : `<div class="tok-grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));">${tok.stables.map((s,i) => buildStableCard(s,i)).join('')}</div>`
+      }
+    </div>`;
+  }
+
+  function buildChainToggles() {
+    const chips = tok.wQST.chains.map((c,i) =>
+      `<span class="tok-tag on">${esc(c)} <span class="tok-tag-x" onclick="tokRemoveChain(${i})">×</span></span>`
+    ).join('');
+    return chips + `<input id="wqstChainInp" class="tok-input" style="width:160px;height:28px;padding:4px 8px;font-size:12px;" placeholder="Chain name… press Enter"/>`;
+  }
+  window.tokRemoveChain = function(i) {
+    tok.wQST.chains.splice(i,1);
+    document.getElementById('wqstChains').innerHTML = buildChainToggles();
+    wireChainInput();
+  };
+  function wireChainInput() {
+    const inp = document.getElementById('wqstChainInp');
+    if (!inp) return;
+    inp.addEventListener('keydown', e => {
+      if (e.key==='Enter' && inp.value.trim()) {
+        e.preventDefault();
+        tok.wQST.chains.push(inp.value.trim());
+        document.getElementById('wqstChains').innerHTML = buildChainToggles();
+        wireChainInput();
+        document.getElementById('wqstChainInp')?.focus();
+      }
+    });
+  }
+  window.tokToggleChain = function(c) {
+    const idx = tok.wQST.chains.indexOf(c);
+    if (idx>-1) tok.wQST.chains.splice(idx,1); else tok.wQST.chains.push(c);
+    document.getElementById('wqstChains').innerHTML = buildChainToggles();
+    wireChainInput();
+  };
+
+  function buildStableCard(s, i) {
+    const cols=['#63b3ed','#68d391','#f0b429','#fc8181','#76e4f7','#d6bcfa','#f6ad55','#fbd38d','#a0aec0','#90cdf4'];
+    const c = cols[i%cols.length];
+    const alloc = s.reservePct + s.liquidityPct + s.insurancePct + s.treasuryPct + s.burnPct;
+    const allocOk = Math.abs(alloc-100)<0.01;
+    return `<div class="tok-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div class="tok-card-hdr" style="margin-bottom:0;">
+          <span class="tok-badge" style="color:${c};border-color:${c}40;background:${c}12;">${esc(s.symbol)||'NEW'}</span>
+          <span class="tok-card-title">${esc(s.name)||'New Stablecoin'}</span>
+        </div>
+        <button class="tok-del-btn" onclick="tokDelStable(${i})" title="Delete">×</button>
+      </div>
+
+      <!-- Identity -->
+      <div class="tok-2col">
+        <div class="tok-field"><div class="tok-label">Symbol</div>
+          <input class="tok-input" value="${esc(s.symbol)}" placeholder="USDZ" onchange="tok.stables[${i}].symbol=this.value;tokRefreshOverview()"/></div>
+        <div class="tok-field"><div class="tok-label">Fiat Code</div>
+          <input class="tok-input" value="${esc(s.fiat)}" placeholder="USD" onchange="tok.stables[${i}].fiat=this.value"/></div>
+      </div>
+      <div class="tok-2col">
+        <div class="tok-field"><div class="tok-label">Full Name</div>
+          <input class="tok-input" value="${esc(s.name)}" placeholder="US Dollar" onchange="tok.stables[${i}].name=this.value;tokRefreshOverview()"/></div>
+        <div class="tok-field"><div class="tok-label">Status</div>
+          <select class="tok-select" onchange="tok.stables[${i}].status=this.value">
+            ${['Planned','In Dev','Testnet','Live','Paused'].map(v=>`<option ${s.status===v?'selected':''}>${v}</option>`).join('')}
+          </select></div>
+      </div>
+
+      <!-- Minting Mechanism -->
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--txt3);margin:10px 0 6px;padding-top:10px;border-top:1px solid var(--bdr);">Minting Mechanism</div>
+      <div class="tok-field" style="margin-bottom:8px;"><div class="tok-label">Model</div>
+        <select class="tok-select" onchange="tok.stables[${i}].mintModel=this.value">
+          ${['QST-Lock','QST-Burn','QST-Hybrid','Fiat-Backed','Algorithmic'].map(v=>`<option ${s.mintModel===v?'selected':''}>${v}</option>`).join('')}
+        </select></div>
+      <div class="tok-3col">
+        <div class="tok-field"><div class="tok-label">QST Burn %</div>
+          <input class="tok-input" type="number" value="${s.qstBurnPct}" min="0" max="100" step="0.1" onchange="tok.stables[${i}].qstBurnPct=parseFloat(this.value)||0" placeholder="0"/></div>
+        <div class="tok-field"><div class="tok-label">QST Lock %</div>
+          <input class="tok-input" type="number" value="${s.qstLockPct}" min="0" max="500" step="0.1" onchange="tok.stables[${i}].qstLockPct=parseFloat(this.value)||0" placeholder="100"/></div>
+        <div class="tok-field"><div class="tok-label">Collateral Ratio</div>
+          <input class="tok-input" type="number" value="${s.collateralRatio}" min="100" max="1000" step="1" onchange="tok.stables[${i}].collateralRatio=parseFloat(this.value)||150" placeholder="150"/></div>
+      </div>
+
+      <!-- Reserve Allocation -->
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--txt3);margin:10px 0 6px;padding-top:10px;border-top:1px solid var(--bdr);">
+        Reserve Allocation <span style="margin-left:6px;font-family:'Space Mono',monospace;${allocOk?'color:#68d391':'color:var(--danger)'};">${alloc.toFixed(1)}% ${allocOk?'✓':'≠ 100%'}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div class="tok-field"><div class="tok-label">Backing Reserve %</div>
+          <input class="tok-input" type="number" value="${s.reservePct}" min="0" max="100" step="0.1" onchange="tok.stables[${i}].reservePct=parseFloat(this.value)||0;tokRefreshOverview()"/></div>
+        <div class="tok-field"><div class="tok-label">Liquidity Pool %</div>
+          <input class="tok-input" type="number" value="${s.liquidityPct}" min="0" max="100" step="0.1" onchange="tok.stables[${i}].liquidityPct=parseFloat(this.value)||0;tokRefreshOverview()"/></div>
+        <div class="tok-field"><div class="tok-label">Insurance Fund %</div>
+          <input class="tok-input" type="number" value="${s.insurancePct}" min="0" max="100" step="0.1" onchange="tok.stables[${i}].insurancePct=parseFloat(this.value)||0;tokRefreshOverview()"/></div>
+        <div class="tok-field"><div class="tok-label">Treasury %</div>
+          <input class="tok-input" type="number" value="${s.treasuryPct}" min="0" max="100" step="0.1" onchange="tok.stables[${i}].treasuryPct=parseFloat(this.value)||0;tokRefreshOverview()"/></div>
+        <div class="tok-field"><div class="tok-label">Burn %</div>
+          <input class="tok-input" type="number" value="${s.burnPct}" min="0" max="100" step="0.1" onchange="tok.stables[${i}].burnPct=parseFloat(this.value)||0;tokRefreshOverview()"/></div>
+      </div>
+      ${alloc>0?`<div style="display:flex;height:6px;border-radius:99px;overflow:hidden;margin-top:4px;gap:1px;">
+        ${[['#63b3ed',s.reservePct],['#00e5a0',s.liquidityPct],['#f0b429',s.insurancePct],['#d6bcfa',s.treasuryPct],['#ff5a5a',s.burnPct]].filter(([,v])=>v>0).map(([col,v])=>`<div style="flex:${v};background:${col};"></div>`).join('')}
+      </div>`:''}
+
+      <!-- Fee Structure -->
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--txt3);margin:10px 0 6px;padding-top:10px;border-top:1px solid var(--bdr);">Fee Structure</div>
+      <div class="tok-3col">
+        <div class="tok-field"><div class="tok-label">Mint Fee %</div>
+          <input class="tok-input" type="number" value="${s.mintFeePct}" min="0" step="0.01" onchange="tok.stables[${i}].mintFeePct=parseFloat(this.value)||0" placeholder="0.1"/></div>
+        <div class="tok-field"><div class="tok-label">Redeem Fee %</div>
+          <input class="tok-input" type="number" value="${s.redeemFeePct}" min="0" step="0.01" onchange="tok.stables[${i}].redeemFeePct=parseFloat(this.value)||0" placeholder="0.1"/></div>
+        <div class="tok-field"><div class="tok-label">Stability Fee %</div>
+          <input class="tok-input" type="number" value="${s.stabilityFeePct}" min="0" step="0.01" onchange="tok.stables[${i}].stabilityFeePct=parseFloat(this.value)||0" placeholder="0"/></div>
+      </div>
+
+      <div class="tok-field" style="margin-top:8px;"><div class="tok-label">Notes</div>
+        <textarea class="tok-textarea" rows="2" onchange="tok.stables[${i}].notes=this.value">${esc(s.notes)}</textarea></div>
+    </div>`;
+  }
+
+  window.tokAddStable = function() {
+    tok.stables.push({
+      id:'st'+tok.stableUid++, symbol:'', fiat:'', name:'', status:'Planned',
+      mintModel:'QST-Lock', qstBurnPct:0, qstLockPct:100, collateralRatio:150,
+      reservePct:0, liquidityPct:0, insurancePct:0, treasuryPct:0, burnPct:0,
+      mintFeePct:0, redeemFeePct:0, stabilityFeePct:0, notes:'',
+    });
+    renderTab();
+  };
+  window.tokDelStable = function(i) {
+    smapConfirm(`Delete stablecoin "${tok.stables[i]?.symbol||'this entry'}"? This cannot be undone.`, () => {
+      tok.stables.splice(i,1); renderTab();
+    });
+  };
+  window.tokRefreshOverview = function() { renderTab(); };
+
+  function wireOverview() { wireChainInput(); }
+
+  /* ═══════════════════════════════════════════════════
+     TAB 2: EMISSION SCHEDULE
+  ═══════════════════════════════════════════════════ */
+  function buildEmission() {
+    const phases = tok.emission.phases;
+    const totalMonths = phases.reduce((s,p)=>s+p.months,0);
+    const totalEmitted = phases.reduce((s,p)=>s+p.months*p.perMonth,0);
+    const remaining = tok.QST.totalSupply - totalEmitted;
+
+    return `
+    <div class="tok-h1">Emission Schedule</div>
+    <div class="tok-sub">Define token release phases. Visualise cumulative emission over time.</div>
+
+    <div class="tok-chart-wrap">
+      <div class="tok-chart-title">Emission by Phase — Monthly Rate</div>
+      ${buildEmissionSVG(phases)}
+    </div>
+
+    <div class="tok-result-grid" style="margin-bottom:24px;">
+      <div class="tok-result-card">
+        <div class="tok-result-val" style="color:var(--acc);">${fmtNum(tok.QST.totalSupply)}</div>
+        <div class="tok-result-lbl">Total Supply</div>
+      </div>
+      <div class="tok-result-card ${totalEmitted>tok.QST.totalSupply?'red':'green'}">
+        <div class="tok-result-val" style="color:${totalEmitted>tok.QST.totalSupply?'var(--danger)':'#68d391'};">${fmtNum(totalEmitted)}</div>
+        <div class="tok-result-lbl">Scheduled Emission</div>
+      </div>
+      <div class="tok-result-card ${remaining<0?'red':''}">
+        <div class="tok-result-val" style="color:${remaining<0?'var(--danger)':'var(--txt)'};">${fmtNum(Math.abs(remaining))}</div>
+        <div class="tok-result-lbl">${remaining<0?'Over-allocated':'Unscheduled'}</div>
+      </div>
+      <div class="tok-result-card">
+        <div class="tok-result-val">${totalMonths}</div>
+        <div class="tok-result-lbl">Total Months</div>
+      </div>
+    </div>
+
+    <div class="tok-section">
+      <div class="tok-section-title">Phases</div>
+      <div style="display:grid;grid-template-columns:1fr 90px 110px 80px 80px 36px;gap:8px;padding:6px 0;margin-bottom:4px;">
+        ${['Name','Duration (mo)','Per Month','Vesting (mo)','Cliff (mo)',''].map(h=>`<div class="tok-phase-hdr">${h}</div>`).join('')}
+      </div>
+      <div id="emissionPhases">${phases.map((p,i)=>buildPhaseRow(p,i)).join('')}</div>
+      <div style="margin-top:12px;">
+        <button class="tok-add-btn" onclick="tokAddPhase()">+ Add Phase</button>
+      </div>
+    </div>`;
+  }
+
+  function buildPhaseRow(p, i) {
+    return `<div style="display:grid;grid-template-columns:1fr 90px 110px 80px 80px 36px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--bdr);">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input type="color" value="${p.color}" style="width:22px;height:22px;border:none;border-radius:4px;cursor:pointer;padding:0;" onchange="tok.emission.phases[${i}].color=this.value;tokRefreshEmission()"/>
+        <input class="tok-input" value="${esc(p.name)}" style="flex:1;" onchange="tok.emission.phases[${i}].name=this.value;tokRefreshEmission()"/>
+      </div>
+      <input class="tok-input" type="number" value="${p.months}" min="1" onchange="tok.emission.phases[${i}].months=parseInt(this.value)||1;tokRefreshEmission()"/>
+      <input class="tok-input" type="number" value="${p.perMonth}" min="0" onchange="tok.emission.phases[${i}].perMonth=parseFloat(this.value)||0;tokRefreshEmission()"/>
+      <input class="tok-input" type="number" value="${p.vesting}" min="0" onchange="tok.emission.phases[${i}].vesting=parseInt(this.value)||0"/>
+      <input class="tok-input" type="number" value="${p.cliff}" min="0" onchange="tok.emission.phases[${i}].cliff=parseInt(this.value)||0"/>
+      <button class="tok-del-btn" onclick="tokDelPhase(${i})">×</button>
+    </div>`;
+  }
+
+  function buildEmissionSVG(phases) {
+    if (!phases.length) return `<div style="padding:40px;text-align:center;color:var(--txt3);">No phases defined yet.</div>`;
+    const totalMonths = phases.reduce((s,p)=>s+p.months,0);
+    const maxRate = Math.max(...phases.map(p=>p.perMonth));
+    const W=700, H=180, PL=50, PR=20, PT=20, PB=30;
+    const cW=W-PL-PR, cH=H-PT-PB;
+    let bars='', labels='', cumLine='', x=0;
+    let cumPoints=[];
+    let cumTotal=0;
+    phases.forEach((p,pi) => {
+      const bW=Math.max(1,(p.months/totalMonths)*cW);
+      const bH=(p.perMonth/maxRate)*cH;
+      const bX=PL+x, bY=PT+cH-bH;
+      bars+=`<rect x="${bX}" y="${bY}" width="${bW}" height="${bH}" fill="${p.color}28" stroke="${p.color}" stroke-width="1.5" rx="2"/>`;
+      labels+=`<text x="${bX+bW/2}" y="${H-PB+14}" text-anchor="middle" fill="${p.color}" font-size="9" font-family="Space Mono,monospace">${p.name}</text>`;
+      // Cumulative line points
+      const steps=Math.min(p.months,20);
+      for(let s=0;s<=steps;s++){
+        const mx=(x+(s/steps)*bW), my=cH-Math.min(1,(cumTotal+p.perMonth*(s/steps))/(tok.QST.totalSupply||1))*cH;
+        cumPoints.push(`${PL+mx},${PT+my}`);
+      }
+      cumTotal+=p.months*p.perMonth;
+      x+=bW;
+    });
+    if(cumPoints.length>1) cumLine=`<polyline points="${cumPoints.join(' ')}" fill="none" stroke="var(--acc)" stroke-width="2" stroke-dasharray="4,2"/>`;
+    // Y axis labels
+    const yLabels=[0,0.5,1].map(v=>`<text x="${PL-6}" y="${PT+cH-v*cH+4}" text-anchor="end" fill="#4a4f60" font-size="9" font-family="Space Mono">${fmtNum(maxRate*v)}</text>`).join('');
+    return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" width="100%">
+      <line x1="${PL}" y1="${PT}" x2="${PL}" y2="${PT+cH}" stroke="#252830" stroke-width="1"/>
+      <line x1="${PL}" y1="${PT+cH}" x2="${W-PR}" y2="${PT+cH}" stroke="#252830" stroke-width="1"/>
+      ${bars}${cumLine}${labels}${yLabels}
+      <text x="${W-PR-2}" y="${PT+cH-8}" fill="var(--acc)" font-size="9" font-family="Space Mono">Cumulative</text>
+    </svg>`;
+  }
+
+  window.tokAddPhase = function() {
+    const cols=['#00e5a0','#63b3ed','#f0b429','#d6bcfa','#fc8181','#f6ad55'];
+    tok.emission.phases.push({id:'p'+tok.phaseUid++,name:'New Phase',months:12,perMonth:1000000,vesting:12,cliff:0,color:cols[tok.emission.phases.length%cols.length]});
+    renderTab();
+  };
+  window.tokDelPhase = function(i) {
+    smapConfirm(`Delete phase "${tok.emission.phases[i]?.name}"?`, ()=>{ tok.emission.phases.splice(i,1); renderTab(); });
+  };
+  window.tokRefreshEmission = function() {
+    const chart=document.querySelector('.tok-chart-wrap');
+    if(chart) { chart.querySelector('svg,div')?.remove?.(); chart.insertAdjacentHTML('beforeend',buildEmissionSVG(tok.emission.phases)); }
+  };
+
+  function wireEmission() {}
+
+  /* ═══════════════════════════════════════════════════
+     TAB 3: STABLECOIN STRESS TEST
+  ═══════════════════════════════════════════════════ */
+  const SCENARIOS = {
+    custom:  {reserveRatio:100, redemptionPct:20, cascadePct:10, shockPct:0,  label:'Custom'},
+    mild:    {reserveRatio:100, redemptionPct:15, cascadePct:5,  shockPct:2,  label:'Mild Volatility'},
+    crash:   {reserveRatio:100, redemptionPct:40, cascadePct:20, shockPct:15, label:'Market Crash'},
+    bankrun: {reserveRatio:100, redemptionPct:80, cascadePct:30, shockPct:5,  label:'Bank Run'},
+    swan:    {reserveRatio:100, redemptionPct:95, cascadePct:50, shockPct:40, label:'Black Swan'},
+  };
+
+  function calcStress(s) {
+    const effectiveReserve = s.reserveRatio * (1 - s.shockPct/100);
+    const redemptionDemand = s.redemptionPct;
+    const cascade = s.cascadePct;
+    const totalPressure = redemptionDemand + cascade * (redemptionDemand/100);
+    const pegStability = Math.max(0, Math.min(100, 100 - Math.max(0, totalPressure - effectiveReserve)));
+    const reserveBuffer = Math.max(0, effectiveReserve - totalPressure);
+    const daysToDepletion = reserveBuffer <= 0 ? 0 : Math.round((reserveBuffer / totalPressure) * 30);
+    let risk='low', riskLabel='Low';
+    if(pegStability<90){risk='medium';riskLabel='Medium';}
+    if(pegStability<70){risk='high';riskLabel='High';}
+    if(pegStability<40){risk='critical';riskLabel='Critical';}
+    return {pegStability:pegStability.toFixed(1), reserveBuffer:reserveBuffer.toFixed(1), daysToDepletion, risk, riskLabel};
+  }
+
+  function buildStress() {
+    const s=tok.stress;
+    const r=calcStress(s);
+    const coin=tok.stables.find(c=>c.symbol===s.coin)||tok.stables[0];
+    return `
+    <div class="tok-h1">Stablecoin Stress Test</div>
+    <div class="tok-sub">Simulate market scenarios and evaluate peg stability for each stablecoin.</div>
+    <div style="display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start;">
+      <div>
+        <div class="tok-card" style="margin-bottom:16px;">
+          <div class="tok-section-title" style="margin-bottom:12px;">Configuration</div>
+          <div class="tok-field" style="margin-bottom:10px;">
+            <div class="tok-label">Stablecoin</div>
+            <select class="tok-select" id="stressCoin" onchange="tok.stress.coin=this.value;tokRefreshStress()">
+              ${tok.stables.map(s=>`<option value="${s.symbol}" ${s.symbol===tok.stress.coin?'selected':''}>${s.flag} ${s.symbol}</option>`).join('')}
+            </select>
+          </div>
+          <div class="tok-field" style="margin-bottom:10px;">
+            <div class="tok-label">Scenario Preset</div>
+            <select class="tok-select" id="stressScenario" onchange="tokApplyScenario(this.value)">
+              ${Object.entries(SCENARIOS).map(([k,v])=>`<option value="${k}" ${k===s.scenario?'selected':''}>${v.label}</option>`).join('')}
+            </select>
+          </div>
+          <div class="tok-field" style="margin-bottom:10px;">
+            <div class="tok-label">Reserve Ratio — ${s.reserveRatio}%</div>
+            <input type="range" class="tok-slider" min="50" max="200" value="${s.reserveRatio}" oninput="tok.stress.reserveRatio=parseInt(this.value);this.previousElementSibling.textContent='Reserve Ratio — '+this.value+'%';tokRefreshStress()"/>
+          </div>
+          <div class="tok-field" style="margin-bottom:10px;">
+            <div class="tok-label">Redemption Pressure — ${s.redemptionPct}%</div>
+            <input type="range" class="tok-slider" min="0" max="100" value="${s.redemptionPct}" oninput="tok.stress.redemptionPct=parseInt(this.value);this.previousElementSibling.textContent='Redemption Pressure — '+this.value+'%';tokRefreshStress()"/>
+          </div>
+          <div class="tok-field" style="margin-bottom:10px;">
+            <div class="tok-label">Liquidation Cascade — ${s.cascadePct}%</div>
+            <input type="range" class="tok-slider" min="0" max="100" value="${s.cascadePct}" oninput="tok.stress.cascadePct=parseInt(this.value);this.previousElementSibling.textContent='Liquidation Cascade — '+this.value+'%';tokRefreshStress()"/>
+          </div>
+          <div class="tok-field">
+            <div class="tok-label">External Shock — ${s.shockPct}%</div>
+            <input type="range" class="tok-slider" min="0" max="100" value="${s.shockPct}" oninput="tok.stress.shockPct=parseInt(this.value);this.previousElementSibling.textContent='External Shock — '+this.value+'%';tokRefreshStress()"/>
+          </div>
+        </div>
+      </div>
+      <div id="stressResults">
+        <div class="tok-card" style="margin-bottom:16px;">
+          <div class="tok-section-title" style="margin-bottom:12px;">${coin.flag} ${coin.symbol} — ${coin.name}</div>
+          <div class="tok-result-grid" style="grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="tok-result-card ${parseFloat(r.pegStability)>=90?'green':parseFloat(r.pegStability)>=60?'yellow':'red'}">
+              <div class="tok-result-val" style="color:${parseFloat(r.pegStability)>=90?'#68d391':parseFloat(r.pegStability)>=60?'#f0b429':'var(--danger)'};">${r.pegStability}%</div>
+              <div class="tok-result-lbl">Peg Stability</div>
+            </div>
+            <div class="tok-result-card ${parseFloat(r.reserveBuffer)>20?'green':parseFloat(r.reserveBuffer)>0?'yellow':'red'}">
+              <div class="tok-result-val" style="color:${parseFloat(r.reserveBuffer)>20?'#68d391':parseFloat(r.reserveBuffer)>0?'#f0b429':'var(--danger)'};">${r.reserveBuffer}%</div>
+              <div class="tok-result-lbl">Reserve Buffer</div>
+            </div>
+            <div class="tok-result-card ${r.daysToDepletion>90?'green':r.daysToDepletion>30?'yellow':'red'}">
+              <div class="tok-result-val">${r.daysToDepletion===0?'∞':r.daysToDepletion}</div>
+              <div class="tok-result-lbl">Days Reserve Lasts</div>
+            </div>
+            <div class="tok-result-card">
+              <div style="padding:8px 0;"><span class="tok-risk ${r.risk}">${r.riskLabel} Risk</span></div>
+              <div class="tok-result-lbl">Overall Rating</div>
+            </div>
+          </div>
+          <div style="margin-top:16px;padding:12px;background:var(--surf2);border-radius:8px;font-size:12px;color:var(--txt2);line-height:1.7;">
+            ${buildStressNarrative(r, s, coin)}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function buildStressNarrative(r, s, coin) {
+    const issues=[];
+    if(s.redemptionPct>50) issues.push(`High redemption pressure (${s.redemptionPct}%) could rapidly drain reserves.`);
+    if(s.cascadePct>20) issues.push(`Liquidation cascade risk (${s.cascadePct}%) may amplify market impact.`);
+    if(s.shockPct>10) issues.push(`External shock (${s.shockPct}%) reduces effective reserve capacity.`);
+    if(parseFloat(r.pegStability)<70) issues.push(`Peg is at serious risk — consider increasing the reserve ratio above ${Math.round(s.reserveRatio*1.5)}%.`);
+    if(!issues.length) issues.push(`${coin.symbol} appears stable under these conditions. Reserve buffer is sufficient.`);
+    return issues.join(' ');
+  }
+
+  window.tokApplyScenario = function(key) {
+    const sc=SCENARIOS[key];
+    if(!sc) return;
+    tok.stress.scenario=key;
+    tok.stress.redemptionPct=sc.redemptionPct;
+    tok.stress.cascadePct=sc.cascadePct;
+    tok.stress.shockPct=sc.shockPct;
+    renderTab();
+  };
+  window.tokRefreshStress = function() {
+    const results=document.getElementById('stressResults');
+    if(results){ const coin=tok.stables.find(c=>c.symbol===tok.stress.coin)||tok.stables[0]; const r=calcStress(tok.stress); results.innerHTML=buildStress().match(/<div id="stressResults">([\s\S]*)/)?.[0]||''; renderTab(); }
+    else renderTab();
+  };
+
+  function wireStress() {}
+
+  /* ═══════════════════════════════════════════════════
+     TAB 4: NODE REWARD CALCULATOR
+  ═══════════════════════════════════════════════════ */
+  const NODE_TYPES = {
+    Validator: {multiplier:2.0,  minStake:50000,  desc:'Full consensus participation, highest rewards.'},
+    Observer:  {multiplier:0.8,  minStake:5000,   desc:'Read-only network node, light participation.'},
+    Relay:     {multiplier:1.2,  minStake:10000,  desc:'Routes transactions between validators.'},
+    Archive:   {multiplier:1.0,  minStake:20000,  desc:'Stores full historical chain data.'},
+    'Full Node':{multiplier:0.5, minStake:1000,   desc:'Validates blocks without staking rewards.'},
+  };
+
+  function calcNodeRewards(n) {
+    const nt=NODE_TYPES[n.type]||NODE_TYPES.Validator;
+    const stakeShare = n.stake / (n.totalNodes * n.stake); // simplified equal stake model
+    const poolShare = stakeShare * nt.multiplier;
+    const dailyQST = (n.rewardPool / 30) * poolShare * (n.uptime/100);
+    const monthlyQST = dailyQST * 30;
+    const annualQST = dailyQST * 365;
+    const annualAPR = n.stake > 0 ? (annualQST / n.stake * 100) : 0;
+    return {
+      daily:dailyQST.toFixed(2), monthly:monthlyQST.toFixed(2), annual:annualQST.toFixed(2),
+      dailyUSD:(dailyQST*n.qstPrice).toFixed(2), monthlyUSD:(monthlyQST*n.qstPrice).toFixed(2), annualUSD:(annualQST*n.qstPrice).toFixed(2),
+      apr:annualAPR.toFixed(2), multiplier:nt.multiplier, minStake:nt.minStake, desc:nt.desc,
+      belowMin: n.stake < nt.minStake,
+    };
+  }
+
+  function buildNodes() {
+    const n=tok.nodes;
+    const r=calcNodeRewards(n);
+    return `
+    <div class="tok-h1">Node Reward Calculator</div>
+    <div class="tok-sub">Estimate QST rewards for running different node types on the network.</div>
+    <div style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start;">
+      <div class="tok-card">
+        <div class="tok-section-title" style="margin-bottom:12px;">Parameters</div>
+        <div class="tok-field" style="margin-bottom:10px;">
+          <div class="tok-label">Node Type</div>
+          <select class="tok-select" onchange="tok.nodes.type=this.value;tokRefreshNodes()">
+            ${Object.keys(NODE_TYPES).map(t=>`<option ${t===n.type?'selected':''}>${t}</option>`).join('')}
+          </select>
+          <div style="font-size:11px;color:var(--txt3);margin-top:4px;">${NODE_TYPES[n.type]?.desc||''}</div>
+        </div>
+        ${tf('Stake Amount (QST)','nodes.stake',n.stake,'number','10000')}
+        <div class="tok-field" style="margin:10px 0;">
+          <div class="tok-label">Uptime — ${n.uptime}%</div>
+          <input type="range" class="tok-slider" min="50" max="100" step="0.1" value="${n.uptime}" oninput="tok.nodes.uptime=parseFloat(this.value);this.previousElementSibling.textContent='Uptime — '+this.value+'%';tokRefreshNodes()"/>
+        </div>
+        <div class="tok-section-title" style="margin:16px 0 10px;">Network Settings</div>
+        ${tf('Monthly Reward Pool (QST)','nodes.rewardPool',n.rewardPool,'number','1000000')}
+        ${tf('Total Active Nodes','nodes.totalNodes',n.totalNodes,'number','1000')}
+        ${tf('QST Price (USD)','nodes.qstPrice',n.qstPrice,'number','0.10')}
+        ${r.belowMin?`<div style="padding:8px 10px;border-radius:6px;background:var(--danger-dim);border:1px solid var(--danger);color:var(--danger);font-size:12px;margin-top:8px;">⚠ Minimum stake for ${n.type} is ${fmtNum(r.minStake)} QST.</div>`:''}
+      </div>
+      <div id="nodeResults">
+        <div class="tok-card" style="margin-bottom:16px;">
+          <div class="tok-section-title" style="margin-bottom:12px;">Estimated Rewards — ${n.type}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+            ${['Daily','Monthly','Annual'].map((p,i)=>{
+              const qst=[r.daily,r.monthly,r.annual][i];
+              const usd=[r.dailyUSD,r.monthlyUSD,r.annualUSD][i];
+              return `<div class="tok-result-card">
+                <div class="tok-result-val" style="color:var(--acc);">${fmtNum(parseFloat(qst))}</div>
+                <div class="tok-result-lbl">${p} QST</div>
+                <div style="font-size:12px;color:var(--txt2);margin-top:4px;">≈ $${usd} USD</div>
+              </div>`;
+            }).join('')}
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="tok-result-card ${parseFloat(r.apr)>20?'green':parseFloat(r.apr)>8?'yellow':''}">
+              <div class="tok-result-val" style="color:${parseFloat(r.apr)>20?'#68d391':parseFloat(r.apr)>8?'#f0b429':'var(--txt)'};">${r.apr}%</div>
+              <div class="tok-result-lbl">Estimated APR</div>
+            </div>
+            <div class="tok-result-card">
+              <div class="tok-result-val" style="color:#d6bcfa;">${r.multiplier}×</div>
+              <div class="tok-result-lbl">Reward Multiplier</div>
+            </div>
+          </div>
+        </div>
+        <div class="tok-card">
+          <div class="tok-section-title" style="margin-bottom:12px;">All Node Types — Comparison</div>
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead><tr style="color:var(--txt3);font-size:11px;text-transform:uppercase;letter-spacing:.06em;">
+              <th style="text-align:left;padding:6px 8px;">Type</th>
+              <th style="text-align:right;padding:6px 8px;">Min Stake</th>
+              <th style="text-align:right;padding:6px 8px;">Multiplier</th>
+              <th style="text-align:right;padding:6px 8px;">Est. APR</th>
+            </tr></thead>
+            <tbody>${Object.entries(NODE_TYPES).map(([type,nt])=>{
+              const est=calcNodeRewards({...n,type}).apr;
+              return `<tr style="border-top:1px solid var(--bdr);${type===n.type?'background:var(--acc-dim);':''}">
+                <td style="padding:7px 8px;font-weight:${type===n.type?'600':'400'};color:${type===n.type?'var(--acc)':'var(--txt)'};">${type}</td>
+                <td style="text-align:right;padding:7px 8px;color:var(--txt2);font-family:'Space Mono',monospace;font-size:12px;">${fmtNum(nt.minStake)}</td>
+                <td style="text-align:right;padding:7px 8px;color:var(--txt2);">${nt.multiplier}×</td>
+                <td style="text-align:right;padding:7px 8px;color:${parseFloat(est)>20?'#68d391':parseFloat(est)>8?'#f0b429':'var(--txt2)'};font-family:'Space Mono',monospace;font-size:12px;">${est}%</td>
+              </tr>`;
+            }).join('')}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  window.tokRefreshNodes = function() { renderTab(); };
+  function wireNodes() {
+    document.querySelectorAll('#nodeResults ~ * [data-tok], .tok-card [data-tok]').forEach(el=>{
+      el.addEventListener('change',()=>renderTab());
+    });
+    const stakeInp=document.querySelector('[data-tok="nodes.stake"]');
+    if(stakeInp) stakeInp.addEventListener('change',()=>{ tok.nodes.stake=parseFloat(stakeInp.value)||0; renderTab(); });
+    const poolInp=document.querySelector('[data-tok="nodes.rewardPool"]');
+    if(poolInp) poolInp.addEventListener('change',()=>{ tok.nodes.rewardPool=parseFloat(poolInp.value)||0; renderTab(); });
+    const nodesInp=document.querySelector('[data-tok="nodes.totalNodes"]');
+    if(nodesInp) nodesInp.addEventListener('change',()=>{ tok.nodes.totalNodes=parseFloat(nodesInp.value)||0; renderTab(); });
+    const priceInp=document.querySelector('[data-tok="nodes.qstPrice"]');
+    if(priceInp) priceInp.addEventListener('change',()=>{ tok.nodes.qstPrice=parseFloat(priceInp.value)||0; renderTab(); });
+  }
+
+  /* ── Helpers ── */
+  function tf(label, key, val, type='text', placeholder='') {
+    if (type==='textarea') return `<div class="tok-field"><div class="tok-label">${label}</div><textarea class="tok-textarea" data-tok="${key}" placeholder="${esc(placeholder)}">${esc(String(val))}</textarea></div>`;
+    return `<div class="tok-field"><div class="tok-label">${label}</div><input class="tok-input" type="${type}" data-tok="${key}" value="${esc(String(val))}" placeholder="${esc(placeholder)}"/></div>`;
+  }
+  function fmtNum(n) {
+    if(n>=1e9) return (n/1e9).toFixed(2)+'B';
+    if(n>=1e6) return (n/1e6).toFixed(2)+'M';
+    if(n>=1e3) return (n/1e3).toFixed(1)+'K';
+    return n.toLocaleString();
+  }
+
+  /* ── Init ── */
+  window._tokOnShow = function() {
+    document.querySelectorAll('.tok-tab').forEach(b =>
+      b.addEventListener('click', () => tokSwitchTab(b.dataset.tab))
+    );
+    renderTab();
+  };
+
+  window._tokGetState = function() {
+    return JSON.parse(JSON.stringify(tok));
+  };
+  window._tokLoadState = function(saved) {
+    if (!saved) return;
+    Object.assign(tok, saved);
+  };
+})();
+
+/* ================================================================
+   PERSISTENCE — auto-save all state to localStorage
+================================================================ */
+const WZ_DATA_KEY = 'wz_appdata_v1';
+
+function saveAll() {
+  try {
+    // Serialise TREES (strip onSelect — it's a function, not data)
+    const treesData = {};
+    Object.entries(TREES).forEach(([k,t]) => {
+      treesData[k] = { data: t.data, sel: t.sel };
+    });
+    const payload = {
+      trees: treesData,
+      smap: { maps: window._smapGetState?.(), uid: null },
+      tok:  window._tokGetState?.(),
+      ts:   Date.now(),
+    };
+    localStorage.setItem(WZ_DATA_KEY, JSON.stringify(payload));
+  } catch(e) { console.warn('Save failed:', e); }
+}
+
+function loadAll() {
+  try {
+    const raw = localStorage.getItem(WZ_DATA_KEY);
+    if (!raw) return false;
+    const payload = JSON.parse(raw);
+
+    // Restore trees
+    if (payload.trees) {
+      Object.entries(payload.trees).forEach(([k, saved]) => {
+        if (TREES[k]) {
+          TREES[k].data = saved.data || [];
+          TREES[k].sel  = saved.sel  || null;
+        }
+      });
+    }
+
+    // Restore smap and tok via their own loaders
+    if (payload.smap) window._smapLoadState?.(payload.smap);
+    if (payload.tok)  window._tokLoadState?.(payload.tok);
+
+    return true;
+  } catch(e) { console.warn('Load failed:', e); return false; }
+}
+
+// Debounced auto-save — fires 800ms after last change
+let _saveTimer = null;
+window.wz_save = function() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveAll, 800);
+};
+
+// Patch all mutation points to trigger auto-save
+(function patchSave() {
+  // Tree mutations — wrap mConfirm click and toolbar buttons
+  const origConfirm = document.getElementById('mConfirm');
+  if (origConfirm) {
+    origConfirm.addEventListener('click', () => setTimeout(window.wz_save, 50));
+  }
+
+  // Patch input events globally on the whole document
+  // (tokenomics, stablecoins, module fields etc. all bubble up)
+  document.addEventListener('input',  () => window.wz_save());
+  document.addEventListener('change', () => window.wz_save());
+})();
+
+buildNav();
+Object.values(TREES).forEach(renderTree);
+
+// Restore saved state then init views
+const _hadSavedData = loadAll();
+if (_hadSavedData) {
+  Object.values(TREES).forEach(renderTree);
+}
+
+gotoView('dashboard');
+</script>
+<!-- CONFIRM MODAL -->
+<div class="confirm-ov hidden" id="confirmOv">
+  <div class="confirm-box">
+    <div class="confirm-msg" id="confirmMsg"></div>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" id="confirmCancel">Cancel</button>
+      <button class="btn btn-danger" id="confirmOk">Delete</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
