@@ -73,7 +73,7 @@
     /* SHARED SPLIT LAYOUT */
     .split-view{flex-direction:row;}
     .tree-panel{width:var(--tw);flex-shrink:0;background:var(--surf);border-right:1px solid var(--bdr);display:flex;flex-direction:column;}
-    .tree-toolbar{padding:9px 10px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:4px;}
+    .tree-toolbar{padding:9px 10px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:4px;flex-wrap:nowrap;}
     .tree-tlbl{flex:1;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--txt3);padding-left:4px;}
     .ico-btn{width:26px;height:26px;border-radius:5px;background:transparent;border:1px solid transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--txt2);transition:all .15s;}
     .ico-btn:hover{background:var(--surf2);border-color:var(--bdr);color:var(--txt);}
@@ -267,7 +267,17 @@
     .vocab-link:hover{background:var(--acc-glow);}
     /* ── SYSTEMS MAP ──────────────────────────────────────────── */
     .smap-wrap{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden;}
-    .smap-toolbar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--surf);border-bottom:1px solid var(--bdr);gap:8px;flex-shrink:0;}
+    .smap-toolbar{display:flex;flex-direction:column;background:var(--surf);border-bottom:1px solid var(--bdr);flex-shrink:0;}
+    .smap-toolbar-row{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;gap:8px;}
+    .smap-layers-bar{padding:6px 14px 8px;border-top:1px solid var(--bdr);display:none;gap:8px;flex-wrap:wrap;align-items:center;}
+    .smap-layers-bar.open{display:flex;}
+    .smap-layer-chip{display:flex;align-items:center;gap:5px;background:var(--surf2);border:1px solid var(--bdr);border-radius:20px;padding:3px 8px 3px 6px;gap:5px;}
+    .smap-layer-chip-color{width:12px;height:12px;border-radius:50%;flex-shrink:0;cursor:pointer;border:none;padding:0;}
+    .smap-layer-chip-name{font-size:11px;background:transparent;border:none;outline:none;color:var(--txt);font-family:'DM Sans',sans-serif;min-width:40px;max-width:90px;cursor:text;}
+    .smap-layer-chip-del{background:none;border:none;color:var(--txt3);cursor:pointer;padding:0 0 0 2px;font-size:13px;line-height:1;}
+    .smap-layer-chip-del:hover{color:var(--danger);}
+    .smap-layers-add-btn{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;background:transparent;border:1px dashed var(--bdr2);color:var(--txt3);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+    .smap-layers-add-btn:hover{border-color:var(--acc);color:var(--acc);}
     .smap-toolbar-left{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
     .smap-divider{width:1px;height:18px;background:var(--bdr2);margin:0 2px;}
     .smap-tbtn{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;background:transparent;border:1px solid var(--bdr);color:var(--txt2);font-size:12.5px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;}
@@ -454,7 +464,13 @@
       .arch-restore-btn, .arch-del-btn { font-size: 11px; padding: 4px 10px; }
 
       /* ── Systems Map ── */
-      .smap-toolbar { flex-wrap: wrap; gap: 6px; padding: 8px 10px; }
+      .smap-toolbar { flex-wrap: wrap; }
+      .smap-toolbar-row { flex-wrap: wrap; padding: 6px 8px; gap: 6px; }
+      .smap-tbtn { padding: 5px 10px; font-size: 11px; }
+      .smap-type-sel { font-size: 11px; }
+      .smap-hint { display: none; }
+      .smap-tb-collapsed .smap-toolbar-left,
+      .smap-tb-collapsed .smap-layers-bar { display: none !important; }
       .smap-sidebar { display: none; } /* hide on mobile */
       .smap-main { flex: 1; }
 
@@ -477,6 +493,8 @@
 
       /* ── Misc ── */
       .t-acts { display: flex !important; } /* always show tree actions on mobile */
+      .ico-btn { min-width: 36px; min-height: 36px; } /* bigger touch targets */
+      .tree-tlbl { font-size: 10px; }
 
       /* ── Tree panel toggle button ── */
       .mob-tree-toggle {
@@ -735,38 +753,50 @@
 <!-- SYSTEMS MAP -->
 <div class="view" id="vSystems">
   <div class="smap-wrap">
-    <div class="smap-toolbar">
-      <div class="smap-toolbar-left">
-        <select class="smap-map-sel" id="smapMapSel" onchange="smapSwitchMap(this.value)" title="Switch map"></select>
-        <button class="smap-tbtn" onclick="smapNewMap()">+ Map</button>
-        <button class="smap-tbtn" onclick="smapRenameMap()" title="Rename current map">✎</button>
-        <button class="smap-tbtn" onclick="smapDeleteMap()" title="Delete current map" style="color:var(--danger);border-color:var(--danger-dim);">✕ Map</button>
-        <div class="smap-divider"></div>
-        <button class="smap-tbtn" onclick="smapAddNode()">
-          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="12" height="12"><circle cx="7" cy="7" r="5"/><line x1="7" y1="4" x2="7" y2="10"/><line x1="4" y1="7" x2="10" y2="7"/></svg>
-          Add Node
-        </button>
-        <select class="smap-type-sel" id="smapNodeTypeSel">
-          <option value="service">Service</option>
-          <option value="database">Database</option>
-          <option value="api">API</option>
-          <option value="queue">Queue</option>
-          <option value="cache">Cache</option>
-          <option value="client">Client</option>
-          <option value="server">Server</option>
-          <option value="module">Module</option>
-          <option value="external">External</option>
-        </select>
-        <div class="smap-divider"></div>
-        <button class="smap-tbtn" id="smapConnBtn" onclick="smapToggleConnect()">
-          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="12" height="12"><circle cx="2.5" cy="7" r="1.5"/><circle cx="11.5" cy="7" r="1.5"/><line x1="4" y1="7" x2="10" y2="7"/></svg>
-          Connect
-        </button>
-        <div class="smap-divider"></div>
-        <button class="smap-tbtn" onclick="smapReset()">⟲ Reset</button>
-        <button class="smap-tbtn" onclick="smapTopView()">⊙ Top View</button>
+    <div class="smap-toolbar" id="smapToolbar">
+      <div class="smap-toolbar-row">
+        <div class="smap-toolbar-left">
+          <select class="smap-map-sel" id="smapMapSel" onchange="smapSwitchMap(this.value)" title="Switch map"></select>
+          <button class="smap-tbtn" onclick="smapNewMap()">+ Map</button>
+          <button class="smap-tbtn" onclick="smapRenameMap()" title="Rename current map">✎</button>
+          <button class="smap-tbtn" onclick="smapDeleteMap()" title="Delete current map" style="color:var(--danger);border-color:var(--danger-dim);">✕ Map</button>
+          <div class="smap-divider"></div>
+          <button class="smap-tbtn" onclick="smapAddNode()">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="12" height="12"><circle cx="7" cy="7" r="5"/><line x1="7" y1="4" x2="7" y2="10"/><line x1="4" y1="7" x2="10" y2="7"/></svg>
+            Add Node
+          </button>
+          <select class="smap-type-sel" id="smapNodeTypeSel">
+            <option value="service">Service</option>
+            <option value="database">Database</option>
+            <option value="api">API</option>
+            <option value="queue">Queue</option>
+            <option value="cache">Cache</option>
+            <option value="client">Client</option>
+            <option value="server">Server</option>
+            <option value="module">Module</option>
+            <option value="external">External</option>
+          </select>
+          <div class="smap-divider"></div>
+          <button class="smap-tbtn" id="smapConnBtn" onclick="smapToggleConnect()">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="12" height="12"><circle cx="2.5" cy="7" r="1.5"/><circle cx="11.5" cy="7" r="1.5"/><line x1="4" y1="7" x2="10" y2="7"/></svg>
+            Connect
+          </button>
+          <div class="smap-divider"></div>
+          <button class="smap-tbtn" onclick="smapToggleLayersBar()" id="smapLayersBtn">
+            <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="12" height="12"><rect x="1" y="2" width="12" height="3" rx="1"/><rect x="1" y="6.5" width="12" height="3" rx="1"/><rect x="1" y="11" width="12" height="3" rx="1"/></svg>
+            Layers
+          </button>
+          <div class="smap-divider"></div>
+          <button class="smap-tbtn" onclick="smapReset()">⟲ Reset</button>
+          <button class="smap-tbtn" onclick="smapTopView()">⊙ Top View</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="smap-hint" id="smapHint">Drag — orbit &nbsp;·&nbsp; Pinch — zoom &nbsp;·&nbsp; Tap node — properties</span>
+          <button class="smap-tbtn mob-smap-collapse" id="smapCollapseBtn" onclick="smapToggleToolbar()" title="Collapse toolbar" style="padding:4px 8px;">▲</button>
+        </div>
       </div>
-      <span class="smap-hint">Left drag — rotate &nbsp;·&nbsp; Right drag — pan &nbsp;·&nbsp; Scroll — zoom &nbsp;·&nbsp; Drag node — move it</span>
+      <!-- Layers bar — shown when Layers button is clicked -->
+      <div class="smap-layers-bar" id="smapLayersBar"></div>
     </div>
     <div class="smap-main">
       <div class="smap-canvas-wrap" id="smapCanvasWrap">
@@ -1386,6 +1416,21 @@ function buildRow(node, depth, tree, ancestors=[], isLast=false) {
     tree.sel = node.id;
     renderTree(tree);
     if (tree.onSelect) tree.onSelect(node, isDir, tree);
+    // On mobile, auto-collapse tree when a FILE is selected so content is visible
+    if (!isDir && window.innerWidth <= 768) {
+      const viewEl = row.closest('.split-view');
+      if (viewEl) {
+        const panel = viewEl.querySelector('.tree-panel');
+        const btn   = viewEl.querySelector('.mob-tree-toggle');
+        if (panel && !panel.classList.contains('mob-collapsed')) {
+          panel.classList.add('mob-collapsed');
+          if (btn) {
+            btn.classList.add('collapsed');
+            btn.querySelector('span').textContent = '📁 Show folders';
+          }
+        }
+      }
+    }
   });
   row.addEventListener('contextmenu', e => {
     e.preventDefault(); activeTree = tree;
@@ -2953,9 +2998,60 @@ function copyGeneratedPhrase() {
 
   window.smapAddLayer=function(){
     const cols=['#63b3ed','#00e5a0','#f0b429','#d6bcfa','#fc8181','#f6ad55','#76e4f7'];
-    smap.layers.push({id:'sl'+smapUid++,name:'New Layer',color:cols[smap.layers.length%cols.length]});
-    renderLayersPanel(); draw();
+    smap.layers.push({id:'sl'+smapUid++,name:'Layer '+(smap.layers.length+1),color:cols[smap.layers.length%cols.length]});
+    renderLayersPanel(); renderLayersBar(); draw();
   };
+
+  window.smapToggleLayersBar = function() {
+    const bar = document.getElementById('smapLayersBar');
+    const btn = document.getElementById('smapLayersBtn');
+    if (!bar) return;
+    const open = bar.classList.toggle('open');
+    if (btn) btn.classList.toggle('active', open);
+    if (open) renderLayersBar();
+  };
+
+  window.smapToggleToolbar = function() {
+    const tb = document.getElementById('smapToolbar');
+    const btn = document.getElementById('smapCollapseBtn');
+    const hint = document.getElementById('smapHint');
+    if (!tb) return;
+    const collapsed = tb.classList.toggle('smap-tb-collapsed');
+    if (btn) btn.textContent = collapsed ? '▼' : '▲';
+    if (hint) hint.style.display = collapsed ? 'none' : '';
+    // Trigger canvas resize
+    setTimeout(() => { if (window._smapOnShow) window._smapOnShow(); }, 50);
+  };
+
+  function renderLayersBar() {
+    const bar = document.getElementById('smapLayersBar');
+    if (!bar || !bar.classList.contains('open')) return;
+    bar.innerHTML = '';
+    smap.layers.forEach((layer, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'smap-layer-chip';
+      chip.innerHTML = `
+        <input type="color" class="smap-layer-chip-color" value="${layer.color}" title="Change colour" style="background:${layer.color};"/>
+        <input class="smap-layer-chip-name" value="${esc(layer.name)}" placeholder="Layer name…"/>
+        <button class="smap-layer-chip-del" title="Delete layer">×</button>`;
+      const [colorInp, nameInp, delBtn] = [chip.querySelector('[type=color]'), chip.querySelector('.smap-layer-chip-name'), chip.querySelector('.smap-layer-chip-del')];
+      colorInp.addEventListener('input', e => { layer.color = e.target.value; colorInp.style.background = e.target.value; renderLayersPanel(); draw(); });
+      nameInp.addEventListener('input', e => { layer.name = e.target.value; renderLayersPanel(); draw(); });
+      delBtn.addEventListener('click', () => {
+        smapConfirm(`Delete layer "${layer.name}"?`, () => {
+          smap.layers.splice(i, 1);
+          if (smap.layers.length) smap.nodes.forEach(n => { if (!smap.layers.find(l=>l.id===n.layerId)) n.layerId=smap.layers[0].id; });
+          renderLayersPanel(); renderLayersBar(); draw();
+        });
+      });
+      bar.appendChild(chip);
+    });
+    const addBtn = document.createElement('button');
+    addBtn.className = 'smap-layers-add-btn';
+    addBtn.innerHTML = '+ Add Layer';
+    addBtn.addEventListener('click', () => smapAddLayer());
+    bar.appendChild(addBtn);
+  }
 
   window.smapToggleConnect=function(){
     smap.connectMode=!smap.connectMode; smap.connectFirst=null;
