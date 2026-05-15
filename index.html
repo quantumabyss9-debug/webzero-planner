@@ -551,8 +551,8 @@
     .file-view-header{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--bdr);flex-shrink:0;background:var(--surf);}
     .file-view-name{font-size:14px;font-weight:600;letter-spacing:-.01em;}
     .file-view-ext{font-family:'Space Mono',monospace;font-size:10px;padding:2px 7px;border-radius:99px;background:var(--surf2);border:1px solid var(--bdr);color:var(--txt3);}
-    .file-view-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:20px 24px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;min-height:0;display:flex;flex-direction:column;}
-    .file-editor{width:100%;flex:1;min-height:300px;background:transparent;border:none;outline:none;color:var(--txt);font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.7;resize:vertical;scrollbar-width:thin;}
+    .file-view-body{flex:1;overflow-y:scroll;overflow-x:hidden;padding:20px 0 20px 24px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;min-height:0;display:flex;flex-direction:column;-webkit-overflow-scrolling:touch;touch-action:pan-y;}
+    .file-editor{width:100%;flex:1;min-height:300px;background:transparent;border:none;outline:none;color:var(--txt);font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.7;resize:vertical;scrollbar-width:thin;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding-right:0;}
     .file-editor:focus{outline:none;}
     .file-rendered{font-size:14px;line-height:1.7;color:var(--txt);max-width:760px;width:100%;}
     .file-rendered h1,.file-rendered h2,.file-rendered h3{color:var(--acc);font-weight:600;margin:1.2em 0 .4em;}
@@ -2231,7 +2231,7 @@ function fileViewTab(tab, panelId, btn) {
   const ed = body.querySelector('.file-editor');
   if (tab === 'preview') {
     const rawContent = ed ? ed.value : '';
-    body.innerHTML = `<div class="file-rendered" style="flex:1;overflow-y:auto;padding-bottom:40px;">${simpleMarkdown(rawContent)}</div>`;
+    body.innerHTML = `<div class="file-rendered" style="flex:1;overflow-y:scroll;padding-right:24px;padding-bottom:60px;-webkit-overflow-scrolling:touch;touch-action:pan-y;">${simpleMarkdown(rawContent)}</div>`;
   } else {
     // Restore editor
     const node = body._node;
