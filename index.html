@@ -309,7 +309,7 @@
     .confirm-msg{font-size:14px;color:var(--txt);line-height:1.6;text-align:center;}
     .confirm-actions{display:flex;gap:10px;justify-content:center;}
 
-    /* ── ARCHIVE & CHANGELOG ─────────────────────────────────── */
+    /* ── ARCHIVE & LOGS ─────────────────────────────────── */
     .arch-wrap,.clog-wrap{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden;}
     .arch-header,.clog-header{padding:24px 32px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
     .arch-title,.clog-title{font-size:18px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px;}
@@ -328,7 +328,7 @@
     .clog-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bdr);}
     .clog-item:last-child{border-bottom:none;}
     .clog-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
-    .clog-dot.add{background:#00e5a0;}.clog-dot.del{background:#ff5a5a;}.clog-dot.edit{background:#f0a500;}.clog-dot.restore{background:#7c9eff;}
+    .clog-dot.add{background:#00e5a0;}.clog-dot.del{background:#ff5a5a;}.clog-dot.edit{background:#f0a500;}.clog-dot.restore{background:#7c9eff;}.clog-dot.warn{background:#ff5a5a;}
     .clog-action{font-size:13px;line-height:1.4;}
     .clog-action strong{font-weight:600;}
     .clog-time{font-size:11px;color:var(--txt3);margin-top:2px;}
@@ -522,8 +522,8 @@
     <div class="clog-header">
       <div style="display:flex;align-items:center;">
         <div style="flex:1">
-          <div class="clog-title">Changelog</div>
-          <div class="clog-sub">A log of every change made to the workspace.</div>
+          <div class="clog-title">Logs</div>
+          <div class="clog-sub">All activity — changes, deletions, restores, and blocked logins.</div>
         </div>
         <button class="clog-clear-btn" onclick="clearChangelog()">Clear log</button>
       </div>
@@ -727,8 +727,8 @@ const FEATURES = [
     icon:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h12v2H2z"/><path d="M3 6v7a1 1 0 001 1h8a1 1 0 001-1V6"/><path d="M6 9h4"/></svg>`,
   },
   {
-    id:'changelog', label:'Changelog', showCard:true, viewId:'vChangelog',
-    desc:'A full history of every change made to the workspace — who created, renamed, deleted, or restored what and when.',
+    id:'changelog', label:'Logs', showCard:true, viewId:'vChangelog',
+    desc:'A full activity log — changes, deletions, restores, and blocked login attempts.',
     icon:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h10M3 7h7M3 11h5"/><circle cx="13" cy="11" r="2"/><path d="M13 9.5V11l.7.7"/></svg>`,
   },
 ];
@@ -2090,6 +2090,8 @@ async function attemptLogin() {
   }
   if (user.frozen) {
     if (errEl) errEl.textContent = 'This account has been frozen. Contact FATHOM.';
+    // Log the blocked attempt
+    logChange('warn', 'Blocked login attempt', user.displayName, 'Frozen account');
     return;
   }
   currentUser = user;
@@ -2870,15 +2872,18 @@ function renderChangelog() {
   const clearBtn = document.querySelector('.clog-clear-btn');
   if (clearBtn) clearBtn.style.display = isMaster() ? 'block' : 'none';
   if (!WZ_CHANGELOG.length) {
-    body.innerHTML = '<div class="clog-empty">No changes recorded yet.</div>';
+    body.innerHTML = '<div class="clog-empty">No activity recorded yet.</div>';
     return;
   }
   body.innerHTML = WZ_CHANGELOG.map(e => {
     const when = new Date(e.ts).toLocaleString();
+    // Some entries (login events) don't have a treeName
+    const context = e.treeName ? ` in ${e.treeName}` : '';
+    const itemPart = e.itemName ? ` <em>${e.itemName}</em>` : '';
     return `<div class="clog-item">
       <div class="clog-dot ${e.type}"></div>
       <div style="flex:1">
-        <div class="clog-action"><strong>${e.action}</strong> <em>${e.itemName}</em> in ${e.treeName}<span class="clog-user-badge">${e.user}</span></div>
+        <div class="clog-action"><strong>${e.action}</strong>${itemPart}${context}<span class="clog-user-badge">${e.user}</span></div>
         <div class="clog-time">${when}</div>
       </div>
     </div>`;
