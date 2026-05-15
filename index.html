@@ -2645,8 +2645,8 @@ function _applyPayload(payload) {
     });
   }
   if (payload.smap)      window._smapLoadState?.(payload.smap);
-  if (payload.archive)   WZ_ARCHIVE   = payload.archive;
-  if (payload.changelog) WZ_CHANGELOG = payload.changelog;
+  if (payload.archive)   { WZ_ARCHIVE   = payload.archive;   renderArchive();   }
+  if (payload.changelog) { WZ_CHANGELOG = payload.changelog; renderChangelog(); }
   return true;
 }
 
