@@ -3542,6 +3542,36 @@ function _buildPayload() {
   };
 }
 
+/* Scan all trees for duplicate node IDs and reassign them.
+   This fixes data saved before the globalUid-reset bug was patched. */
+function _fixDuplicateIds() {
+  const seen = new Set();
+  let fixed = false;
+
+  function fixNodes(nodes) {
+    for (const n of nodes) {
+      if (seen.has(n.id)) {
+        // Duplicate — give it a fresh unique ID
+        n.id = globalUid++;
+        fixed = true;
+      } else {
+        seen.add(n.id);
+      }
+      if (n.children?.length) fixNodes(n.children);
+    }
+  }
+
+  Object.values(TREES).forEach(t => {
+    if (t.data?.length) fixNodes(t.data);
+    t.sel = null; // clear selection to avoid stale refs
+  });
+
+  if (fixed) {
+    console.log('[WZP] Fixed duplicate node IDs — saving corrected data');
+    setTimeout(saveAll, 500); // push corrected data back to Supabase
+  }
+}
+
 function _maxNodeId(nodes) {
   let max = 0;
   for (const n of nodes) {
@@ -3564,6 +3594,8 @@ function _applyPayload(payload) {
     });
     // Critical: ensure globalUid is above all existing node IDs so new nodes never get duplicate IDs
     if (maxId >= globalUid) globalUid = maxId + 1;
+    // Fix any duplicate IDs already present in loaded data
+    _fixDuplicateIds();
   }
   if (payload.smap)      window._smapLoadState?.(payload.smap);
   if (payload.archive)   { WZ_ARCHIVE   = payload.archive;   renderArchive();   }
