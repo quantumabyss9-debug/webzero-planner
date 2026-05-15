@@ -122,7 +122,7 @@
     .t-act svg{width:10px;height:10px;}
     .t-children{overflow:hidden;}
     .t-hint{font-size:12px;color:var(--txt3);font-style:italic;padding:4px 12px;}
-    .content-panel{flex:1;min-width:0;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;}
+    .content-panel{flex:1;min-width:0;height:0;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;}
     .c-empty{text-align:center;opacity:.28;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:auto;width:100%;padding:60px 20px;box-sizing:border-box;}
     .c-empty .big{font-family:'Space Mono',monospace;font-size:44px;color:var(--acc);margin-bottom:10px;}
     .c-empty p{font-size:12px;color:var(--txt2);letter-spacing:.08em;text-transform:uppercase;}
@@ -547,11 +547,11 @@
     }
 
     /* ── File / Doc viewer ── */
-    .file-view{display:flex;flex-direction:column;width:100%;flex:1;overflow:hidden;min-height:0;}
+    .file-view{display:flex;flex-direction:column;width:100%;flex:1;height:0;overflow:hidden;}
     .file-view-header{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--bdr);flex-shrink:0;background:var(--surf);}
     .file-view-name{font-size:14px;font-weight:600;letter-spacing:-.01em;}
     .file-view-ext{font-family:'Space Mono',monospace;font-size:10px;padding:2px 7px;border-radius:99px;background:var(--surf2);border:1px solid var(--bdr);color:var(--txt3);}
-    .file-view-body{flex:1;overflow-y:scroll;overflow-x:hidden;padding:20px 0 20px 24px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;min-height:0;display:block;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;}
+    .file-view-body{flex:1;height:0;overflow-y:scroll;overflow-x:hidden;padding:20px 0 20px 24px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;display:block;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;}
     .file-editor{width:100%;flex:1;min-height:300px;background:transparent;border:none;outline:none;color:var(--txt);font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.7;resize:vertical;scrollbar-width:thin;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding-right:0;}
     .file-editor:focus{outline:none;}
     .file-rendered{font-size:14px;line-height:1.7;color:var(--txt);max-width:760px;width:100%;}
