@@ -2178,14 +2178,28 @@ function renderFileView(node, panelId, tree) {
     sbGet(node.binaryKey).then(data => {
       if (!data || !binDiv) return;
       const { base64, type } = data;
-      if (type === 'application/pdf' || dispExt === 'pdf') {
-        binDiv.innerHTML = `<iframe src="${base64}" style="width:100%;height:100%;min-height:500px;border:none;border-radius:6px;" title="${esc(node.name)}.pdf"></iframe>`;
-      } else {
-        // Other binary — offer download link
-        binDiv.innerHTML = `<div class="c-empty" style="margin:auto;"><div class="big">📄</div><p style="margin-top:12px;">.${dispExt} — <a href="${base64}" download="${esc(node.name)}.${dispExt}" style="color:var(--acc);">Click to download</a></p></div>`;
+      // Convert base64 data URL to Blob URL — data: URIs in iframes are blocked by browsers
+      try {
+        const parts = base64.match(/^data:([^;]+);base64,(.+)$/);
+        if (!parts) throw new Error('bad base64');
+        const mime = parts[1];
+        const raw  = atob(parts[2]);
+        const arr  = new Uint8Array(raw.length);
+        for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+        const blob = new Blob([arr], { type: mime });
+        const url  = URL.createObjectURL(blob);
+        if (mime === 'application/pdf' || dispExt === 'pdf') {
+          binDiv.innerHTML = `<iframe src="${url}" style="width:100%;height:100%;min-height:500px;border:none;border-radius:6px;" title="${esc(node.name)}.pdf"></iframe>`;
+        } else {
+          binDiv.innerHTML = `<div class="c-empty" style="margin:auto;"><div class="big">📄</div>
+            <p style="margin-top:12px;">.${dispExt} file</p>
+            <a href="${url}" download="${esc(node.name)}.${dispExt}" class="fv-action-btn" style="margin-top:12px;text-decoration:none;">⬇ Download</a></div>`;
+        }
+      } catch(e) {
+        binDiv.innerHTML = `<div class="c-empty" style="margin:auto;"><div class="big">📄</div><p>.${dispExt} — could not render inline</p></div>`;
       }
     }).catch(() => {
-      if (binDiv) binDiv.textContent = 'Could not load file.';
+      if (binDiv) binDiv.textContent = 'Could not load file from storage.';
     });
     return; // no textarea to wire
   }
@@ -2316,10 +2330,20 @@ async function fvDownload(panelId) {
     // Binary file — fetch base64 from Supabase, trigger download
     const data = await sbGet(node.binaryKey).catch(() => null);
     if (!data?.base64) { alert('File content not found.'); return; }
-    const a = document.createElement('a');
-    a.href = data.base64; a.download = name;
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a);
+    // Use Blob URL for reliable download
+    const parts = data.base64.match(/^data:([^;]+);base64,(.+)$/);
+    if (parts) {
+      const raw = atob(parts[2]);
+      const arr = new Uint8Array(raw.length);
+      for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+      const blob = new Blob([arr], { type: parts[1] });
+      const url  = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    }
   } else {
     const blob = new Blob([node.content || ''], {type:'text/plain;charset=utf-8'});
     const url  = URL.createObjectURL(blob);
@@ -2543,10 +2567,12 @@ async function sbGet(key) {
 }
 async function sbSet(key, value) {
   try {
-    await fetch(`${SB_URL}/rest/v1/wzp_shared_state?key=eq.${key}`, {
-      method: 'PATCH',
-      headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-      body: JSON.stringify({ value, updated_at: new Date().toISOString() })
+    // Use POST with upsert so it creates the row if it doesn't exist
+    await fetch(`${SB_URL}/rest/v1/wzp_shared_state`, {
+      method: 'POST',
+      headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json',
+                 Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ key, value, updated_at: new Date().toISOString() })
     });
   } catch(e) { console.warn('sbSet failed:', e); }
 }
