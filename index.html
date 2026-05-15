@@ -2261,7 +2261,7 @@ function simpleMarkdown(md) {
 /* Upload a file from the toolbar — creates a new node in the tree */
 const TEXT_EXTS = new Set(['txt','md','json','yaml','yml','xml','html','htm','js','ts','jsx','tsx','css','scss','csv','toml','ini','sh','py','rb','go','rs','sql','env','log','conf','cfg']);
 const MAX_TEXT_SIZE = 512 * 1024;   // 512 KB for text files
-const MAX_BIN_SIZE  = 5 * 1024 * 1024; // 5 MB for binary (base64 stored separately)
+const MAX_BIN_SIZE  = 30 * 1024 * 1024; // 30 MB for binary files
 
 function fvHandleUploadToTree(event, panelId, treeKey) {
   const files = Array.from(event.target.files);
@@ -2281,7 +2281,7 @@ function fvHandleUploadToTree(event, panelId, treeKey) {
       return;
     }
     if (!isText && file.size > MAX_BIN_SIZE) {
-      alert(`"${file.name}" is ${(file.size/1024/1024).toFixed(1)} MB — files over 5 MB aren't supported.`);
+      alert(`"${file.name}" is ${(file.size/1024/1024).toFixed(1)} MB — files over 30 MB aren't supported.`);
       return;
     }
 
