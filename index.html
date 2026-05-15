@@ -2177,13 +2177,25 @@ function renderFileView(node, panelId, tree) {
     const binDiv = document.getElementById('fvBinView_' + panelId);
     if (!binDiv) return;
     if (node.storageUrl) {
-      // Got a public URL — display directly, no conversion needed
-      if (dispExt === 'pdf' || (node.binaryType || '').includes('pdf')) {
-        binDiv.innerHTML = `<iframe src="${node.storageUrl}" style="width:100%;height:100%;min-height:500px;border:none;border-radius:6px;" title="${esc(node.name)}.pdf"></iframe>`;
+      const isPdf = dispExt === 'pdf' || (node.binaryType || '').includes('pdf');
+      if (isPdf) {
+        // Google Docs Viewer works on all devices including mobile
+        const gdocsUrl = 'https://docs.google.com/viewer?url=' + encodeURIComponent(node.storageUrl) + '&embedded=true';
+        binDiv.innerHTML = `
+          <div style="display:flex;flex-direction:column;width:100%;height:100%;min-height:0;">
+            <div style="display:flex;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr);flex-shrink:0;">
+              <a href="${node.storageUrl}" target="_blank" class="fv-action-btn" style="text-decoration:none;">↗ Open PDF</a>
+              <a href="${node.storageUrl}" download="${esc(node.name)}.pdf" class="fv-action-btn" style="text-decoration:none;">⬇ Download</a>
+            </div>
+            <iframe src="${gdocsUrl}" style="flex:1;width:100%;border:none;min-height:400px;" title="${esc(node.name)}.pdf"></iframe>
+          </div>`;
       } else {
-        binDiv.innerHTML = `<div class="c-empty" style="margin:auto;"><div class="big">📄</div>
+        binDiv.innerHTML = `<div class="c-empty" style="margin:auto;">
+          <div class="big">📄</div>
           <p style="margin-top:12px;">.${dispExt} file</p>
-          <a href="${node.storageUrl}" download="${esc(node.name)}.${dispExt}" class="fv-action-btn" style="margin-top:12px;text-decoration:none;">⬇ Download</a></div>`;
+          <a href="${node.storageUrl}" download="${esc(node.name)}.${dispExt}" class="fv-action-btn" style="margin-top:12px;text-decoration:none;">⬇ Download</a>
+          <a href="${node.storageUrl}" target="_blank" class="fv-action-btn" style="margin-top:8px;text-decoration:none;">↗ Open</a>
+        </div>`;
       }
     } else {
       binDiv.innerHTML = `<div class="c-empty" style="margin:auto;"><div class="big">📄</div><p>Uploading… please wait</p></div>`;
