@@ -344,6 +344,130 @@
     .arch-item.soft-deleted{opacity:0.55;border-color:var(--danger);border-style:dashed;}
     .arch-item.soft-deleted .arch-item-name{text-decoration:line-through;}
     .arch-pending-tag{font-size:10px;padding:2px 8px;border-radius:99px;background:#ff5a5a20;border:1px solid var(--danger);color:var(--danger);margin-left:6px;}
+
+    /* ============================================================
+       MOBILE — phones up to 768px
+    ============================================================ */
+    @media (max-width: 768px) {
+
+      /* Core layout adjustments */
+      :root { --hh: 54px; --tw: 100%; }
+      html, body { overflow: hidden; }
+
+      /* ── Header ── */
+      header { height: var(--hh); padding: 0; }
+      .logo { flex: 0 0 auto; padding: 0 14px; border-right: none; }
+      .logo-text .w1 { font-size: 13px; }
+      .logo-text .w2 { display: none; }
+      .logo-mark { width: 22px; height: 22px; }
+
+      /* Nav: hide text labels, show only icons in a bottom bar */
+      .nav-wrap { display: none; }
+      .h-actions { gap: 6px; padding-right: 10px; }
+      .user-badge-pill { display: none; }
+
+      /* Bottom navigation bar */
+      #mobileNav {
+        position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+        background: var(--surf); border-top: 1px solid var(--bdr);
+        display: flex; align-items: center;
+        height: 58px; padding: 0 4px;
+        overflow-x: auto; gap: 0;
+        scrollbar-width: none;
+      }
+      #mobileNav::-webkit-scrollbar { display: none; }
+      .mob-nav-btn {
+        flex: 1; min-width: 52px; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; gap: 3px;
+        padding: 6px 4px; border: none; background: none; cursor: pointer;
+        color: var(--txt3); font-size: 9px; font-family: 'DM Sans', sans-serif;
+        font-weight: 500; letter-spacing: .02em; white-space: nowrap;
+        border-radius: 8px; transition: color .15s, background .15s;
+      }
+      .mob-nav-btn svg { width: 18px; height: 18px; opacity: .6; }
+      .mob-nav-btn.active { color: var(--acc); }
+      .mob-nav-btn.active svg { opacity: 1; }
+
+      /* Views fill below header, above bottom nav */
+      .view {
+        top: var(--hh); bottom: 58px;
+        overflow-y: auto; overflow-x: hidden;
+      }
+
+      /* ── Dashboard ── */
+      #vDash > div {
+        padding: 20px 16px !important;
+        gap: 20px !important;
+      }
+      .dash-hd h1 { font-size: 18px; }
+      .dash-hd p { font-size: 13px; }
+      .stats-row { gap: 8px; }
+      .stat { padding: 12px 16px; min-width: 0; flex: 1; }
+      .stat-val { font-size: 18px; }
+      .feat-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+      .feat-card { padding: 16px; }
+      .feat-card h3 { font-size: 13.5px; }
+      .feat-card p { font-size: 12px; }
+
+      /* ── Split views (Project, Research, etc.) ── */
+      .split-view { flex-direction: column; position: relative; }
+
+      /* Tree panel takes full width, collapses to a drawer */
+      .tree-panel {
+        width: 100% !important;
+        height: auto !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--bdr);
+        flex-shrink: 0;
+        max-height: 42vh;
+      }
+      .tree-body { max-height: calc(42vh - 44px); overflow-y: auto; }
+
+      /* Detail panel fills remaining space */
+      .detail-panel {
+        flex: 1; min-height: 0;
+        overflow-y: auto;
+      }
+
+      /* Tree toolbar tighter */
+      .tree-toolbar { padding: 7px 8px; }
+      .tree-tlbl { font-size: 10px; }
+
+      /* ── Module/Word detail panels ── */
+      .wd-two-col, .wd-three-col { grid-template-columns: 1fr !important; }
+
+      /* ── Archive & Logs ── */
+      .arch-header, .clog-header { padding: 16px 16px 12px; }
+      .arch-body, .clog-body { padding: 12px 16px; }
+      .arch-item { flex-wrap: wrap; gap: 8px; }
+      .arch-item-info { min-width: 0; flex: 1 1 100%; }
+      .arch-restore-btn, .arch-del-btn { font-size: 11px; padding: 4px 10px; }
+
+      /* ── Systems Map ── */
+      .smap-toolbar { flex-wrap: wrap; gap: 6px; padding: 8px 10px; }
+      .smap-sidebar { display: none; } /* hide on mobile */
+      .smap-main { flex: 1; }
+
+      /* ── Modals ── */
+      .modal-box {
+        width: calc(100vw - 32px) !important;
+        max-width: 100% !important;
+        margin: 16px !important;
+      }
+      .users-box {
+        width: calc(100vw - 32px) !important;
+        max-height: 90vh !important;
+      }
+
+      /* ── Login screen ── */
+      .login-box {
+        width: calc(100vw - 32px) !important;
+        padding: 24px 20px !important;
+      }
+
+      /* ── Misc ── */
+      .t-acts { display: flex !important; } /* always show tree actions on mobile */
+    }
   </style>
 </head>
 <body>
@@ -375,6 +499,7 @@
     </div>
   </div>
 </header>
+<div id="mobileNav" style="display:none"></div>
 
 <!-- DASHBOARD -->
 <div class="view" id="vDash">
@@ -851,19 +976,40 @@ document.addEventListener('click', e => {
 function buildNav() {
   const nav = document.getElementById('mainNav');
   nav.innerHTML = '';
+  const mob = document.getElementById('mobileNav');
+  if (mob) mob.innerHTML = '';
+
+  // Show mobile nav only on small screens
+  const isMob = window.innerWidth <= 768;
+  if (mob) mob.style.display = isMob ? 'flex' : 'none';
+
   FEATURES.forEach(f => {
+    // Desktop nav
     const b = document.createElement('button');
     b.className = 'nav-btn' + (f.id === activeFId ? ' active' : '');
     b.dataset.id = f.id;
     b.innerHTML  = f.icon + `<span>${f.label}</span>`;
     b.addEventListener('click', () => gotoView(f.id));
     nav.appendChild(b);
+
+    // Mobile bottom nav
+    if (mob) {
+      const mb = document.createElement('button');
+      mb.className = 'mob-nav-btn' + (f.id === activeFId ? ' active' : '');
+      mb.dataset.id = f.id;
+      mb.innerHTML = f.icon + `<span>${f.label}</span>`;
+      mb.addEventListener('click', () => gotoView(f.id));
+      mob.appendChild(mb);
+    }
   });
 }
 
+// Rebuild nav on resize so it switches between mobile/desktop
+window.addEventListener('resize', () => buildNav());
+
 function gotoView(id) {
   activeFId = id;
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.id === id));
+  document.querySelectorAll('.nav-btn, .mob-nav-btn').forEach(b => b.classList.toggle('active', b.dataset.id === id));
   const feat = FEATURES.find(f => f.id === id);
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === feat?.viewId));
   if (id === 'dashboard') refreshDash();
