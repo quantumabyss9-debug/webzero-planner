@@ -176,11 +176,18 @@
     .users-header{display:flex;align-items:center;justify-content:space-between;}
     .users-title{font-size:16px;font-weight:600;letter-spacing:-.01em;}
     .users-list{display:flex;flex-direction:column;overflow-y:auto;max-height:320px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;}
-    .user-row{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--bdr);}
+    .user-row{display:flex;align-items:center;gap:10px;padding:12px 4px;border-bottom:1px solid var(--bdr);}
     .user-row:last-child{border-bottom:none;}
+    .user-row.frozen{opacity:.5;}
     .user-info{flex:1;min-width:0;}
-    .user-name{font-size:13.5px;font-weight:500;margin-bottom:3px;}
+    .user-name{font-size:13.5px;font-weight:500;margin-bottom:3px;display:flex;align-items:center;gap:6px;}
+    .user-frozen-badge{font-size:10px;padding:1px 7px;border-radius:99px;background:#f0a50020;border:1px solid #f0a500;color:#f0a500;font-family:'Space Mono',monospace;letter-spacing:.04em;}
     .user-phrase-preview{font-family:'Space Mono',monospace;font-size:10px;color:var(--txt3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .user-act-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--bdr);background:transparent;color:var(--txt2);font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:4px;}
+    .user-act-btn:hover{border-color:var(--bdr2);color:var(--txt);}
+    .user-act-btn.freeze:hover{border-color:#f0a500;color:#f0a500;background:#f0a50015;}
+    .user-act-btn.unfreeze:hover{border-color:var(--acc);color:var(--acc);background:var(--acc-dim);}
+    .user-act-btn.delete:hover{border-color:var(--danger);color:var(--danger);background:#ff5a5a15;}
     .user-role-badge{font-family:'Space Mono',monospace;font-size:9px;color:var(--acc);background:var(--acc-dim);border:1px solid var(--acc-glow);padding:2px 8px;border-radius:99px;flex-shrink:0;letter-spacing:.06em;}
     .copy-phrase-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:6px;background:var(--surf2);border:1px solid var(--bdr2);color:var(--txt2);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;flex-shrink:0;white-space:nowrap;}
     .copy-phrase-btn:hover{border-color:var(--acc);color:var(--acc);}
@@ -2113,19 +2120,58 @@ function openUsersModal() {
 function closeUsersModal() { document.getElementById('usersModal').classList.add('hidden'); }
 
 function renderUsersList() {
-  document.getElementById('usersList').innerHTML = users.map(u => `
-    <div class="user-row">
-      <div class="user-info">
-        <div class="user-name">${esc(u.displayName)}</div>
-        <div class="user-phrase-preview">${esc(u.phrase)}</div>
-      </div>
-      ${u.role==='master' ? '<span class="user-role-badge">MASTER</span>' : ''}
-      <button class="copy-phrase-btn" onclick="copyPhrase('${u.id}')">
-        <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M2 10V3a1 1 0 011-1h7"/></svg>
-        Copy
-      </button>
-    </div>
-  `).join('');
+  document.getElementById('usersList').innerHTML = users.map(u => {
+    const isMasterUser = u.role === 'master';
+    const frozenBadge = u.frozen ? '<span class="user-frozen-badge">FROZEN</span>' : '';
+    const masterBadge = isMasterUser ? '<span class="user-role-badge">MASTER</span>' : '';
+    const frozenClass = u.frozen ? ' frozen' : '';
+
+    const freezeBtn = !isMasterUser ? `
+      <button class="user-act-btn ${u.frozen ? 'unfreeze' : 'freeze'}" onclick="toggleFreezeUser('${u.id}')" title="${u.frozen ? 'Unfreeze account' : 'Freeze account'}">
+        ${u.frozen
+          ? `<svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 1v10M1 6h10M3.5 3.5l5 5M8.5 3.5l-5 5"/></svg> Unfreeze`
+          : `<svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 1v10M1 6h10M3.5 3.5l5 5M8.5 3.5l-5 5"/></svg> Freeze`
+        }
+      </button>` : '';
+
+    const deleteBtn = !isMasterUser ? `
+      <button class="user-act-btn delete" onclick="deleteUser('${u.id}')" title="Delete account permanently">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="2" y1="3" x2="10" y2="3"/><path d="M4 3V2h4v1M3 3l.75 7h4.5L9 3"/></svg>
+        Delete
+      </button>` : '';
+
+    return `
+      <div class="user-row${frozenClass}">
+        <div class="user-info">
+          <div class="user-name">${esc(u.displayName)}${frozenBadge}</div>
+          <div class="user-phrase-preview">${esc(u.phrase)}</div>
+        </div>
+        ${masterBadge}
+        <button class="copy-phrase-btn" onclick="copyPhrase('${u.id}')">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M2 10V3a1 1 0 011-1h7"/></svg>
+          Copy
+        </button>
+        ${freezeBtn}
+        ${deleteBtn}
+      </div>`;
+  }).join('');
+}
+
+function toggleFreezeUser(userId) {
+  const u = getUserById(userId);
+  if (!u || u.role === 'master') return;
+  u.frozen = !u.frozen;
+  saveUsers();
+  renderUsersList();
+}
+
+function deleteUser(userId) {
+  const u = getUserById(userId);
+  if (!u || u.role === 'master') return;
+  if (!confirm(`Permanently delete "${u.displayName}"? This cannot be undone.`)) return;
+  users = users.filter(x => x.id !== userId);
+  saveUsers();
+  renderUsersList();
 }
 
 function copyPhrase(userId) {
