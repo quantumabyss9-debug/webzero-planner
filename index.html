@@ -276,6 +276,9 @@
     .smap-layer-chip-name{font-size:11px;background:transparent;border:none;outline:none;color:var(--txt);font-family:'DM Sans',sans-serif;min-width:40px;max-width:90px;cursor:text;}
     .smap-layer-chip-del{background:none;border:none;color:var(--txt3);cursor:pointer;padding:0 0 0 2px;font-size:13px;line-height:1;}
     .smap-layer-chip-del:hover{color:var(--danger);}
+    .smap-layer-chip-move{background:none;border:none;color:var(--txt3);cursor:pointer;padding:0 1px;font-size:14px;line-height:1;transition:color .12s;}
+    .smap-layer-chip-move:hover:not([disabled]){color:var(--acc);}
+    .smap-layer-chip-move[disabled]{opacity:.25;cursor:default;}
     .smap-layers-add-btn{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;background:transparent;border:1px dashed var(--bdr2);color:var(--txt3);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
     .smap-layers-add-btn:hover{border-color:var(--acc);color:var(--acc);}
     .smap-toolbar-left{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
@@ -3030,15 +3033,26 @@ function copyGeneratedPhrase() {
     smap.layers.forEach((layer, i) => {
       const chip = document.createElement('div');
       chip.className = 'smap-layer-chip';
-      chip.innerHTML = `
-        <input type="color" class="smap-layer-chip-color" value="${layer.color}" title="Change colour" style="background:${layer.color};"/>
-        <input class="smap-layer-chip-name" value="${esc(layer.name)}" placeholder="Layer name…"/>
-        <button class="smap-layer-chip-del" title="Delete layer">×</button>`;
-      const [colorInp, nameInp, delBtn] = [chip.querySelector('[type=color]'), chip.querySelector('.smap-layer-chip-name'), chip.querySelector('.smap-layer-chip-del')];
+      chip.innerHTML =
+        '<button class="smap-layer-chip-move" title="Move left"' + (i===0?' disabled':'') + '>&#8249;</button>' +
+        '<input type="color" class="smap-layer-chip-color" value="' + layer.color + '" title="Change colour" style="background:' + layer.color + ';"/>' +
+        '<input class="smap-layer-chip-name" value="' + esc(layer.name) + '" placeholder="Layer name…"/>' +
+        '<button class="smap-layer-chip-move" title="Move right"' + (i===smap.layers.length-1?' disabled':'') + '>&#8250;</button>' +
+        '<button class="smap-layer-chip-del" title="Delete layer">&times;</button>';
+      const colorInp = chip.querySelector('[type=color]');
+      const nameInp  = chip.querySelector('.smap-layer-chip-name');
+      const moveBtns = chip.querySelectorAll('.smap-layer-chip-move');
+      const delBtn   = chip.querySelector('.smap-layer-chip-del');
       colorInp.addEventListener('input', e => { layer.color = e.target.value; colorInp.style.background = e.target.value; renderLayersPanel(); draw(); });
       nameInp.addEventListener('input', e => { layer.name = e.target.value; renderLayersPanel(); draw(); });
+      moveBtns[0].addEventListener('click', () => {
+        if (i > 0) { [smap.layers[i-1], smap.layers[i]] = [smap.layers[i], smap.layers[i-1]]; renderLayersPanel(); renderLayersBar(); draw(); }
+      });
+      moveBtns[1].addEventListener('click', () => {
+        if (i < smap.layers.length-1) { [smap.layers[i], smap.layers[i+1]] = [smap.layers[i+1], smap.layers[i]]; renderLayersPanel(); renderLayersBar(); draw(); }
+      });
       delBtn.addEventListener('click', () => {
-        smapConfirm(`Delete layer "${layer.name}"?`, () => {
+        smapConfirm('Delete layer "' + layer.name + '"?', () => {
           smap.layers.splice(i, 1);
           if (smap.layers.length) smap.nodes.forEach(n => { if (!smap.layers.find(l=>l.id===n.layerId)) n.layerId=smap.layers[0].id; });
           renderLayersPanel(); renderLayersBar(); draw();
