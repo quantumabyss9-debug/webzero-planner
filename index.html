@@ -94,6 +94,11 @@
     .t-lbl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .t-acts{display:none;gap:1px;flex-shrink:0;}
     .t-row:hover .t-acts{display:flex;}
+    .t-row[draggable]{cursor:grab;}
+    .t-row.drag-over-folder{background:var(--acc-dim)!important;border-color:var(--acc)!important;outline:1px solid var(--acc);outline-offset:-1px;}
+    .t-drop-line{height:2px;background:var(--acc);border-radius:2px;margin:0 8px;display:none;pointer-events:none;}
+    .t-drop-line.active{display:block;}
+    .t-row.dragging{opacity:0.4;}
     .t-act{width:18px;height:18px;border-radius:3px;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--txt3);padding:0;transition:all .1s;}
     .t-act:hover{background:var(--surf3);color:var(--txt);}
     .t-act.del:hover{color:var(--danger);}
@@ -871,6 +876,110 @@ function countNodes(nodes) {
 /* ================================================================
    TREE RENDER  (generic — pass in any tree state object)
 ================================================================ */
+/* ================================================================
+   DRAG AND DROP — move files/folders between folders
+================================================================ */
+let _dragNode = null;   // {node, parentArr, tree}
+
+function findParentArrAndNode(data, id, parentArr=null) {
+  for (const n of data) {
+    if (n.id === id) return { node: n, parentArr: parentArr || data };
+    if (n.type === 'folder' && n.children.length) {
+      const found = findParentArrAndNode(n.children, id, n.children);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function moveNode(tree, dragId, targetId, position) {
+  // position: 'inside' | 'before' | 'after'
+  const drag = findParentArrAndNode(tree.data, dragId);
+  if (!drag) return;
+
+  // Remove from current position
+  const dragIdx = drag.parentArr.indexOf(drag.node);
+  drag.parentArr.splice(dragIdx, 1);
+
+  if (position === 'inside') {
+    // Drop into folder
+    const target = findParentArrAndNode(tree.data, targetId);
+    if (!target || target.node.type !== 'folder') { drag.parentArr.splice(dragIdx, 0, drag.node); return; }
+    target.node.children.unshift(drag.node);
+    target.node.open = true;
+  } else {
+    // Drop before/after target
+    const target = findParentArrAndNode(tree.data, targetId);
+    if (!target) { drag.parentArr.splice(dragIdx, 0, drag.node); return; }
+    const arr = target.parentArr;
+    const tIdx = arr.indexOf(target.node);
+    const insertAt = position === 'before' ? tIdx : tIdx + 1;
+    arr.splice(insertAt, 0, drag.node);
+  }
+  logChange('edit', 'Moved', drag.node.name, tree.label);
+  renderTree(tree);
+}
+
+function wireDrag(row, node, tree) {
+  row.draggable = true;
+
+  row.addEventListener('dragstart', e => {
+    _dragNode = { node, tree };
+    row.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', node.id);
+  });
+
+  row.addEventListener('dragend', () => {
+    row.classList.remove('dragging');
+    document.querySelectorAll('.drag-over-folder').forEach(el => el.classList.remove('drag-over-folder'));
+    document.querySelectorAll('.t-drop-line.active').forEach(el => el.classList.remove('active'));
+    _dragNode = null;
+  });
+
+  // Drop INTO a folder
+  if (node.type === 'folder') {
+    row.addEventListener('dragover', e => {
+      if (!_dragNode || _dragNode.node.id === node.id) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      document.querySelectorAll('.drag-over-folder').forEach(el => el.classList.remove('drag-over-folder'));
+      row.classList.add('drag-over-folder');
+    });
+    row.addEventListener('dragleave', e => {
+      if (!e.currentTarget.contains(e.relatedTarget)) row.classList.remove('drag-over-folder');
+    });
+    row.addEventListener('drop', e => {
+      e.preventDefault(); e.stopPropagation();
+      row.classList.remove('drag-over-folder');
+      if (!_dragNode || _dragNode.node.id === node.id) return;
+      if (_dragNode.tree !== tree) return;
+      // Don't allow dropping a folder into its own descendant
+      const isDescendant = (parent, childId) => parent.children?.some(c => c.id === childId || isDescendant(c, childId));
+      if (isDescendant(_dragNode.node, node.id)) return;
+      moveNode(tree, _dragNode.node.id, node.id, 'inside');
+    });
+  }
+}
+
+function wireDropLine(dropLine, node, tree, position) {
+  dropLine.addEventListener('dragover', e => {
+    if (!_dragNode || _dragNode.node.id === node.id) return;
+    e.preventDefault();
+    document.querySelectorAll('.t-drop-line.active').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.drag-over-folder').forEach(el => el.classList.remove('drag-over-folder'));
+    dropLine.classList.add('active');
+  });
+  dropLine.addEventListener('dragleave', () => dropLine.classList.remove('active'));
+  dropLine.addEventListener('drop', e => {
+    e.preventDefault(); e.stopPropagation();
+    dropLine.classList.remove('active');
+    if (!_dragNode || _dragNode.node.id === node.id) return;
+    if (_dragNode.tree !== tree) return;
+    moveNode(tree, _dragNode.node.id, node.id, position);
+  });
+}
+
 function renderTree(tree) {
   const body = document.getElementById(tree.bodyId);
   if (tree.data.length === 0) {
@@ -944,6 +1053,15 @@ function buildRow(node, depth, tree) {
     e.preventDefault(); activeTree = tree;
     showCtx(e.clientX, e.clientY, node.id, isDir, tree);
   });
+
+  // Drop line BEFORE this row
+  const dropBefore = document.createElement('div');
+  dropBefore.className = 't-drop-line';
+  wrap.appendChild(dropBefore);
+  wireDropLine(dropBefore, node, tree, 'before');
+
+  // Wire drag on the row itself
+  wireDrag(row, node, tree);
   wrap.appendChild(row);
 
   if (isDir && node.open) {
@@ -958,6 +1076,12 @@ function buildRow(node, depth, tree) {
     } else {
       node.children.forEach(ch => kids.appendChild(buildRow(ch, depth+1, tree)));
     }
+    // Drop line at end of children (drop after last child = drop inside folder at end)
+    const dropEnd = document.createElement('div');
+    dropEnd.className = 't-drop-line';
+    dropEnd.style.marginLeft = ((depth+1)*14+8)+'px';
+    kids.appendChild(dropEnd);
+    wireDropLine(dropEnd, node, tree, 'inside');
     wrap.appendChild(kids);
   }
   return wrap;
