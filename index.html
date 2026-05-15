@@ -2709,11 +2709,21 @@ async function syncFromCloud() {
     _applyPayload(payload);
     Object.values(TREES).forEach(renderTree);
   }
+  // Mark cloud ready after first sync attempt (success or no new data)
+  if (!_cloudReady) {
+    _cloudReady = true;
+    if (_pendingSave) { _pendingSave = false; saveAll(); }
+  }
 }
 
-// Debounced auto-save — fires 800ms after last change
+// Debounced auto-save — blocked until initial cloud sync finishes
+// to prevent early saves from overwriting cloud data with empty arrays
 let _saveTimer = null;
+let _cloudReady = false;
+let _pendingSave = false;
+
 window.wz_save = function() {
+  if (!_cloudReady) { _pendingSave = true; return; } // hold until sync done
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(saveAll, 800);
 };
