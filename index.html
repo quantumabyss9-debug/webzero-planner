@@ -2161,7 +2161,9 @@ function renderFileView(node, panelId, tree) {
       <div class="file-view-body" id="fvBody_${panelId}">
         ${isText
           ? `<textarea class="file-editor" id="fvEditor_${panelId}" placeholder="Start typing…" spellcheck="false">${esc(node.content)}</textarea>`
-          : `<div class="c-empty" style="margin:60px auto;"><div class="big">📄</div><p>.${dispExt} — binary file, content stored as text</p><textarea class="file-editor" style="height:200px;margin-top:20px;" id="fvEditor_${panelId}" placeholder="Notes or metadata…">${esc(node.content)}</textarea></div>`
+          : node.binaryKey
+            ? `<div id="fvBinView_${panelId}" style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:13px;">Loading…</div>`
+            : `<div class="c-empty" style="margin:60px auto;"><div class="big">📄</div><p>.${dispExt} file</p><textarea class="file-editor" style="height:200px;margin-top:20px;" id="fvEditor_${panelId}" placeholder="Notes…">${esc(node.content)}</textarea></div>`
         }
       </div>
     </div>`;
@@ -2169,6 +2171,24 @@ function renderFileView(node, panelId, tree) {
   // Store node ref on panel element for upload/download access
   const panelEl = document.getElementById(panelId);
   if (panelEl) { panelEl._currentNode = node; }
+
+  // For binary files, load from Supabase and render
+  if (node.binaryKey) {
+    const binDiv = document.getElementById('fvBinView_' + panelId);
+    sbGet(node.binaryKey).then(data => {
+      if (!data || !binDiv) return;
+      const { base64, type } = data;
+      if (type === 'application/pdf' || dispExt === 'pdf') {
+        binDiv.innerHTML = `<iframe src="${base64}" style="width:100%;height:100%;min-height:500px;border:none;border-radius:6px;" title="${esc(node.name)}.pdf"></iframe>`;
+      } else {
+        // Other binary — offer download link
+        binDiv.innerHTML = `<div class="c-empty" style="margin:auto;"><div class="big">📄</div><p style="margin-top:12px;">.${dispExt} — <a href="${base64}" download="${esc(node.name)}.${dispExt}" style="color:var(--acc);">Click to download</a></p></div>`;
+      }
+    }).catch(() => {
+      if (binDiv) binDiv.textContent = 'Could not load file.';
+    });
+    return; // no textarea to wire
+  }
 
   // Wire editor to save on change
   const ed = document.getElementById('fvEditor_' + panelId);
@@ -2220,43 +2240,95 @@ function simpleMarkdown(md) {
 }
 
 /* Upload a file from the toolbar — creates a new node in the tree */
+const TEXT_EXTS = new Set(['txt','md','json','yaml','yml','xml','html','htm','js','ts','jsx','tsx','css','scss','csv','toml','ini','sh','py','rb','go','rs','sql','env','log','conf','cfg']);
+const MAX_TEXT_SIZE = 512 * 1024;   // 512 KB for text files
+const MAX_BIN_SIZE  = 5 * 1024 * 1024; // 5 MB for binary (base64 stored separately)
+
 function fvHandleUploadToTree(event, panelId, treeKey) {
   const files = Array.from(event.target.files);
   if (!files.length) return;
   const tree = TREES[treeKey];
   if (!tree) return;
+
   files.forEach(file => {
+    const dotIdx = file.name.lastIndexOf('.');
+    const name   = dotIdx > -1 ? file.name.slice(0, dotIdx) : file.name;
+    const ext    = dotIdx > -1 ? file.name.slice(dotIdx + 1).toLowerCase() : 'txt';
+    const isText = TEXT_EXTS.has(ext);
+
+    // Size guards
+    if (isText && file.size > MAX_TEXT_SIZE) {
+      alert(`"${file.name}" is ${(file.size/1024).toFixed(0)} KB — text files over 512 KB can't be stored. Try splitting it up.`);
+      return;
+    }
+    if (!isText && file.size > MAX_BIN_SIZE) {
+      alert(`"${file.name}" is ${(file.size/1024/1024).toFixed(1)} MB — files over 5 MB aren't supported.`);
+      return;
+    }
+
+    const nodeId = globalUid++;
+    const node   = { id: nodeId, type: 'file', name, ext };
+    tree.data.push(node);
+    tree.sel = nodeId;
+    renderTree(tree);
+
     const reader = new FileReader();
-    reader.onload = e => {
-      const dotIdx = file.name.lastIndexOf('.');
-      const name   = dotIdx > -1 ? file.name.slice(0, dotIdx) : file.name;
-      const ext    = dotIdx > -1 ? file.name.slice(dotIdx + 1).toLowerCase() : 'txt';
-      const node   = { id: globalUid++, type: 'file', name, ext, content: e.target.result };
-      tree.data.push(node);
-      tree.sel = node.id;
-      renderTree(tree);
+
+    if (isText) {
+      // Text files — read as text, store inline (already small)
+      reader.onload = e => {
+        node.content = e.target.result;
+        renderFileView(node, panelId, tree);
+        logChange('add', 'Uploaded file', file.name, tree.label);
+      };
+      reader.readAsText(file);
+    } else {
+      // Binary files (PDF, DOCX, etc.) — store as base64 in a SEPARATE Supabase key
+      // so it never inflates the main appdata payload
+      node.content = '';
+      node.binaryKey = 'file_' + nodeId; // reference to the Supabase row
+      node.binaryType = file.type;
       renderFileView(node, panelId, tree);
-      logChange('add', 'Uploaded file', file.name, tree.label);
-    };
-    reader.readAsText(file);
+
+      reader.onload = e => {
+        const base64 = e.target.result; // data:...;base64,xxxx
+        // Store in separate Supabase key — don't touch appdata
+        sbSet(node.binaryKey, { base64, name: file.name, type: file.type, size: file.size });
+        node.content = '[binary]'; // marker so saveAll doesn't store the big blob
+        logChange('add', 'Uploaded file', file.name, tree.label);
+      };
+      reader.readAsDataURL(file); // gives base64
+    }
   });
-  event.target.value = ''; // reset so same file can be re-uploaded
+
+  event.target.value = '';
 }
 
 /* Download the current node's content as a file */
-function fvDownload(panelId) {
+async function fvDownload(panelId) {
   const panel = document.getElementById(panelId);
   const node  = panel?._currentNode;
   if (!node) return;
   const ext  = node.ext ? '.' + node.ext : '.txt';
   const name = node.name + ext;
-  const blob = new Blob([node.content || ''], {type:'text/plain;charset=utf-8'});
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = name;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+  if (node.binaryKey) {
+    // Binary file — fetch base64 from Supabase, trigger download
+    const data = await sbGet(node.binaryKey).catch(() => null);
+    if (!data?.base64) { alert('File content not found.'); return; }
+    const a = document.createElement('a');
+    a.href = data.base64; a.download = name;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+  } else {
+    const blob = new Blob([node.content || ''], {type:'text/plain;charset=utf-8'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
 }
 
 TREES.project.onSelect  = (node, isDir, tree) => renderFileView(node, 'pContentPanel', tree);
