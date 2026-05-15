@@ -98,6 +98,10 @@
     .t-row.drag-over-folder{background:var(--acc-dim)!important;border-color:var(--acc)!important;outline:1px solid var(--acc);outline-offset:-1px;}
     .t-drop-line{height:2px;background:var(--acc);border-radius:2px;margin:0 8px;display:none;pointer-events:none;}
     .t-drop-line.active{display:block;}
+    .t-drop-out{height:14px;display:none;align-items:center;pointer-events:none;padding:0 8px;opacity:0;}
+    .t-drop-out.active{display:flex;opacity:1;}
+    .t-drop-out-line{flex:1;height:2px;background:var(--acc);border-radius:2px;}
+    .t-drop-out-label{font-size:9px;color:var(--acc);margin-left:4px;white-space:nowrap;font-family:'Space Mono',monospace;}
     .t-row.dragging{opacity:0.4;}
     .t-act{width:18px;height:18px;border-radius:3px;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--txt3);padding:0;transition:all .1s;}
     .t-act:hover{background:var(--surf3);color:var(--txt);}
@@ -905,7 +909,7 @@ function moveNode(tree, dragId, targetId, position) {
     // Drop into folder
     const target = findParentArrAndNode(tree.data, targetId);
     if (!target || target.node.type !== 'folder') { drag.parentArr.splice(dragIdx, 0, drag.node); return; }
-    target.node.children.unshift(drag.node);
+    target.node.children.push(drag.node);
     target.node.open = true;
   } else {
     // Drop before/after target
@@ -932,8 +936,7 @@ function wireDrag(row, node, tree) {
 
   row.addEventListener('dragend', () => {
     row.classList.remove('dragging');
-    document.querySelectorAll('.drag-over-folder').forEach(el => el.classList.remove('drag-over-folder'));
-    document.querySelectorAll('.t-drop-line.active').forEach(el => el.classList.remove('active'));
+    clearDropHighlights();
     _dragNode = null;
   });
 
@@ -962,22 +965,35 @@ function wireDrag(row, node, tree) {
   }
 }
 
-function wireDropLine(dropLine, node, tree, position) {
-  dropLine.addEventListener('dragover', e => {
+function clearDropHighlights() {
+  document.querySelectorAll('.t-drop-line.active').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.t-drop-out.active').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.drag-over-folder').forEach(el => el.classList.remove('drag-over-folder'));
+}
+
+function wireDropZone(el, node, tree, position, activeClass='active') {
+  el.style.pointerEvents = 'auto';
+  el.addEventListener('dragover', e => {
     if (!_dragNode || _dragNode.node.id === node.id) return;
+    if (_dragNode.tree !== tree) return;
     e.preventDefault();
-    document.querySelectorAll('.t-drop-line.active').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.drag-over-folder').forEach(el => el.classList.remove('drag-over-folder'));
-    dropLine.classList.add('active');
+    clearDropHighlights();
+    el.classList.add(activeClass);
   });
-  dropLine.addEventListener('dragleave', () => dropLine.classList.remove('active'));
-  dropLine.addEventListener('drop', e => {
+  el.addEventListener('dragleave', e => {
+    if (!el.contains(e.relatedTarget)) el.classList.remove(activeClass);
+  });
+  el.addEventListener('drop', e => {
     e.preventDefault(); e.stopPropagation();
-    dropLine.classList.remove('active');
+    el.classList.remove(activeClass);
     if (!_dragNode || _dragNode.node.id === node.id) return;
     if (_dragNode.tree !== tree) return;
     moveNode(tree, _dragNode.node.id, node.id, position);
   });
+}
+
+function wireDropLine(dropLine, node, tree, position) {
+  wireDropZone(dropLine, node, tree, position);
 }
 
 function renderTree(tree) {
@@ -1076,13 +1092,21 @@ function buildRow(node, depth, tree) {
     } else {
       node.children.forEach(ch => kids.appendChild(buildRow(ch, depth+1, tree)));
     }
-    // Drop line at end of children (drop after last child = drop inside folder at end)
+    // Drop zone: inside at end of children (same indent as children)
     const dropEnd = document.createElement('div');
     dropEnd.className = 't-drop-line';
     dropEnd.style.marginLeft = ((depth+1)*14+8)+'px';
     kids.appendChild(dropEnd);
     wireDropLine(dropEnd, node, tree, 'inside');
     wrap.appendChild(kids);
+
+    // Drop zone: AFTER the folder (at folder's own indent level) — escape hatch to drag out
+    const dropOut = document.createElement('div');
+    dropOut.className = 't-drop-out';
+    dropOut.style.paddingLeft = (depth*14+8)+'px';
+    dropOut.innerHTML = '<div class="t-drop-out-line"></div><span class="t-drop-out-label">↑ outside folder</span>';
+    wrap.appendChild(dropOut);
+    wireDropZone(dropOut, node, tree, 'after', 'active');
   }
   return wrap;
 }
