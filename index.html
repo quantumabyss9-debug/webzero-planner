@@ -101,11 +101,12 @@
     .t-drop-line::after{content:'';position:absolute;left:0;right:0;top:2px;height:2px;background:var(--acc);border-radius:2px;opacity:0;transition:opacity .1s;}
     .drag-active .t-drop-line::after{opacity:.15;}
     .t-drop-line.active::after{opacity:1;}
-    /* Escape-hatch zone to drop item OUTSIDE its parent folder */
-    .t-drop-out{height:10px;display:flex;align-items:center;padding:0 8px;pointer-events:auto;position:relative;}
-    .t-drop-out::after{content:'';position:absolute;left:8px;right:8px;top:4px;height:2px;background:var(--acc);border-radius:2px;opacity:0;transition:opacity .1s;}
-    .drag-active .t-drop-out::after{opacity:.15;}
-    .t-drop-out.active::after{opacity:1;}
+    /* Escape-hatch zone — invisible until drag starts */
+    .t-drop-out{height:0;overflow:hidden;pointer-events:auto;position:relative;transition:height .1s;}
+    .drag-active .t-drop-out{height:8px;}
+    .t-drop-out::after{content:'';position:absolute;left:8px;right:8px;top:3px;height:2px;background:var(--acc);border-radius:2px;opacity:0;transition:opacity .1s;}
+    .drag-active .t-drop-out::after{opacity:.2;}
+    .t-drop-out.active::after{opacity:1!important;}
     .t-row.dragging{opacity:0.4;}
     .t-act{width:18px;height:18px;border-radius:3px;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--txt3);padding:0;transition:all .1s;}
     .t-act:hover{background:var(--surf3);color:var(--txt);}
@@ -1110,7 +1111,7 @@ function buildRow(node, depth, tree) {
     const dropOut = document.createElement('div');
     dropOut.className = 't-drop-out';
     dropOut.style.paddingLeft = (depth*14+8)+'px';
-    dropOut.innerHTML = '<div class="t-drop-out-line"></div><span class="t-drop-out-label">↑ outside folder</span>';
+    dropOut.innerHTML = '';
     wrap.appendChild(dropOut);
     wireDropZone(dropOut, node, tree, 'after', 'active');
   }
