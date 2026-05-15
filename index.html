@@ -2208,16 +2208,12 @@ function simpleMarkdown(md) {
     .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
     .replace(/\*(.+?)\*/g,'<em>$1</em>')
     .replace(/`([^`]+)`/g,'<code>$1</code>')
-    .replace(/^\> (.+)$/gm,'<blockquote>$1</blockquote>')
+    .replace(/^> (.+)$/gm,'<blockquote>$1</blockquote>')
     .replace(/^- (.+)$/gm,'<li>$1</li>')
     .replace(/(<li>[\s\S]+?<\/li>)/g,'<ul>$1</ul>')
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" style="color:var(--acc)">$1</a>')
-    .replace(/
-
-/g,'</p><p>')
-    .replace(/^(?!<[h|u|b|o|p|l|h])/gm, '<p>')
-    .replace(/<p><\/p>/g,'')
-    + '';
+    .split('\n\n').join('</p><p>')
+    .replace(/^(?!<[hubolp])/gm,'<p>') + '';
 }
 
 /* Upload a local file into the current node's content */
