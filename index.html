@@ -2072,28 +2072,32 @@ document.getElementById('phraseInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); attemptLogin(); }
 });
 
-function attemptLogin() {
-  try {
-    const el = document.getElementById('phraseInput');
-    const errEl = document.getElementById('loginError');
-    if (!el) return;
-    const phrase = el.value.trim().toLowerCase().replace(/\s+/g,' ');
-    if (!phrase) { if (errEl) errEl.textContent = 'Please enter your phrase.'; return; }
-    const user = getUserByPhrase(phrase);
-    if (user) {
-      currentUser = user;
-      try { localStorage.setItem(WZ_SESSION_KEY, user.id); } catch(e) {}
-      document.getElementById('loginScreen').classList.add('hidden');
-      el.value = '';
-      if (errEl) errEl.textContent = '';
-      onLogin();
-    } else {
-      if (errEl) errEl.textContent = 'Phrase not recognised — check your words and try again.';
-    }
-  } catch(err) {
-    const errEl = document.getElementById('loginError');
-    if (errEl) errEl.textContent = 'Error: ' + err.message;
+async function attemptLogin() {
+  const el    = document.getElementById('phraseInput');
+  const errEl = document.getElementById('loginError');
+  if (!el) return;
+  const phrase = el.value.trim().toLowerCase().replace(/\s+/g,' ');
+  if (!phrase) { if (errEl) errEl.textContent = 'Please enter your phrase.'; return; }
+
+  // Always fetch latest user list from cloud before checking — ensures frozen/deleted states are current
+  if (errEl) errEl.textContent = '';
+  try { await syncUsersFromCloud(); } catch(e) {}
+
+  const user = getUserByPhrase(phrase);
+  if (!user) {
+    if (errEl) errEl.textContent = 'Phrase not recognised — check your words and try again.';
+    return;
   }
+  if (user.frozen) {
+    if (errEl) errEl.textContent = 'This account has been frozen. Contact FATHOM.';
+    return;
+  }
+  currentUser = user;
+  try { localStorage.setItem(WZ_SESSION_KEY, user.id); } catch(e) {}
+  document.getElementById('loginScreen').classList.add('hidden');
+  el.value = '';
+  if (errEl) errEl.textContent = '';
+  onLogin();
 }
 
 function logout() {
@@ -2956,6 +2960,7 @@ window.wz_save = function() {
 
 // Poll Supabase every 30s so all users stay in sync
 setInterval(syncFromCloud, 30000);
+setInterval(syncUsersFromCloud, 30000);
 
 // Patch all mutation points to trigger auto-save
 (function patchSave() {
