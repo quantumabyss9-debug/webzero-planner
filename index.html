@@ -426,10 +426,12 @@
       }
       .tree-body { max-height: calc(42vh - 44px); overflow-y: auto; }
 
-      /* Detail panel fills remaining space */
-      .detail-panel {
-        flex: 1; min-height: 0;
+      /* Content panel fills remaining space below tree panel */
+      .content-panel {
+        flex: 1; min-height: 0; min-width: 0;
         overflow-y: auto;
+        display: flex; flex-direction: column;
+        align-items: flex-start; justify-content: flex-start;
       }
 
       /* Tree toolbar tighter */
@@ -438,6 +440,8 @@
 
       /* ── Module/Word detail panels ── */
       .wd-two-col, .wd-three-col { grid-template-columns: 1fr !important; }
+      .word-detail { padding: 16px 14px 40px !important; }
+      .c-empty { padding: 40px 20px; }
 
       /* ── Archive & Logs ── */
       .arch-header, .clog-header { padding: 16px 16px 12px; }
@@ -2808,9 +2812,7 @@ function copyGeneratedPhrase() {
     const panel=document.getElementById('smapPropsSection');
     if (!panel) return;
     if (!smap.selected) {
-      if (window.innerWidth <= 768) {
-        mobSmapDrawerOpen(`<div style="padding:16px;font-size:13px;color:var(--txt3);">Tap background to dismiss</div>`);
-      }
+      if (window.innerWidth <= 768) { mobSmapDrawerClose(); }
       panel.innerHTML=`<div class="smap-panel-empty">
         Click a node to see its properties.<br><br>
         <span style="color:var(--txt3);font-size:12px;">
@@ -2827,13 +2829,6 @@ function copyGeneratedPhrase() {
     if (smap.selectType==='conn') {
       const conn=smap.connections.find(c=>c.id===smap.selected);
       if (!conn) return;
-      if (window.innerWidth <= 768) {
-        // Clone panel content to mobile drawer
-        setTimeout(() => {
-          const pc = panel.querySelector('.smap-panel-content');
-          if (pc) mobSmapDrawerOpen(pc.outerHTML);
-        }, 10);
-      }
       panel.innerHTML=`<div class="smap-panel-content">
         <div class="smap-panel-title">Connection</div>
         <div class="m-field"><label class="m-label">Label</label>
@@ -2841,6 +2836,9 @@ function copyGeneratedPhrase() {
         <button class="btn btn-danger" style="margin-top:auto;" onclick="smapDeleteSelected()">Delete Connection</button>
       </div>`;
       document.getElementById('spConnLabel')?.addEventListener('input',e=>{conn.label=e.target.value;draw();});
+      if (window.innerWidth <= 768) {
+        mobSmapDrawerOpen(panel.querySelector('.smap-panel-content')?.outerHTML || '');
+      }
       return;
     }
     const node=smap.nodes.find(n=>n.id===smap.selected);
@@ -2877,6 +2875,9 @@ function copyGeneratedPhrase() {
     document.getElementById('spDesc')?.addEventListener('input',e=>{node.info.description=e.target.value;});
     document.getElementById('spTech')?.addEventListener('input',e=>{node.info.tech=e.target.value;});
     document.getElementById('spNotes')?.addEventListener('input',e=>{node.info.notes=e.target.value;});
+    if (window.innerWidth <= 768) {
+      mobSmapDrawerOpen(panel.querySelector('.smap-panel-content')?.outerHTML || '');
+    }
   }
 
   /* ── Global toolbar API ── */
