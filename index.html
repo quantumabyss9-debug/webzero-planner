@@ -1100,28 +1100,28 @@ document.getElementById('mConfirm').addEventListener('click', () => {
     if(!name) return;
     newNode={id:globalUid++,type:'folder',name,open:true,children:[]};
     insertNode(tree,newNode,mTargetId);
-    logChange('add','Created folder',name,tree.label);
+    logChange('add','Created folder',name,tree.label); // logChange calls saveAll
   }
   else if (mMode==='file') {
     if(!name) return;
     newNode={id:globalUid++,type:'file',name,ext};
     insertNode(tree,newNode,mTargetId);
-    logChange('add','Created file',name+(ext?'.'+ext:''),tree.label);
+    logChange('add','Created file',name+(ext?'.'+ext:''),tree.label); // logChange calls saveAll
   }
   else if (mMode==='rename') {
     if(!name) return;
     const n=findNode(tree.data,mTargetId);
     const oldName = n?.name || '';
     if(n) n.name=name;
-    logChange('edit','Renamed',`${oldName} → ${name}`,tree.label);
+    logChange('edit','Renamed',`${oldName} → ${name}`,tree.label); // logChange calls saveAll
   }
   else if (mMode==='delete') {
     const delNode=findNode(tree.data,mTargetId);
     const delName=delNode?.name||'item';
     archiveNode(tree,mTargetId);
-    logChange('del','Deleted',delName,tree.label);
     if(tree.sel===mTargetId) tree.sel=null;
     removeNode(tree,mTargetId);
+    logChange('del','Deleted',delName,tree.label); // logChange calls saveAll
   }
 
   // Auto-select and open the new node if one was created
@@ -2532,7 +2532,7 @@ function logChange(type, action, itemName, treeName) {
   };
   WZ_CHANGELOG.unshift(entry);
   if (WZ_CHANGELOG.length > 200) WZ_CHANGELOG.length = 200; // cap at 200
-  window.wz_save();
+  saveAll(); // immediate — don't debounce changelog/archive writes
   if (activeFId === 'changelog') renderChangelog();
 }
 
@@ -2558,17 +2558,16 @@ function restoreFromArchive(archId) {
   if (!tree) { alert('Original tree no longer exists.'); return; }
   tree.data.push(entry.node);
   WZ_ARCHIVE.splice(idx, 1);
-  logChange('restore', 'Restored', entry.node.name, entry.treeLabel);
   renderTree(tree);
   renderArchive();
-  window.wz_save();
+  logChange('restore', 'Restored', entry.node.name, entry.treeLabel); // includes saveAll
 }
 
 function permDeleteFromArchive(archId) {
   const idx = WZ_ARCHIVE.findIndex(a => a.archId === archId);
   if (idx !== -1) WZ_ARCHIVE.splice(idx, 1);
   renderArchive();
-  window.wz_save();
+  saveAll(); // immediate
 }
 
 let _archFilter = 'all';
@@ -2578,9 +2577,8 @@ function softDeleteFromArchive(archId) {
   if (idx === -1) return;
   WZ_ARCHIVE[idx].softDeleted   = true;
   WZ_ARCHIVE[idx].softDeletedBy = currentUser?.displayName || 'Unknown';
-  logChange('del', 'Requested permanent deletion of archived item', WZ_ARCHIVE[idx].node.name, WZ_ARCHIVE[idx].treeLabel);
   renderArchive();
-  window.wz_save();
+  logChange('del', 'Requested permanent deletion of archived item', WZ_ARCHIVE[idx].node.name, WZ_ARCHIVE[idx].treeLabel); // includes saveAll
 }
 
 function renderArchive() {
@@ -2652,7 +2650,7 @@ function clearChangelog() {
   if (!confirm('Clear all changelog entries?')) return;
   WZ_CHANGELOG = [];
   renderChangelog();
-  window.wz_save();
+  saveAll(); // immediate
 }
 let _lastCloudTs = 0;
 
@@ -2709,21 +2707,11 @@ async function syncFromCloud() {
     _applyPayload(payload);
     Object.values(TREES).forEach(renderTree);
   }
-  // Mark cloud ready after first sync attempt (success or no new data)
-  if (!_cloudReady) {
-    _cloudReady = true;
-    if (_pendingSave) { _pendingSave = false; saveAll(); }
-  }
 }
 
-// Debounced auto-save — blocked until initial cloud sync finishes
-// to prevent early saves from overwriting cloud data with empty arrays
+// Debounced auto-save for input/change events
 let _saveTimer = null;
-let _cloudReady = false;
-let _pendingSave = false;
-
 window.wz_save = function() {
-  if (!_cloudReady) { _pendingSave = true; return; } // hold until sync done
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(saveAll, 800);
 };
