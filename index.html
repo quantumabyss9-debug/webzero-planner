@@ -279,6 +279,36 @@
     .confirm-box{background:var(--surf);border:1px solid var(--danger);border-radius:14px;padding:32px 28px;width:380px;display:flex;flex-direction:column;gap:20px;box-shadow:0 20px 60px rgba(0,0,0,.7);animation:mIn .18s cubic-bezier(.16,1,.3,1) both;}
     .confirm-msg{font-size:14px;color:var(--txt);line-height:1.6;text-align:center;}
     .confirm-actions{display:flex;gap:10px;justify-content:center;}
+
+    /* ── ARCHIVE & CHANGELOG ─────────────────────────────────── */
+    .arch-wrap,.clog-wrap{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden;}
+    .arch-header,.clog-header{padding:24px 32px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+    .arch-title,.clog-title{font-size:18px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px;}
+    .arch-sub,.clog-sub{font-size:13px;color:var(--txt2);}
+    .arch-body,.clog-body{flex:1;overflow-y:auto;padding:20px 32px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;}
+    .arch-empty,.clog-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:8px;color:var(--txt3);font-size:13px;}
+    .arch-item{background:var(--surf);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+    .arch-item-ico{width:32px;height:32px;border-radius:8px;background:var(--surf2);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--txt2);}
+    .arch-item-info{flex:1;min-width:0;}
+    .arch-item-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .arch-item-meta{font-size:11px;color:var(--txt3);margin-top:2px;}
+    .arch-restore-btn{padding:5px 14px;border-radius:6px;border:1px solid var(--acc-glow);background:transparent;color:var(--acc);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;transition:background .15s;}
+    .arch-restore-btn:hover{background:var(--acc-dim);}
+    .arch-del-btn{padding:5px 10px;border-radius:6px;border:1px solid var(--bdr);background:transparent;color:var(--txt3);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:color .15s;}
+    .arch-del-btn:hover{color:var(--danger);}
+    .clog-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--bdr);}
+    .clog-item:last-child{border-bottom:none;}
+    .clog-dot{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+    .clog-dot.add{background:#00e5a0;}.clog-dot.del{background:#ff5a5a;}.clog-dot.edit{background:#f0a500;}.clog-dot.restore{background:#7c9eff;}
+    .clog-action{font-size:13px;line-height:1.4;}
+    .clog-action strong{font-weight:600;}
+    .clog-time{font-size:11px;color:var(--txt3);margin-top:2px;}
+    .clog-user-badge{font-size:10px;padding:2px 7px;border-radius:99px;background:var(--surf2);border:1px solid var(--bdr);color:var(--txt2);margin-left:6px;vertical-align:middle;}
+    .arch-filter{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+    .arch-filter-btn{padding:4px 12px;border-radius:99px;border:1px solid var(--bdr);background:transparent;color:var(--txt2);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;}
+    .arch-filter-btn.active{border-color:var(--acc);color:var(--acc);background:var(--acc-dim);}
+    .clog-clear-btn{padding:5px 14px;border-radius:6px;border:1px solid var(--bdr);background:transparent;color:var(--txt3);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;float:right;}
+    .clog-clear-btn:hover{color:var(--danger);border-color:var(--danger);}
   </style>
 </head>
 <body>
@@ -434,6 +464,42 @@
   </div>
 </div>
 
+<!-- ARCHIVE -->
+<div class="view" id="vArchive">
+  <div class="arch-wrap">
+    <div class="arch-header">
+      <div class="arch-title">Archive</div>
+      <div class="arch-sub">Deleted items are kept here. Restore anything you need back.</div>
+    </div>
+    <div class="arch-body">
+      <div class="arch-filter" id="archFilter">
+        <button class="arch-filter-btn active" data-tree="all">All</button>
+        <button class="arch-filter-btn" data-tree="project">Project</button>
+        <button class="arch-filter-btn" data-tree="research">Research</button>
+        <button class="arch-filter-btn" data-tree="language">Language</button>
+        <button class="arch-filter-btn" data-tree="modules">Modules</button>
+      </div>
+      <div id="archList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGELOG -->
+<div class="view" id="vChangelog">
+  <div class="clog-wrap">
+    <div class="clog-header">
+      <div style="display:flex;align-items:center;">
+        <div style="flex:1">
+          <div class="clog-title">Changelog</div>
+          <div class="clog-sub">A log of every change made to the workspace.</div>
+        </div>
+        <button class="clog-clear-btn" onclick="clearChangelog()">Clear log</button>
+      </div>
+    </div>
+    <div class="clog-body" id="clogBody"></div>
+  </div>
+</div>
+
 <!-- SYSTEMS MAP -->
 <div class="view" id="vSystems">
   <div class="smap-wrap">
@@ -584,7 +650,7 @@ const FEATURES = [
     icon:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>`,
   },
   {
-    id:'project', label:'Project Layout', showCard:true, viewId:'vProject',
+    id:'project', label:'Project Layout', key:'project', treeLabel:'Project', showCard:true, viewId:'vProject',
     desc:'Organise your project with infinitely nested folders and files. Supports .md, .txt, .json, .csv, .html, .js, .ts, .css, .yaml and more.',
     icon:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4.5A1.5 1.5 0 013.5 3h2.879a1.5 1.5 0 011.06.44l.622.621A1.5 1.5 0 009.121 4.5H12.5A1.5 1.5 0 0114 6v6a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12V4.5z"/></svg>`,
   },
@@ -623,6 +689,14 @@ const FEATURES = [
           </svg>`,
   },
   // ── ADD NEW FEATURES BELOW ──
+  {
+    id:'archive', label:'Archive', showCard:false, viewId:'vArchive',
+    icon:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h12v2H2z"/><path d="M3 6v7a1 1 0 001 1h8a1 1 0 001-1V6"/><path d="M6 9h4"/></svg>`,
+  },
+  {
+    id:'changelog', label:'Changelog', showCard:false, viewId:'vChangelog',
+    icon:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h10M3 7h7M3 11h5"/><circle cx="13" cy="11" r="2"/><path d="M13 9.5V11l.7.7"/></svg>`,
+  },
 ];
 
 /* ================================================================
@@ -694,24 +768,28 @@ let activeTree = null; // which tree triggered the current modal/ctx
 
 const TREES = {
   project: {
+    key:'project', label:'Project',
     data:[], sel:null,
     bodyId:'pTreeBody', btnNF:'pBtnNF', btnNFile:'pBtnNFile',
     fileTypes: PROJECT_TYPES, fileLabel:'File',
     hint:'Right-click or use the buttons above to add folders and files.',
   },
   research: {
+    key:'research', label:'Research',
     data:[], sel:null,
     bodyId:'rTreeBody', btnNF:'rBtnNF', btnNFile:'rBtnNFile',
     fileTypes: RESEARCH_TYPES, fileLabel:'Document',
     hint:'Right-click or use the buttons above to add research folders and documents.',
   },
   language: {
+    key:'language', label:'Language',
     data:[], sel:null,
     bodyId:'lTreeBody', btnNF:'lBtnNF', btnNFile:'lBtnNFile',
     fileTypes: LANG_TYPES, fileLabel:'Entry',
     hint:'Right-click or use the buttons above to add language folders and entries.',
   },
   modules: {
+    key:'modules', label:'Modules',
     data:[], sel:null,
     bodyId:'mTreeBody', btnNF:'mBtnNF', btnNFile:'mBtnNFile',
     fileTypes: MODULE_TYPES, fileLabel:'File',
@@ -723,6 +801,15 @@ const TREES = {
    NAV + VIEW SWITCHING
 ================================================================ */
 let activeFId = 'dashboard';
+
+// Archive filter buttons
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.arch-filter-btn');
+  if (!btn) return;
+  _archFilter = btn.dataset.tree;
+  document.querySelectorAll('.arch-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.tree === _archFilter));
+  renderArchive();
+});
 
 function buildNav() {
   const nav = document.getElementById('mainNav');
@@ -743,7 +830,9 @@ function gotoView(id) {
   const feat = FEATURES.find(f => f.id === id);
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === feat?.viewId));
   if (id === 'dashboard') refreshDash();
-  if (id === 'systems') setTimeout(() => { if (window._smapOnShow) window._smapOnShow(); }, 20);
+  if (id === 'systems')   setTimeout(() => { if (window._smapOnShow) window._smapOnShow(); }, 20);
+  if (id === 'archive')   renderArchive();
+  if (id === 'changelog') renderChangelog();
 }
 
 /* ================================================================
@@ -979,8 +1068,8 @@ function openModal(mode, targetId, tree) {
   } else if (mode==='delete') {
     const node=findNode(tree.data,targetId);
     $('mTitle').textContent='Delete'; $('mfName').style.display='none'; $('mfConfirm').style.display='flex';
-    $('mConfirmTxt').textContent=`Delete "${node?.name}"? This cannot be undone.`;
-    $('mConfirm').textContent='Delete'; $('mConfirm').className='btn btn-danger';
+    $('mConfirmTxt').textContent=`Move "${node?.name}" to Archive?`;
+    $('mConfirm').textContent='Archive'; $('mConfirm').className='btn btn-danger';
   }
 
   $('modal').classList.remove('hidden');
@@ -1002,10 +1091,33 @@ document.getElementById('mConfirm').addEventListener('click', () => {
   const ext =document.getElementById('mSelect').value;
   let newNode = null;
 
-  if      (mMode==='folder') { if(!name) return; newNode={id:globalUid++,type:'folder',name,open:true,children:[]}; insertNode(tree,newNode,mTargetId); }
-  else if (mMode==='file')   { if(!name) return; newNode={id:globalUid++,type:'file',name,ext}; insertNode(tree,newNode,mTargetId); }
-  else if (mMode==='rename') { if(!name) return; const n=findNode(tree.data,mTargetId); if(n) n.name=name; }
-  else if (mMode==='delete') { if(tree.sel===mTargetId) tree.sel=null; removeNode(tree,mTargetId); }
+  if      (mMode==='folder') {
+    if(!name) return;
+    newNode={id:globalUid++,type:'folder',name,open:true,children:[]};
+    insertNode(tree,newNode,mTargetId);
+    logChange('add','Created folder',name,tree.label);
+  }
+  else if (mMode==='file') {
+    if(!name) return;
+    newNode={id:globalUid++,type:'file',name,ext};
+    insertNode(tree,newNode,mTargetId);
+    logChange('add','Created file',name+(ext?'.'+ext:''),tree.label);
+  }
+  else if (mMode==='rename') {
+    if(!name) return;
+    const n=findNode(tree.data,mTargetId);
+    const oldName = n?.name || '';
+    if(n) n.name=name;
+    logChange('edit','Renamed',`${oldName} → ${name}`,tree.label);
+  }
+  else if (mMode==='delete') {
+    const delNode=findNode(tree.data,mTargetId);
+    const delName=delNode?.name||'item';
+    archiveNode(tree,mTargetId);
+    logChange('del','Deleted',delName,tree.label);
+    if(tree.sel===mTargetId) tree.sel=null;
+    removeNode(tree,mTargetId);
+  }
 
   // Auto-select and open the new node if one was created
   if (newNode) {
@@ -2398,6 +2510,114 @@ function copyGeneratedPhrase() {
    PERSISTENCE — shared state via Supabase, cached in localStorage
 ================================================================ */
 const WZ_DATA_KEY = 'wz_appdata_v1';
+
+/* ── Archive & Changelog stores ── */
+let WZ_ARCHIVE   = [];   // [{archId, node, treeName, treeLabel, deletedBy, deletedAt}]
+let WZ_CHANGELOG = [];   // [{id, type, action, itemName, treeName, user, ts}]
+
+function logChange(type, action, itemName, treeName) {
+  const entry = {
+    id: Date.now() + Math.random(),
+    type,        // 'add' | 'del' | 'edit' | 'restore'
+    action,      // human-readable e.g. "Created folder"
+    itemName,
+    treeName,
+    user: currentUser?.displayName || 'Unknown',
+    ts: Date.now(),
+  };
+  WZ_CHANGELOG.unshift(entry);
+  if (WZ_CHANGELOG.length > 200) WZ_CHANGELOG.length = 200; // cap at 200
+  window.wz_save();
+  if (activeFId === 'changelog') renderChangelog();
+}
+
+function archiveNode(tree, id) {
+  const node = findNode(tree.data, id);
+  if (!node) return;
+  WZ_ARCHIVE.unshift({
+    archId: Date.now() + Math.random(),
+    node: JSON.parse(JSON.stringify(node)), // deep clone
+    treeName: tree.key,
+    treeLabel: tree.label,
+    deletedBy: currentUser?.displayName || 'Unknown',
+    deletedAt: Date.now(),
+  });
+  if (WZ_ARCHIVE.length > 500) WZ_ARCHIVE.length = 500;
+}
+
+function restoreFromArchive(archId) {
+  const idx = WZ_ARCHIVE.findIndex(a => a.archId === archId);
+  if (idx === -1) return;
+  const entry = WZ_ARCHIVE[idx];
+  const tree = Object.values(TREES).find(t => t.key === entry.treeName);
+  if (!tree) { alert('Original tree no longer exists.'); return; }
+  tree.data.push(entry.node);
+  WZ_ARCHIVE.splice(idx, 1);
+  logChange('restore', 'Restored', entry.node.name, entry.treeLabel);
+  renderTree(tree);
+  renderArchive();
+  window.wz_save();
+}
+
+function permDeleteFromArchive(archId) {
+  const idx = WZ_ARCHIVE.findIndex(a => a.archId === archId);
+  if (idx !== -1) WZ_ARCHIVE.splice(idx, 1);
+  renderArchive();
+  window.wz_save();
+}
+
+let _archFilter = 'all';
+function renderArchive() {
+  const list = document.getElementById('archList');
+  if (!list) return;
+  const items = _archFilter === 'all' ? WZ_ARCHIVE : WZ_ARCHIVE.filter(a => a.treeName === _archFilter);
+  if (!items.length) {
+    list.innerHTML = '<div class="arch-empty"><svg width="32" height="32" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 4h12v2H2z"/><path d="M3 6v7a1 1 0 001 1h8a1 1 0 001-1V6"/><path d="M6 9h4"/></svg><span>Archive is empty</span></div>';
+    return;
+  }
+  const folderIco = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4.5A1.5 1.5 0 013.5 3h2.879a1.5 1.5 0 011.06.44l.622.621A1.5 1.5 0 009.121 4.5H12.5A1.5 1.5 0 0114 6v6a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12V4.5z"/></svg>`;
+  const fileIco  = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 1h5l4 4v10H4V1z"/><polyline points="9,1 9,5 13,5"/></svg>`;
+  list.innerHTML = items.map(a => {
+    const when = new Date(a.deletedAt).toLocaleString();
+    const ico  = a.node.type === 'folder' ? folderIco : fileIco;
+    const childCount = a.node.type === 'folder' ? ` · ${countNodes([a.node]).files + countNodes([a.node]).folders} items inside` : '';
+    return `<div class="arch-item">
+      <div class="arch-item-ico">${ico}</div>
+      <div class="arch-item-info">
+        <div class="arch-item-name">${a.node.name}${a.node.ext ? '.' + a.node.ext : ''}</div>
+        <div class="arch-item-meta">${a.treeLabel}${childCount} · Deleted by ${a.deletedBy} · ${when}</div>
+      </div>
+      <button class="arch-restore-btn" onclick="restoreFromArchive(${a.archId})">Restore</button>
+      <button class="arch-del-btn" onclick="if(confirm('Permanently delete this? Cannot be undone.')) permDeleteFromArchive(${a.archId})" title="Delete permanently">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function renderChangelog() {
+  const body = document.getElementById('clogBody');
+  if (!body) return;
+  if (!WZ_CHANGELOG.length) {
+    body.innerHTML = '<div class="clog-empty">No changes recorded yet.</div>';
+    return;
+  }
+  body.innerHTML = WZ_CHANGELOG.map(e => {
+    const when = new Date(e.ts).toLocaleString();
+    return `<div class="clog-item">
+      <div class="clog-dot ${e.type}"></div>
+      <div style="flex:1">
+        <div class="clog-action"><strong>${e.action}</strong> <em>${e.itemName}</em> in ${e.treeName}<span class="clog-user-badge">${e.user}</span></div>
+        <div class="clog-time">${when}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function clearChangelog() {
+  if (!confirm('Clear all changelog entries?')) return;
+  WZ_CHANGELOG = [];
+  renderChangelog();
+  window.wz_save();
+}
 let _lastCloudTs = 0;
 
 function _buildPayload() {
@@ -2422,7 +2642,9 @@ function _applyPayload(payload) {
       }
     });
   }
-  if (payload.smap) window._smapLoadState?.(payload.smap);
+  if (payload.smap)      window._smapLoadState?.(payload.smap);
+  if (payload.archive)   WZ_ARCHIVE   = payload.archive;
+  if (payload.changelog) WZ_CHANGELOG = payload.changelog;
   return true;
 }
 
