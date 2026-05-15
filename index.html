@@ -3542,15 +3542,28 @@ function _buildPayload() {
   };
 }
 
+function _maxNodeId(nodes) {
+  let max = 0;
+  for (const n of nodes) {
+    if (typeof n.id === 'number' && n.id > max) max = n.id;
+    if (n.children?.length) max = Math.max(max, _maxNodeId(n.children));
+  }
+  return max;
+}
+
 function _applyPayload(payload) {
   if (!payload) return false;
   if (payload.trees) {
+    let maxId = 0;
     Object.entries(payload.trees).forEach(([k, saved]) => {
       if (TREES[k]) {
         TREES[k].data = saved.data || [];
         TREES[k].sel  = saved.sel  || null;
+        maxId = Math.max(maxId, _maxNodeId(TREES[k].data));
       }
     });
+    // Critical: ensure globalUid is above all existing node IDs so new nodes never get duplicate IDs
+    if (maxId >= globalUid) globalUid = maxId + 1;
   }
   if (payload.smap)      window._smapLoadState?.(payload.smap);
   if (payload.archive)   { WZ_ARCHIVE   = payload.archive;   renderArchive();   }
