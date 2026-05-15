@@ -89,6 +89,13 @@
     .t-chev.open{transform:rotate(90deg);}
     .t-chev svg{width:9px;height:9px;}
     .t-chev-sp{width:14px;flex-shrink:0;}
+    /* Tree guide lines */
+    .t-guide{display:flex;flex-shrink:0;align-self:stretch;width:14px;position:relative;}
+    .t-guide-line{position:absolute;left:6px;top:0;bottom:0;width:1px;background:var(--bdr2);opacity:.6;}
+    .t-guide-branch{position:absolute;left:6px;top:0;bottom:50%;width:1px;background:var(--bdr2);opacity:.6;}
+    .t-guide-branch::after{content:'';position:absolute;bottom:0;left:0;width:7px;height:1px;background:var(--bdr2);opacity:1;}
+    .t-row:hover .t-guide-line,.t-row:hover .t-guide-branch{opacity:1;}
+    .t-row.sel .t-guide-line,.t-row.sel .t-guide-branch{background:var(--acc);opacity:.4;}
     .t-ico{width:15px;height:15px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
     .t-ico svg{width:13px;height:13px;}
     .t-lbl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -1010,20 +1017,42 @@ function renderTree(tree) {
     return;
   }
   body.innerHTML = '';
-  tree.data.forEach(n => body.appendChild(buildRow(n, 0, tree)));
+  tree.data.forEach((n, i) => body.appendChild(buildRow(n, 0, tree, [], i === tree.data.length - 1)));
 }
 
-function buildRow(node, depth, tree) {
+function buildRow(node, depth, tree, ancestors=[], isLast=false) {
   const isDir = node.type === 'folder';
   const c     = col(isDir ? 'folder' : node.ext);
   const wrap  = document.createElement('div');
   const row   = document.createElement('div');
   row.className = 't-row' + (tree.sel === node.id ? ' sel' : '');
 
-  if (depth > 0) {
-    const sp = document.createElement('div');
-    sp.style.cssText = `width:${depth*14}px;flex-shrink:0`;
-    row.appendChild(sp);
+  // Tree guide lines — one segment per ancestor level
+  for (let i = 0; i < depth; i++) {
+    const guide = document.createElement('div');
+    guide.className = 't-guide';
+    if (i === depth - 1) {
+      // Connector for this item's level
+      const branch = document.createElement('div');
+      branch.className = isLast ? 't-guide-branch' : 't-guide-line';
+      if (!isLast) {
+        // Add the horizontal hook via a child element
+        const hook = document.createElement('div');
+        hook.style.cssText = 'position:absolute;left:6px;top:50%;width:7px;height:1px;background:var(--bdr2);opacity:.6;';
+        guide.appendChild(hook);
+      }
+      guide.appendChild(branch);
+    } else {
+      // Pass-through vertical line (ancestor has more siblings)
+      if (!ancestors[i]) {
+        // ancestor was last — no vertical line needed
+      } else {
+        const line = document.createElement('div');
+        line.className = 't-guide-line';
+        guide.appendChild(line);
+      }
+    }
+    row.appendChild(guide);
   }
 
   const chev = document.createElement('div');
@@ -1097,7 +1126,12 @@ function buildRow(node, depth, tree) {
       h.textContent = 'Empty folder';
       kids.appendChild(h);
     } else {
-      node.children.forEach(ch => kids.appendChild(buildRow(ch, depth+1, tree)));
+      node.children.forEach((ch, ci) => {
+        const childIsLast = ci === node.children.length - 1;
+        // ancestors: carry forward whether each ancestor level has more siblings after it
+        const childAncestors = [...ancestors, !isLast];
+        kids.appendChild(buildRow(ch, depth+1, tree, childAncestors, childIsLast));
+      });
     }
     // Drop zone: inside at end of children (same indent as children)
     const dropEnd = document.createElement('div');
