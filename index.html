@@ -96,12 +96,16 @@
     .t-row:hover .t-acts{display:flex;}
     .t-row[draggable]{cursor:grab;}
     .t-row.drag-over-folder{background:var(--acc-dim)!important;border-color:var(--acc)!important;outline:1px solid var(--acc);outline-offset:-1px;}
-    .t-drop-line{height:2px;background:var(--acc);border-radius:2px;margin:0 8px;display:none;pointer-events:none;}
-    .t-drop-line.active{display:block;}
-    .t-drop-out{height:14px;display:none;align-items:center;pointer-events:none;padding:0 8px;opacity:0;}
-    .t-drop-out.active{display:flex;opacity:1;}
-    .t-drop-out-line{flex:1;height:2px;background:var(--acc);border-radius:2px;}
-    .t-drop-out-label{font-size:9px;color:var(--acc);margin-left:4px;white-space:nowrap;font-family:'Space Mono',monospace;}
+    /* Drop lines — always in layout so they receive drag events, invisible by default */
+    .t-drop-line{height:6px;margin:0 6px;border-radius:3px;background:transparent;position:relative;pointer-events:auto;}
+    .t-drop-line::after{content:'';position:absolute;left:0;right:0;top:2px;height:2px;background:var(--acc);border-radius:2px;opacity:0;transition:opacity .1s;}
+    .drag-active .t-drop-line::after{opacity:.15;}
+    .t-drop-line.active::after{opacity:1;}
+    /* Escape-hatch zone to drop item OUTSIDE its parent folder */
+    .t-drop-out{height:10px;display:flex;align-items:center;padding:0 8px;pointer-events:auto;position:relative;}
+    .t-drop-out::after{content:'';position:absolute;left:8px;right:8px;top:4px;height:2px;background:var(--acc);border-radius:2px;opacity:0;transition:opacity .1s;}
+    .drag-active .t-drop-out::after{opacity:.15;}
+    .t-drop-out.active::after{opacity:1;}
     .t-row.dragging{opacity:0.4;}
     .t-act{width:18px;height:18px;border-radius:3px;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--txt3);padding:0;transition:all .1s;}
     .t-act:hover{background:var(--surf3);color:var(--txt);}
@@ -912,13 +916,14 @@ function moveNode(tree, dragId, targetId, position) {
     target.node.children.push(drag.node);
     target.node.open = true;
   } else {
-    // Drop before/after target
+    // Drop before/after target — target is the FOLDER we're escaping from or a sibling
     const target = findParentArrAndNode(tree.data, targetId);
-    if (!target) { drag.parentArr.splice(dragIdx, 0, drag.node); return; }
+    if (!target) { tree.data.push(drag.node); return; }
+    // target.parentArr is the array containing the target node
     const arr = target.parentArr;
     const tIdx = arr.indexOf(target.node);
     const insertAt = position === 'before' ? tIdx : tIdx + 1;
-    arr.splice(insertAt, 0, drag.node);
+    arr.splice(Math.max(0, insertAt), 0, drag.node);
   }
   logChange('edit', 'Moved', drag.node.name, tree.label);
   renderTree(tree);
@@ -930,12 +935,14 @@ function wireDrag(row, node, tree) {
   row.addEventListener('dragstart', e => {
     _dragNode = { node, tree };
     row.classList.add('dragging');
+    document.body.classList.add('drag-active');
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', node.id);
   });
 
   row.addEventListener('dragend', () => {
     row.classList.remove('dragging');
+    document.body.classList.remove('drag-active');
     clearDropHighlights();
     _dragNode = null;
   });
@@ -972,7 +979,6 @@ function clearDropHighlights() {
 }
 
 function wireDropZone(el, node, tree, position, activeClass='active') {
-  el.style.pointerEvents = 'auto';
   el.addEventListener('dragover', e => {
     if (!_dragNode || _dragNode.node.id === node.id) return;
     if (_dragNode.tree !== tree) return;
