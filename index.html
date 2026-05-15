@@ -122,8 +122,8 @@
     .t-act svg{width:10px;height:10px;}
     .t-children{overflow:hidden;}
     .t-hint{font-size:12px;color:var(--txt3);font-style:italic;padding:4px 12px;}
-    .content-panel{flex:1;min-width:0;background:var(--bg);display:flex;align-items:center;justify-content:center;}
-    .c-empty{text-align:center;opacity:.28;}
+    .content-panel{flex:1;min-width:0;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;}
+    .c-empty{text-align:center;opacity:.28;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:auto;width:100%;padding:60px 20px;box-sizing:border-box;}
     .c-empty .big{font-family:'Space Mono',monospace;font-size:44px;color:var(--acc);margin-bottom:10px;}
     .c-empty p{font-size:12px;color:var(--txt2);letter-spacing:.08em;text-transform:uppercase;}
 
@@ -547,12 +547,12 @@
     }
 
     /* ── File / Doc viewer ── */
-    .file-view{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden;}
+    .file-view{display:flex;flex-direction:column;width:100%;flex:1;overflow:hidden;min-height:0;}
     .file-view-header{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--bdr);flex-shrink:0;background:var(--surf);}
     .file-view-name{font-size:14px;font-weight:600;letter-spacing:-.01em;}
     .file-view-ext{font-family:'Space Mono',monospace;font-size:10px;padding:2px 7px;border-radius:99px;background:var(--surf2);border:1px solid var(--bdr);color:var(--txt3);}
-    .file-view-body{flex:1;overflow:auto;padding:20px 24px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;}
-    .file-editor{width:100%;height:100%;min-height:300px;background:transparent;border:none;outline:none;color:var(--txt);font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.7;resize:none;scrollbar-width:thin;}
+    .file-view-body{flex:1;overflow-y:auto;overflow-x:hidden;padding:20px 24px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;min-height:0;display:flex;flex-direction:column;}
+    .file-editor{width:100%;flex:1;min-height:300px;background:transparent;border:none;outline:none;color:var(--txt);font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.7;resize:vertical;scrollbar-width:thin;}
     .file-editor:focus{outline:none;}
     .file-rendered{font-size:14px;line-height:1.7;color:var(--txt);max-width:760px;}
     .file-rendered h1,.file-rendered h2,.file-rendered h3{color:var(--acc);font-weight:600;margin:1.2em 0 .4em;}
@@ -569,6 +569,8 @@
     .file-view-tabs{display:flex;gap:1px;padding:0 20px;background:var(--surf);border-bottom:1px solid var(--bdr);}
     .file-view-tab{padding:7px 14px;font-size:12px;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif;transition:color .15s;}
     .file-view-tab.active{color:var(--acc);border-bottom-color:var(--acc);}
+    .fv-action-btn{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;border:1px solid var(--bdr);background:transparent;color:var(--txt2);font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;}
+    .fv-action-btn:hover{border-color:var(--bdr2);color:var(--txt);background:var(--surf2);}
     @media(max-width:768px){.file-view-body{padding:12px 14px;}.file-view-header{padding:10px 14px;}}
   </style>
 </head>
@@ -2132,11 +2134,25 @@ function renderFileView(node, panelId, tree) {
       <button class="file-view-tab" id="ftab-preview" onclick="fileViewTab('preview','${panelId}',this)">Preview</button>
     </div>` : '';
 
+  // Store node ref on panel for tab switching
+  panel._currentNode = node;
+  panel._currentTree = tree;
+
   panel.innerHTML = `
     <div class="file-view">
       <div class="file-view-header">
         <div class="file-view-name">${esc(node.name)}</div>
         <span class="file-view-ext">.${dispExt}</span>
+        <div style="flex:1"></div>
+        <label class="fv-action-btn" title="Upload file from device" style="cursor:pointer;">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10V3"/><path d="M4 6l3-3 3 3"/><path d="M2 12h10"/></svg>
+          Upload
+          <input type="file" id="fvUpload_${panelId}" style="display:none" onchange="fvHandleUpload(event,'${panelId}')">
+        </label>
+        <button class="fv-action-btn" onclick="fvDownload('${panelId}')" title="Download this file">
+          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v7"/><path d="M4 7l3 3 3-3"/><path d="M2 12h10"/></svg>
+          Download
+        </button>
       </div>
       ${tabsHtml}
       <div class="file-view-body" id="fvBody_${panelId}">
@@ -2146,6 +2162,10 @@ function renderFileView(node, panelId, tree) {
         }
       </div>
     </div>`;
+
+  // Store node ref on panel element for upload/download access
+  const panelEl = document.getElementById(panelId);
+  if (panelEl) { panelEl._currentNode = node; }
 
   // Wire editor to save on change
   const ed = document.getElementById('fvEditor_' + panelId);
@@ -2198,6 +2218,45 @@ function simpleMarkdown(md) {
     .replace(/^(?!<[h|u|b|o|p|l|h])/gm, '<p>')
     .replace(/<p><\/p>/g,'')
     + '';
+}
+
+/* Upload a local file into the current node's content */
+function fvHandleUpload(event, panelId) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const panel = document.getElementById(panelId);
+    const node  = panel?._currentNode;
+    const tree  = panel?._currentTree;
+    if (!node) return;
+    node.content = e.target.result;
+    node.name    = file.name.replace(/\.[^.]+$/, '') || node.name;
+    // Update extension from uploaded file
+    const dotIdx = file.name.lastIndexOf('.');
+    if (dotIdx > -1) node.ext = file.name.slice(dotIdx + 1).toLowerCase();
+    renderTree(tree || Object.values(TREES).find(t => t === panel?._currentTree));
+    renderFileView(node, panelId, panel?._currentTree);
+    saveAll();
+  };
+  // Try text first; binary files will come back garbled but that's ok for now
+  reader.readAsText(file);
+}
+
+/* Download the current node's content as a file */
+function fvDownload(panelId) {
+  const panel = document.getElementById(panelId);
+  const node  = panel?._currentNode;
+  if (!node) return;
+  const ext  = node.ext ? '.' + node.ext : '.txt';
+  const name = node.name + ext;
+  const blob = new Blob([node.content || ''], {type:'text/plain;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 TREES.project.onSelect  = (node, isDir, tree) => renderFileView(node, 'pContentPanel', tree);
