@@ -516,7 +516,7 @@
   </div>
 </div>
 
-<!-- CHANGELOG -->
+<!-- LOGS -->
 <div class="view" id="vChangelog">
   <div class="clog-wrap">
     <div class="clog-header">
@@ -2758,7 +2758,7 @@ function copyGeneratedPhrase() {
 ================================================================ */
 const WZ_DATA_KEY = 'wz_appdata_v1';
 
-/* ── Archive & Changelog stores ── */
+/* ── Archive & Logs stores ── */
 let WZ_ARCHIVE   = [];   // [{archId, node, treeName, treeLabel, deletedBy, deletedAt}]
 let WZ_CHANGELOG = [];   // [{id, type, action, itemName, treeName, user, ts}]
 
@@ -2892,7 +2892,7 @@ function renderChangelog() {
 
 function clearChangelog() {
   if (!isMaster()) return;
-  if (!confirm('Clear all changelog entries?')) return;
+  if (!confirm('Clear all log entries?')) return;
   WZ_CHANGELOG = [];
   renderChangelog();
   saveAll(); // immediate
