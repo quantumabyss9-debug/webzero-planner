@@ -470,6 +470,52 @@
 
       /* ── Misc ── */
       .t-acts { display: flex !important; } /* always show tree actions on mobile */
+
+      /* ── Tree panel toggle button ── */
+      .mob-tree-toggle {
+        display: flex; position: sticky; top: 0; z-index: 10;
+        width: 100%; padding: 6px 12px;
+        background: var(--surf2); border-bottom: 1px solid var(--bdr);
+        align-items: center; justify-content: space-between;
+        font-size: 11px; color: var(--txt2); cursor: pointer;
+        border: none; font-family: 'DM Sans', sans-serif;
+        letter-spacing: .06em; text-transform: uppercase;
+      }
+      .mob-tree-toggle svg { transition: transform .2s; }
+      .mob-tree-toggle.collapsed svg { transform: rotate(-90deg); }
+
+      /* Tree panel collapse on mobile */
+      .tree-panel.mob-collapsed {
+        max-height: 38px !important;
+        overflow: hidden;
+      }
+      .tree-panel.mob-collapsed .tree-toolbar,
+      .tree-panel.mob-collapsed .tree-body { display: none; }
+
+      /* ── Systems map: slide-up properties drawer ── */
+      .smap-panel {
+        display: none !important; /* hidden normally on mobile */
+      }
+      .mob-smap-drawer {
+        position: fixed; bottom: 58px; left: 0; right: 0; z-index: 250;
+        background: var(--surf); border-top: 1px solid var(--bdr2);
+        border-radius: 16px 16px 0 0;
+        max-height: 55vh; overflow-y: auto;
+        transform: translateY(100%);
+        transition: transform .25s cubic-bezier(.16,1,.3,1);
+        display: flex; flex-direction: column;
+        box-shadow: 0 -8px 32px rgba(0,0,0,.4);
+      }
+      .mob-smap-drawer.open { transform: translateY(0); }
+      .mob-smap-drawer-handle {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 16px 8px; flex-shrink: 0; cursor: pointer;
+      }
+      .mob-smap-drawer-grip {
+        width: 36px; height: 3px; background: var(--bdr2);
+        border-radius: 99px; margin: 0 auto 10px;
+      }
+      .mob-smap-drawer-content { flex: 1; overflow-y: auto; }
     }
   </style>
 </head>
@@ -526,6 +572,10 @@
 <!-- PROJECT LAYOUT -->
 <div class="view split-view" id="vProject">
   <div class="tree-panel">
+    <button class="mob-tree-toggle" id="toggle_vProject" onclick="mobToggleTree('vProject')">
+      <span>📁 Explorer</span>
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4l4 4 4-4"/></svg>
+    </button>
     <div class="tree-toolbar">
       <span class="tree-tlbl">Explorer</span>
       <button class="ico-btn" id="pBtnNF" title="New Folder">
@@ -552,6 +602,10 @@
 <!-- RESEARCH -->
 <div class="view split-view" id="vResearch">
   <div class="tree-panel">
+    <button class="mob-tree-toggle" id="toggle_vResearch" onclick="mobToggleTree('vResearch')">
+      <span>📁 Research</span>
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4l4 4 4-4"/></svg>
+    </button>
     <div class="tree-toolbar">
       <span class="tree-tlbl">Research Library</span>
       <button class="ico-btn" id="rBtnNF" title="New Folder">
@@ -578,6 +632,10 @@
 <!-- MODULES -->
 <div class="view split-view" id="vModules">
   <div class="tree-panel">
+    <button class="mob-tree-toggle" id="toggle_vModules" onclick="mobToggleTree('vModules')">
+      <span>📁 Modules</span>
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4l4 4 4-4"/></svg>
+    </button>
     <div class="tree-toolbar">
       <span class="tree-tlbl">Modules</span>
       <button class="ico-btn" id="mBtnNF" title="New Folder">
@@ -604,6 +662,10 @@
 <!-- LANGUAGE BUILDER -->
 <div class="view split-view" id="vLanguage">
   <div class="tree-panel">
+    <button class="mob-tree-toggle" id="toggle_vLanguage" onclick="mobToggleTree('vLanguage')">
+      <span>📁 Language</span>
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4l4 4 4-4"/></svg>
+    </button>
     <div class="tree-toolbar">
       <span class="tree-tlbl">Language Library</span>
       <button class="ico-btn" id="lBtnNF" title="New Folder">
@@ -716,6 +778,16 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Mobile systems map properties drawer -->
+<div class="mob-smap-drawer" id="mobSmapDrawer">
+  <div onclick="mobSmapDrawerClose()">
+    <div class="mob-smap-drawer-grip"></div>
+  </div>
+  <div class="mob-smap-drawer-content" id="mobSmapContent">
+    <div style="padding:16px;font-size:13px;color:var(--txt3);">Click a node to see its properties.</div>
   </div>
 </div>
 
@@ -1014,6 +1086,40 @@ function buildNav() {
 
 // Rebuild nav on resize so it switches between mobile/desktop
 window.addEventListener('resize', () => buildNav());
+
+/* ── Mobile tree panel toggle ── */
+function mobToggleTree(viewId) {
+  const panel = document.querySelector(`#${viewId} .tree-panel`);
+  const btn   = document.getElementById(`toggle_${viewId}`);
+  if (!panel) return;
+  const collapsed = panel.classList.toggle('mob-collapsed');
+  if (btn) btn.classList.toggle('collapsed', collapsed);
+  btn.querySelector('span').textContent = collapsed ? '📁 Show folders' : `📁 ${
+    {vProject:'Explorer',vResearch:'Research',vModules:'Modules',vLanguage:'Language'}[viewId]
+  }`;
+}
+
+/* ── Mobile systems map properties drawer ── */
+function mobSmapDrawerOpen(html) {
+  const drawer  = document.getElementById('mobSmapDrawer');
+  const content = document.getElementById('mobSmapContent');
+  if (!drawer || !content) return;
+  content.innerHTML = html;
+  drawer.classList.add('open');
+}
+function mobSmapDrawerClose() {
+  const drawer = document.getElementById('mobSmapDrawer');
+  if (drawer) drawer.classList.remove('open');
+}
+// Close drawer on canvas tap outside nodes
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('smapCanvas');
+  if (canvas) {
+    canvas.addEventListener('touchend', e => {
+      // handled by existing smapCanvas click — drawer opens when node is clicked
+    });
+  }
+});
 
 function gotoView(id) {
   activeFId = id;
@@ -2702,6 +2808,9 @@ function copyGeneratedPhrase() {
     const panel=document.getElementById('smapPropsSection');
     if (!panel) return;
     if (!smap.selected) {
+      if (window.innerWidth <= 768) {
+        mobSmapDrawerOpen(`<div style="padding:16px;font-size:13px;color:var(--txt3);">Tap background to dismiss</div>`);
+      }
       panel.innerHTML=`<div class="smap-panel-empty">
         Click a node to see its properties.<br><br>
         <span style="color:var(--txt3);font-size:12px;">
@@ -2718,6 +2827,13 @@ function copyGeneratedPhrase() {
     if (smap.selectType==='conn') {
       const conn=smap.connections.find(c=>c.id===smap.selected);
       if (!conn) return;
+      if (window.innerWidth <= 768) {
+        // Clone panel content to mobile drawer
+        setTimeout(() => {
+          const pc = panel.querySelector('.smap-panel-content');
+          if (pc) mobSmapDrawerOpen(pc.outerHTML);
+        }, 10);
+      }
       panel.innerHTML=`<div class="smap-panel-content">
         <div class="smap-panel-title">Connection</div>
         <div class="m-field"><label class="m-label">Label</label>
