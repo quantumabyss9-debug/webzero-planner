@@ -2161,8 +2161,8 @@ function renderFileView(node, panelId, tree) {
       <div class="file-view-body" id="fvBody_${panelId}">
         ${isText
           ? `<textarea class="file-editor" id="fvEditor_${panelId}" placeholder="Start typing…" spellcheck="false">${esc(node.content)}</textarea>`
-          : node.binaryKey
-            ? `<div id="fvBinView_${panelId}" style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:13px;">Loading…</div>`
+          : (node.storageKey || node.binaryKey)
+            ? `<div id="fvBinView_${panelId}" style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:13px;">${node.storageUrl ? 'Loading…' : 'Uploading…'}</div>`
             : `<div class="c-empty" style="margin:60px auto;"><div class="big">📄</div><p>.${dispExt} file</p><textarea class="file-editor" style="height:200px;margin-top:20px;" id="fvEditor_${panelId}" placeholder="Notes…">${esc(node.content)}</textarea></div>`
         }
       </div>
@@ -2173,35 +2173,28 @@ function renderFileView(node, panelId, tree) {
   if (panelEl) { panelEl._currentNode = node; }
 
   // For binary files, load from Supabase and render
+  if (node.storageKey) {
+    const binDiv = document.getElementById('fvBinView_' + panelId);
+    if (!binDiv) return;
+    if (node.storageUrl) {
+      // Got a public URL — display directly, no conversion needed
+      if (dispExt === 'pdf' || (node.binaryType || '').includes('pdf')) {
+        binDiv.innerHTML = `<iframe src="${node.storageUrl}" style="width:100%;height:100%;min-height:500px;border:none;border-radius:6px;" title="${esc(node.name)}.pdf"></iframe>`;
+      } else {
+        binDiv.innerHTML = `<div class="c-empty" style="margin:auto;"><div class="big">📄</div>
+          <p style="margin-top:12px;">.${dispExt} file</p>
+          <a href="${node.storageUrl}" download="${esc(node.name)}.${dispExt}" class="fv-action-btn" style="margin-top:12px;text-decoration:none;">⬇ Download</a></div>`;
+      }
+    } else {
+      binDiv.innerHTML = `<div class="c-empty" style="margin:auto;"><div class="big">📄</div><p>Uploading… please wait</p></div>`;
+    }
+    return;
+  }
+  // Legacy: old base64 binaryKey nodes
   if (node.binaryKey) {
     const binDiv = document.getElementById('fvBinView_' + panelId);
-    sbGet(node.binaryKey).then(data => {
-      if (!data || !binDiv) return;
-      const { base64, type } = data;
-      // Convert base64 data URL to Blob URL — data: URIs in iframes are blocked by browsers
-      try {
-        const parts = base64.match(/^data:([^;]+);base64,(.+)$/);
-        if (!parts) throw new Error('bad base64');
-        const mime = parts[1];
-        const raw  = atob(parts[2]);
-        const arr  = new Uint8Array(raw.length);
-        for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
-        const blob = new Blob([arr], { type: mime });
-        const url  = URL.createObjectURL(blob);
-        if (mime === 'application/pdf' || dispExt === 'pdf') {
-          binDiv.innerHTML = `<iframe src="${url}" style="width:100%;height:100%;min-height:500px;border:none;border-radius:6px;" title="${esc(node.name)}.pdf"></iframe>`;
-        } else {
-          binDiv.innerHTML = `<div class="c-empty" style="margin:auto;"><div class="big">📄</div>
-            <p style="margin-top:12px;">.${dispExt} file</p>
-            <a href="${url}" download="${esc(node.name)}.${dispExt}" class="fv-action-btn" style="margin-top:12px;text-decoration:none;">⬇ Download</a></div>`;
-        }
-      } catch(e) {
-        binDiv.innerHTML = `<div class="c-empty" style="margin:auto;"><div class="big">📄</div><p>.${dispExt} — could not render inline</p></div>`;
-      }
-    }).catch(() => {
-      if (binDiv) binDiv.textContent = 'Could not load file from storage.';
-    });
-    return; // no textarea to wire
+    if (binDiv) binDiv.innerHTML = `<div class="c-empty" style="margin:auto;"><div class="big">📄</div><p>Re-upload this file to view it.</p></div>`;
+    return;
   }
 
   // Wire editor to save on change
@@ -2289,7 +2282,6 @@ function fvHandleUploadToTree(event, panelId, treeKey) {
     const reader = new FileReader();
 
     if (isText) {
-      // Text files — read as text, store inline (already small)
       reader.onload = e => {
         node.content = e.target.result;
         renderFileView(node, panelId, tree);
@@ -2297,21 +2289,26 @@ function fvHandleUploadToTree(event, panelId, treeKey) {
       };
       reader.readAsText(file);
     } else {
-      // Binary files (PDF, DOCX, etc.) — store as base64 in a SEPARATE Supabase key
-      // so it never inflates the main appdata payload
+      // Binary — upload directly to Supabase Storage (no base64, no JSON bloat)
       node.content = '';
-      node.binaryKey = 'file_' + nodeId; // reference to the Supabase row
+      node.storageKey = 'uploads/' + nodeId + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
       node.binaryType = file.type;
       renderFileView(node, panelId, tree);
+      renderTree(tree);
 
-      reader.onload = e => {
-        const base64 = e.target.result; // data:...;base64,xxxx
-        // Store in separate Supabase key — don't touch appdata
-        sbSet(node.binaryKey, { base64, name: file.name, type: file.type, size: file.size });
-        node.content = '[binary]'; // marker so saveAll doesn't store the big blob
-        logChange('add', 'Uploaded file', file.name, tree.label);
-      };
-      reader.readAsDataURL(file); // gives base64
+      storageUpload(node.storageKey, file)
+        .then(publicUrl => {
+          node.storageUrl = publicUrl;
+          saveAll();
+          logChange('add', 'Uploaded file', file.name, tree.label);
+          renderFileView(node, panelId, tree);
+        })
+        .catch(err => {
+          console.error('Storage upload failed:', err);
+          alert('Upload failed — check your connection.');
+          tree.data = tree.data.filter(n => n.id !== node.id);
+          renderTree(tree);
+        });
     }
   });
 
@@ -2565,6 +2562,27 @@ async function sbGet(key) {
     return data?.[0]?.value ?? null;
   } catch(e) { return null; }
 }
+/* ── Supabase Storage — for binary files (PDFs, DOCX etc.) ── */
+const SB_STORAGE_URL = 'https://stmfocpvzjvcloinoezc.supabase.co/storage/v1/object/wzp-files';
+const SB_STORAGE_PUBLIC = 'https://stmfocpvzjvcloinoezc.supabase.co/storage/v1/object/public/wzp-files';
+
+async function storageUpload(path, file) {
+  const res = await fetch(`${SB_STORAGE_URL}/${path}`, {
+    method: 'POST',
+    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': file.type || 'application/octet-stream', 'x-upsert': 'true' },
+    body: file
+  });
+  if (!res.ok) throw new Error('Upload failed: ' + res.status);
+  return `${SB_STORAGE_PUBLIC}/${path}`;
+}
+
+async function storageDelete(path) {
+  await fetch(`${SB_STORAGE_URL}/${path}`, {
+    method: 'DELETE',
+    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` }
+  });
+}
+
 async function sbSet(key, value) {
   try {
     // Use POST with upsert so it creates the row if it doesn't exist
