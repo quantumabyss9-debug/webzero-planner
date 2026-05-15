@@ -2660,9 +2660,11 @@ function _buildPayload() {
     treesData[k] = { data: t.data, sel: t.sel };
   });
   return {
-    trees: treesData,
-    smap: { maps: window._smapGetState?.(), uid: null },
-    ts: Date.now(),
+    trees:     treesData,
+    smap:      { maps: window._smapGetState?.(), uid: null },
+    archive:   WZ_ARCHIVE,
+    changelog: WZ_CHANGELOG,
+    ts:        Date.now(),
   };
 }
 
