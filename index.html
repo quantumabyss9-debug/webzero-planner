@@ -1635,6 +1635,28 @@ TREES.modules.onSelect = (node, isDir, tree) => {
 const WZ_USERS_KEY = 'wz_users';
 const WZ_SESSION_KEY = 'wz_session';
 
+/* ── Supabase shared backend ── */
+const SB_URL = 'https://stmfocpvzjvcloinoezc.supabase.co';
+const SB_KEY = 'sb_publishable_ffGcxNZprO70SQqLQuLHxw_ZuA2e2iX';
+async function sbGet(key) {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/wzp_shared_state?key=eq.${key}&select=value`, {
+      headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` }
+    });
+    const data = await r.json();
+    return data?.[0]?.value ?? null;
+  } catch(e) { return null; }
+}
+async function sbSet(key, value) {
+  try {
+    await fetch(`${SB_URL}/rest/v1/wzp_shared_state?key=eq.${key}`, {
+      method: 'PATCH',
+      headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ value, updated_at: new Date().toISOString() })
+    });
+  } catch(e) { console.warn('sbSet failed:', e); }
+}
+
 const FATHOM_PHRASE = 'anchor beacon cipher delta ember forge glacier harvest iron jade kernel lattice';
 
 const PHRASE_WORDS = [
@@ -1698,6 +1720,7 @@ function generatePhrase() {
 function generateUserId() { return 'u_' + Math.random().toString(36).slice(2,10); }
 
 function loadUsers() {
+  // Sync load from localStorage cache (Supabase load happens async after login screen renders)
   try {
     const r = localStorage.getItem(WZ_USERS_KEY);
     if (r) return JSON.parse(r);
@@ -1706,7 +1729,20 @@ function loadUsers() {
   try { localStorage.setItem(WZ_USERS_KEY, JSON.stringify(initial)); } catch(e) {}
   return initial;
 }
-function saveUsers() { try { localStorage.setItem(WZ_USERS_KEY, JSON.stringify(users)); } catch(e) {} }
+async function syncUsersFromCloud() {
+  const cloudUsers = await sbGet('users');
+  if (Array.isArray(cloudUsers) && cloudUsers.length > 0) {
+    users = cloudUsers;
+    try { localStorage.setItem(WZ_USERS_KEY, JSON.stringify(users)); } catch(e) {}
+  } else if (users.length > 0) {
+    // Push local users to cloud if cloud is empty
+    await sbSet('users', users);
+  }
+}
+function saveUsers() {
+  try { localStorage.setItem(WZ_USERS_KEY, JSON.stringify(users)); } catch(e) {}
+  sbSet('users', users); // async, fire-and-forget
+}
 function getUserById(id) { return users.find(u => u.id === id) || null; }
 function getUserByPhrase(phrase) {
   const n = phrase.trim().toLowerCase().replace(/\s+/g,' ');
@@ -2360,24 +2396,42 @@ function copyGeneratedPhrase() {
 })();
 
 /* ================================================================
-   PERSISTENCE — auto-save all state to localStorage
+   PERSISTENCE — shared state via Supabase, cached in localStorage
 ================================================================ */
 const WZ_DATA_KEY = 'wz_appdata_v1';
+let _lastCloudTs = 0;
+
+function _buildPayload() {
+  const treesData = {};
+  Object.entries(TREES).forEach(([k,t]) => {
+    treesData[k] = { data: t.data, sel: t.sel };
+  });
+  return {
+    trees: treesData,
+    smap: { maps: window._smapGetState?.(), uid: null },
+    ts: Date.now(),
+  };
+}
+
+function _applyPayload(payload) {
+  if (!payload) return false;
+  if (payload.trees) {
+    Object.entries(payload.trees).forEach(([k, saved]) => {
+      if (TREES[k]) {
+        TREES[k].data = saved.data || [];
+        TREES[k].sel  = saved.sel  || null;
+      }
+    });
+  }
+  if (payload.smap) window._smapLoadState?.(payload.smap);
+  return true;
+}
 
 function saveAll() {
   try {
-    // Serialise TREES (strip onSelect — it's a function, not data)
-    const treesData = {};
-    Object.entries(TREES).forEach(([k,t]) => {
-      treesData[k] = { data: t.data, sel: t.sel };
-    });
-    const payload = {
-      trees: treesData,
-      smap: { maps: window._smapGetState?.(), uid: null },
-      tok:  window._tokGetState?.(),
-      ts:   Date.now(),
-    };
+    const payload = _buildPayload();
     localStorage.setItem(WZ_DATA_KEY, JSON.stringify(payload));
+    sbSet('appdata', payload); // push to Supabase async
   } catch(e) { console.warn('Save failed:', e); }
 }
 
@@ -2385,24 +2439,19 @@ function loadAll() {
   try {
     const raw = localStorage.getItem(WZ_DATA_KEY);
     if (!raw) return false;
-    const payload = JSON.parse(raw);
-
-    // Restore trees
-    if (payload.trees) {
-      Object.entries(payload.trees).forEach(([k, saved]) => {
-        if (TREES[k]) {
-          TREES[k].data = saved.data || [];
-          TREES[k].sel  = saved.sel  || null;
-        }
-      });
-    }
-
-    // Restore smap and tok via their own loaders
-    if (payload.smap) window._smapLoadState?.(payload.smap);
-    if (payload.tok)  window._tokLoadState?.(payload.tok);
-
-    return true;
+    return _applyPayload(JSON.parse(raw));
   } catch(e) { console.warn('Load failed:', e); return false; }
+}
+
+// Pull latest from Supabase and apply if newer
+async function syncFromCloud() {
+  const payload = await sbGet('appdata');
+  if (payload && payload.ts && payload.ts > _lastCloudTs) {
+    _lastCloudTs = payload.ts;
+    try { localStorage.setItem(WZ_DATA_KEY, JSON.stringify(payload)); } catch(e) {}
+    _applyPayload(payload);
+    Object.values(TREES).forEach(renderTree);
+  }
 }
 
 // Debounced auto-save — fires 800ms after last change
@@ -2411,6 +2460,9 @@ window.wz_save = function() {
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(saveAll, 800);
 };
+
+// Poll Supabase every 30s so all users stay in sync
+setInterval(syncFromCloud, 30000);
 
 // Patch all mutation points to trigger auto-save
 (function patchSave() {
@@ -2431,6 +2483,9 @@ Object.values(TREES).forEach(renderTree);
 
 // Restore saved state then init views
 const _hadSavedData = loadAll();
+// Immediately pull latest from Supabase on startup, then sync users
+syncFromCloud();
+syncUsersFromCloud();
 if (_hadSavedData) {
   Object.values(TREES).forEach(renderTree);
 }
