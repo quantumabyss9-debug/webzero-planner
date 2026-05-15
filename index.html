@@ -2171,6 +2171,18 @@ function renderFileView(node, panelId, tree) {
   const panelEl = document.getElementById(panelId);
   if (panelEl) { panelEl._currentNode = node; }
 
+  // Explicitly size fvBody so mobile browsers scroll correctly
+  requestAnimationFrame(() => {
+    const fv   = document.querySelector(`#${panelId} .file-view`);
+    const body = document.getElementById('fvBody_' + panelId);
+    if (!fv || !body) return;
+    const header = fv.querySelector('.file-view-header');
+    const tabs   = fv.querySelector('.file-view-tabs');
+    const used   = (header ? header.offsetHeight : 0) + (tabs ? tabs.offsetHeight : 0);
+    body.style.height = (fv.offsetHeight - used) + 'px';
+    body.style.maxHeight = (fv.offsetHeight - used) + 'px';
+  });
+
   // For binary files, load from Supabase and render
   if (node.storageKey) {
     const binDiv = document.getElementById('fvBinView_' + panelId);
