@@ -309,6 +309,9 @@
     .arch-filter-btn.active{border-color:var(--acc);color:var(--acc);background:var(--acc-dim);}
     .clog-clear-btn{padding:5px 14px;border-radius:6px;border:1px solid var(--bdr);background:transparent;color:var(--txt3);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;float:right;}
     .clog-clear-btn:hover{color:var(--danger);border-color:var(--danger);}
+    .arch-item.soft-deleted{opacity:0.55;border-color:var(--danger);border-style:dashed;}
+    .arch-item.soft-deleted .arch-item-name{text-decoration:line-through;}
+    .arch-pending-tag{font-size:10px;padding:2px 8px;border-radius:99px;background:#ff5a5a20;border:1px solid var(--danger);color:var(--danger);margin-left:6px;}
   </style>
 </head>
 <body>
@@ -833,8 +836,8 @@ function gotoView(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === feat?.viewId));
   if (id === 'dashboard') refreshDash();
   if (id === 'systems')   setTimeout(() => { if (window._smapOnShow) window._smapOnShow(); }, 20);
-  if (id === 'archive')   renderArchive();
-  if (id === 'changelog') renderChangelog();
+  if (id === 'archive')   { syncFromCloud().then(renderArchive); }
+  if (id === 'changelog') { syncFromCloud().then(renderChangelog); }
 }
 
 /* ================================================================
@@ -2569,10 +2572,25 @@ function permDeleteFromArchive(archId) {
 }
 
 let _archFilter = 'all';
+
+function softDeleteFromArchive(archId) {
+  const idx = WZ_ARCHIVE.findIndex(a => a.archId === archId);
+  if (idx === -1) return;
+  WZ_ARCHIVE[idx].softDeleted   = true;
+  WZ_ARCHIVE[idx].softDeletedBy = currentUser?.displayName || 'Unknown';
+  logChange('del', 'Requested permanent deletion of archived item', WZ_ARCHIVE[idx].node.name, WZ_ARCHIVE[idx].treeLabel);
+  renderArchive();
+  window.wz_save();
+}
+
 function renderArchive() {
   const list = document.getElementById('archList');
   if (!list) return;
-  const items = _archFilter === 'all' ? WZ_ARCHIVE : WZ_ARCHIVE.filter(a => a.treeName === _archFilter);
+  const master = isMaster();
+  // Non-master: hide soft-deleted items. Master: show all
+  let items = _archFilter === 'all' ? WZ_ARCHIVE : WZ_ARCHIVE.filter(a => a.treeName === _archFilter);
+  if (!master) items = items.filter(a => !a.softDeleted);
+
   if (!items.length) {
     list.innerHTML = '<div class="arch-empty"><svg width="32" height="32" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 4h12v2H2z"/><path d="M3 6v7a1 1 0 001 1h8a1 1 0 001-1V6"/><path d="M6 9h4"/></svg><span>Archive is empty</span></div>';
     return;
@@ -2583,14 +2601,26 @@ function renderArchive() {
     const when = new Date(a.deletedAt).toLocaleString();
     const ico  = a.node.type === 'folder' ? folderIco : fileIco;
     const childCount = a.node.type === 'folder' ? ` · ${countNodes([a.node]).files + countNodes([a.node]).folders} items inside` : '';
-    return `<div class="arch-item">
+    const softTag = a.softDeleted ? `<span class="arch-pending-tag">⚠ Deletion requested by ${a.softDeletedBy}</span>` : '';
+    // Action buttons differ by role and soft-delete state
+    let actions = '';
+    if (master) {
+      actions = `<button class="arch-restore-btn" onclick="restoreFromArchive(${a.archId})">Restore</button>
+        <button class="arch-del-btn" onclick="if(confirm('Permanently delete? Cannot be undone.')) permDeleteFromArchive(${a.archId})" title="Permanently delete">✕</button>`;
+    } else {
+      // Non-master: can only request deletion (soft-delete) if not already requested
+      actions = a.softDeleted
+        ? `<span style="font-size:11px;color:var(--txt3);padding:0 8px;">Pending deletion</span>`
+        : `<button class="arch-restore-btn" onclick="restoreFromArchive(${a.archId})">Restore</button>
+           <button class="arch-del-btn" onclick="if(confirm('Request permanent deletion? Fathom will need to approve.')) softDeleteFromArchive(${a.archId})" title="Request deletion">✕</button>`;
+    }
+    return `<div class="arch-item${a.softDeleted ? ' soft-deleted' : ''}">
       <div class="arch-item-ico">${ico}</div>
       <div class="arch-item-info">
-        <div class="arch-item-name">${a.node.name}${a.node.ext ? '.' + a.node.ext : ''}</div>
+        <div class="arch-item-name">${a.node.name}${a.node.ext ? '.' + a.node.ext : ''}${softTag}</div>
         <div class="arch-item-meta">${a.treeLabel}${childCount} · Deleted by ${a.deletedBy} · ${when}</div>
       </div>
-      <button class="arch-restore-btn" onclick="restoreFromArchive(${a.archId})">Restore</button>
-      <button class="arch-del-btn" onclick="if(confirm('Permanently delete this? Cannot be undone.')) permDeleteFromArchive(${a.archId})" title="Delete permanently">✕</button>
+      ${actions}
     </div>`;
   }).join('');
 }
@@ -2598,6 +2628,9 @@ function renderArchive() {
 function renderChangelog() {
   const body = document.getElementById('clogBody');
   if (!body) return;
+  // Show/hide clear button based on role
+  const clearBtn = document.querySelector('.clog-clear-btn');
+  if (clearBtn) clearBtn.style.display = isMaster() ? 'block' : 'none';
   if (!WZ_CHANGELOG.length) {
     body.innerHTML = '<div class="clog-empty">No changes recorded yet.</div>';
     return;
@@ -2615,6 +2648,7 @@ function renderChangelog() {
 }
 
 function clearChangelog() {
+  if (!isMaster()) return;
   if (!confirm('Clear all changelog entries?')) return;
   WZ_CHANGELOG = [];
   renderChangelog();
