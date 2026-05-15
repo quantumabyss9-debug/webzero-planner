@@ -82,20 +82,21 @@
     .tree-body::-webkit-scrollbar{width:3px;}
     .tree-body::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:99px;}
     .tree-body::-webkit-scrollbar-thumb:hover{background:var(--acc);box-shadow:0 0 6px var(--acc-glow);}
-    .t-row{display:flex;align-items:center;gap:3px;padding:3px 8px;cursor:pointer;border-radius:6px;margin:1px 6px;min-height:27px;font-size:13px;color:var(--txt2);transition:background .1s,color .1s;user-select:none;border:1px solid transparent;}
+    .t-row{display:flex;align-items:center;gap:3px;padding:3px 8px;cursor:pointer;border-radius:6px;margin:1px 6px;min-height:27px;font-size:13px;color:var(--txt2);transition:background .1s,color .1s;user-select:none;border:1px solid transparent;overflow:visible;}
     .t-row:hover{background:var(--surf2);color:var(--txt);}
     .t-row.sel{background:var(--acc-dim);color:var(--acc);border-color:var(--acc-glow);}
     .t-chev{width:14px;height:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--txt3);transition:transform .14s;}
     .t-chev.open{transform:rotate(90deg);}
     .t-chev svg{width:9px;height:9px;}
     .t-chev-sp{width:14px;flex-shrink:0;}
-    /* Tree guide lines */
-    .t-guide{display:flex;flex-shrink:0;align-self:stretch;width:14px;position:relative;}
-    .t-guide-line{position:absolute;left:6px;top:0;bottom:0;width:1px;background:var(--bdr2);opacity:.6;}
-    .t-guide-branch{position:absolute;left:6px;top:0;bottom:50%;width:1px;background:var(--bdr2);opacity:.6;}
-    .t-guide-branch::after{content:'';position:absolute;bottom:0;left:0;width:7px;height:1px;background:var(--bdr2);opacity:1;}
-    .t-row:hover .t-guide-line,.t-row:hover .t-guide-branch{opacity:1;}
-    .t-row.sel .t-guide-line,.t-row.sel .t-guide-branch{background:var(--acc);opacity:.4;}
+    /* Tree guide lines — extend beyond row padding/margins to connect across gaps */
+    .t-guide{flex-shrink:0;align-self:stretch;width:14px;position:relative;overflow:visible;}
+    .t-guide-line{position:absolute;left:6px;top:-4px;bottom:-4px;width:1px;background:var(--bdr2);opacity:.5;}
+    .t-guide-branch{position:absolute;left:6px;top:-4px;bottom:50%;width:1px;background:var(--bdr2);opacity:.5;}
+    .t-guide-branch::after{content:'';position:absolute;bottom:0;left:0;width:8px;height:1px;background:var(--bdr2);opacity:1;}
+    .t-guide-hook{position:absolute;left:6px;top:50%;width:8px;height:1px;background:var(--bdr2);opacity:.5;}
+    .t-row:hover .t-guide-line,.t-row:hover .t-guide-branch,.t-row:hover .t-guide-hook{opacity:.9;}
+    .t-row.sel .t-guide-line,.t-row.sel .t-guide-branch,.t-row.sel .t-guide-hook{background:var(--acc);opacity:.35;}
     .t-ico{width:15px;height:15px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
     .t-ico svg{width:13px;height:13px;}
     .t-lbl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -1038,7 +1039,7 @@ function buildRow(node, depth, tree, ancestors=[], isLast=false) {
       if (!isLast) {
         // Add the horizontal hook via a child element
         const hook = document.createElement('div');
-        hook.style.cssText = 'position:absolute;left:6px;top:50%;width:7px;height:1px;background:var(--bdr2);opacity:.6;';
+        hook.className = 't-guide-hook';
         guide.appendChild(hook);
       }
       guide.appendChild(branch);
