@@ -646,10 +646,10 @@
           <line x1="8" y1="8.5" x2="8" y2="12.5"/><line x1="6" y1="10.5" x2="10" y2="10.5"/>
         </svg>
       </button>
-      <button class="ico-btn" title="Upload file from device" onclick="document.getElementById('pUploadInput').click()">
+      <label class="ico-btn" title="Upload file" style="cursor:pointer;display:flex;align-items:center;justify-content:center;">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10V3"/><path d="M5 6l3-3 3 3"/><path d="M2 13h12"/></svg>
-      </button>
-      <input id="pUploadInput" type="file" accept=".pdf,.txt,.md,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.json,.csv,.xml,.html,.htm,.js,.ts,.css,.yaml,.yml,.py,.rb,.go,.rs,.sql,.sh,.zip,.epub,.rtf,.log,.ini,.toml,.conf,.env,.tsx,.jsx" multiple style="display:none" onchange="fvHandleUploadToTree(event,'pContentPanel','project')">
+        <input type="file" accept="application/pdf,text/plain,text/html,text/markdown,text/csv,text/xml,application/json,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-zip-compressed" multiple style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;" onchange="fvHandleUploadToTree(event,'pContentPanel','project')">
+      </label>
     </div>
     <div class="tree-body" id="pTreeBody"></div>
   </div>
@@ -680,10 +680,10 @@
           <line x1="8" y1="8.5" x2="8" y2="12.5"/><line x1="6" y1="10.5" x2="10" y2="10.5"/>
         </svg>
       </button>
-      <button class="ico-btn" title="Upload file from device" onclick="document.getElementById('rUploadInput').click()">
+      <label class="ico-btn" title="Upload file" style="cursor:pointer;display:flex;align-items:center;justify-content:center;">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10V3"/><path d="M5 6l3-3 3 3"/><path d="M2 13h12"/></svg>
-      </button>
-      <input id="rUploadInput" type="file" accept=".pdf,.txt,.md,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.json,.csv,.xml,.html,.htm,.js,.ts,.css,.yaml,.yml,.py,.rb,.go,.rs,.sql,.sh,.zip,.epub,.rtf,.log,.ini,.toml,.conf,.env,.tsx,.jsx" multiple style="display:none" onchange="fvHandleUploadToTree(event,'rContentPanel','research')">
+        <input type="file" accept="application/pdf,text/plain,text/html,text/markdown,text/csv,text/xml,application/json,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/zip,application/x-zip-compressed" multiple style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;" onchange="fvHandleUploadToTree(event,'rContentPanel','research')">
+      </label>
     </div>
     <div class="tree-body" id="rTreeBody"></div>
   </div>
