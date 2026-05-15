@@ -646,6 +646,10 @@
           <line x1="8" y1="8.5" x2="8" y2="12.5"/><line x1="6" y1="10.5" x2="10" y2="10.5"/>
         </svg>
       </button>
+      <label class="ico-btn" title="Upload file from device" style="cursor:pointer;">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10V3"/><path d="M5 6l3-3 3 3"/><path d="M2 13h12"/></svg>
+        <input type="file" style="display:none" onchange="fvHandleUploadToTree(event,'pContentPanel','project')">
+      </label>
     </div>
     <div class="tree-body" id="pTreeBody"></div>
   </div>
@@ -676,6 +680,10 @@
           <line x1="8" y1="8.5" x2="8" y2="12.5"/><line x1="6" y1="10.5" x2="10" y2="10.5"/>
         </svg>
       </button>
+      <label class="ico-btn" title="Upload file from device" style="cursor:pointer;">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10V3"/><path d="M5 6l3-3 3 3"/><path d="M2 13h12"/></svg>
+        <input type="file" style="display:none" onchange="fvHandleUploadToTree(event,'rContentPanel','research')">
+      </label>
     </div>
     <div class="tree-body" id="rTreeBody"></div>
   </div>
@@ -2144,11 +2152,6 @@ function renderFileView(node, panelId, tree) {
         <div class="file-view-name">${esc(node.name)}</div>
         <span class="file-view-ext">.${dispExt}</span>
         <div style="flex:1"></div>
-        <label class="fv-action-btn" title="Upload file from device" style="cursor:pointer;">
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10V3"/><path d="M4 6l3-3 3 3"/><path d="M2 12h10"/></svg>
-          Upload
-          <input type="file" id="fvUpload_${panelId}" style="display:none" onchange="fvHandleUpload(event,'${panelId}')">
-        </label>
         <button class="fv-action-btn" onclick="fvDownload('${panelId}')" title="Download this file">
           <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v7"/><path d="M4 7l3 3 3-3"/><path d="M2 12h10"/></svg>
           Download
@@ -2216,27 +2219,28 @@ function simpleMarkdown(md) {
     .replace(/^(?!<[hubolp])/gm,'<p>') + '';
 }
 
-/* Upload a local file into the current node's content */
-function fvHandleUpload(event, panelId) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const panel = document.getElementById(panelId);
-    const node  = panel?._currentNode;
-    const tree  = panel?._currentTree;
-    if (!node) return;
-    node.content = e.target.result;
-    node.name    = file.name.replace(/\.[^.]+$/, '') || node.name;
-    // Update extension from uploaded file
-    const dotIdx = file.name.lastIndexOf('.');
-    if (dotIdx > -1) node.ext = file.name.slice(dotIdx + 1).toLowerCase();
-    renderTree(tree || Object.values(TREES).find(t => t === panel?._currentTree));
-    renderFileView(node, panelId, panel?._currentTree);
-    saveAll();
-  };
-  // Try text first; binary files will come back garbled but that's ok for now
-  reader.readAsText(file);
+/* Upload a file from the toolbar — creates a new node in the tree */
+function fvHandleUploadToTree(event, panelId, treeKey) {
+  const files = Array.from(event.target.files);
+  if (!files.length) return;
+  const tree = TREES[treeKey];
+  if (!tree) return;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const dotIdx = file.name.lastIndexOf('.');
+      const name   = dotIdx > -1 ? file.name.slice(0, dotIdx) : file.name;
+      const ext    = dotIdx > -1 ? file.name.slice(dotIdx + 1).toLowerCase() : 'txt';
+      const node   = { id: globalUid++, type: 'file', name, ext, content: e.target.result };
+      tree.data.push(node);
+      tree.sel = node.id;
+      renderTree(tree);
+      renderFileView(node, panelId, tree);
+      logChange('add', 'Uploaded file', file.name, tree.label);
+    };
+    reader.readAsText(file);
+  });
+  event.target.value = ''; // reset so same file can be re-uploaded
 }
 
 /* Download the current node's content as a file */
