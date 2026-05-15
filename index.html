@@ -3046,10 +3046,10 @@ function copyGeneratedPhrase() {
       colorInp.addEventListener('input', e => { layer.color = e.target.value; colorInp.style.background = e.target.value; renderLayersPanel(); draw(); });
       nameInp.addEventListener('input', e => { layer.name = e.target.value; renderLayersPanel(); draw(); });
       moveBtns[0].addEventListener('click', () => {
-        if (i > 0) { [smap.layers[i-1], smap.layers[i]] = [smap.layers[i], smap.layers[i-1]]; renderLayersPanel(); renderLayersBar(); draw(); }
+        if (i > 0) { [smap.layers[i-1], smap.layers[i]] = [smap.layers[i], smap.layers[i-1]]; renderLayersPanel(); renderLayersBar(); draw(); saveAll(); }
       });
       moveBtns[1].addEventListener('click', () => {
-        if (i < smap.layers.length-1) { [smap.layers[i], smap.layers[i+1]] = [smap.layers[i+1], smap.layers[i]]; renderLayersPanel(); renderLayersBar(); draw(); }
+        if (i < smap.layers.length-1) { [smap.layers[i], smap.layers[i+1]] = [smap.layers[i+1], smap.layers[i]]; renderLayersPanel(); renderLayersBar(); draw(); saveAll(); }
       });
       delBtn.addEventListener('click', () => {
         smapConfirm('Delete layer "' + layer.name + '"?', () => {
@@ -3141,10 +3141,10 @@ function copyGeneratedPhrase() {
       colorInp.addEventListener('input', e => { layer.color = e.target.value; draw(); });
       nameInp.addEventListener('input', e => { layer.name = e.target.value; draw(); });
       upBtn.addEventListener('click', () => {
-        if (i > 0) { [smap.layers[i-1], smap.layers[i]] = [smap.layers[i], smap.layers[i-1]]; renderLayersPanel(); draw(); }
+        if (i > 0) { [smap.layers[i-1], smap.layers[i]] = [smap.layers[i], smap.layers[i-1]]; renderLayersPanel(); renderLayersBar(); draw(); saveAll(); }
       });
       downBtn.addEventListener('click', () => {
-        if (i < smap.layers.length-1) { [smap.layers[i], smap.layers[i+1]] = [smap.layers[i+1], smap.layers[i]]; renderLayersPanel(); draw(); }
+        if (i < smap.layers.length-1) { [smap.layers[i], smap.layers[i+1]] = [smap.layers[i+1], smap.layers[i]]; renderLayersPanel(); renderLayersBar(); draw(); saveAll(); }
       });
       delBtn.addEventListener('click', () => {
         smapConfirm(`Delete layer "${layer.name}"? Nodes on this layer will move to the next available layer.`, () => {
