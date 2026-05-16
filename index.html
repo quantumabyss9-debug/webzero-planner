@@ -2282,11 +2282,18 @@ function renderPdfJs(url, container, width) {
         const scale = (W - 8) / vp.width;
         const viewport = page.getViewport({scale});
         const canvas = document.createElement('canvas');
-        canvas.width  = viewport.width;
-        canvas.height = viewport.height;
-        canvas.style.cssText = 'display:block;margin:0 auto 8px;border-radius:3px;box-shadow:0 1px 6px rgba(0,0,0,.3);max-width:100%;';
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width  = Math.floor(viewport.width  * dpr);
+        canvas.height = Math.floor(viewport.height * dpr);
+        canvas.style.width  = viewport.width  + 'px';
+        canvas.style.height = viewport.height + 'px';
+        canvas.style.cssText = canvas.style.cssText + ';display:block;margin:0 auto 8px;border-radius:3px;box-shadow:0 1px 6px rgba(0,0,0,.3);max-width:100%;';
+        canvas.style.width  = viewport.width  + 'px';
+        canvas.style.height = viewport.height + 'px';
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
         container.appendChild(canvas);
-        return page.render({canvasContext:canvas.getContext('2d'), viewport}).promise;
+        return page.render({canvasContext:ctx, viewport}).promise;
       }));
     }
     chain.catch(e => console.warn('PDF render error:', e));
