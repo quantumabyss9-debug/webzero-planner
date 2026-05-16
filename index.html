@@ -2113,6 +2113,27 @@ function renderLangOverview(node, tree) {
 /* ================================================================
    FILE VIEWER — Project + Research trees
 ================================================================ */
+function _fixMobFileBody(panelId) {
+  const body = document.getElementById('fvBody_' + panelId);
+  if (!body) return;
+  const rect = body.getBoundingClientRect();
+  const mobNav = document.getElementById('mobNav');
+  const navH = mobNav ? mobNav.offsetHeight : 60;
+  // Use position:fixed so it fills exactly between its current top and the nav bar
+  body.style.position = 'fixed';
+  body.style.top      = Math.round(rect.top) + 'px';
+  body.style.left     = '0';
+  body.style.right    = '0';
+  body.style.bottom   = navH + 'px';
+  body.style.height   = 'auto';
+  body.style.overflowY = 'scroll';
+  body.style.webkitOverflowScrolling = 'touch';
+  body.style.zIndex   = '1';
+  body.style.background = 'var(--bg)';
+  body.style.padding  = '12px 14px 20px';
+  body.style.boxSizing = 'border-box';
+}
+
 function renderFileView(node, panelId, tree) {
   const panel = document.getElementById(panelId);
   if (!panel) return;
@@ -2170,15 +2191,7 @@ function renderFileView(node, panelId, tree) {
 
   // Explicitly size fvBody so mobile browsers scroll correctly
   if (window.innerWidth <= 768) {
-    requestAnimationFrame(() => {
-      const fv     = document.getElementById(panelId)?.querySelector('.file-view');
-      const body   = document.getElementById('fvBody_' + panelId);
-      if (!fv || !body) return;
-      const header = fv.querySelector('.file-view-header');
-      const tabs   = fv.querySelector('.file-view-tabs');
-      const top    = (header ? header.offsetHeight : 0) + (tabs ? tabs.offsetHeight : 0);
-      fv.style.setProperty('--fvb-top', top + 'px');
-    });
+    setTimeout(() => { _fixMobFileBody(panelId); }, 50);
   }
 
   // For binary files, load from Supabase and render
@@ -2241,16 +2254,8 @@ function fileViewTab(tab, panelId, btn) {
   if (tab === 'preview') {
     const rawContent = ed ? ed.value : '';
     body.innerHTML = `<div class="file-rendered" style="width:100%;padding:0 0 40px 0;">${simpleMarkdown(rawContent)}</div>`;
-    // Re-apply mobile top offset after preview renders
     if (window.innerWidth <= 768) {
-      requestAnimationFrame(() => {
-        const fv = document.getElementById(panelId)?.querySelector('.file-view');
-        if (!fv) return;
-        const header = fv.querySelector('.file-view-header');
-        const tabs   = fv.querySelector('.file-view-tabs');
-        const top    = (header ? header.offsetHeight : 0) + (tabs ? tabs.offsetHeight : 0);
-        fv.style.setProperty('--fvb-top', top + 'px');
-      });
+      setTimeout(() => { _fixMobFileBody(panelId); }, 50);
     }
   } else {
     // Restore editor
