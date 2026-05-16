@@ -585,6 +585,8 @@
     #mobFileOverlay .mob-fov-tab.active{color:var(--acc);border-bottom-color:var(--acc);}
     #mobFileOverlay .mob-fov-body{flex:1;overflow-y:scroll;-webkit-overflow-scrolling:touch;padding:16px 16px 80px;}
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 </head>
 <body>
 
@@ -2223,13 +2225,12 @@ function mobFovRender(node, tab) {
     if (fileUrl) {
       const isPdf = ext === 'pdf' || (node.binaryType||'').includes('pdf');
       if (isPdf) {
-        body.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;">
-          <div style="display:flex;gap:8px;padding:8px 0 12px;flex-shrink:0;">
-            <a href="${fileUrl}" target="_blank" class="fv-action-btn" style="text-decoration:none;">↗ Open PDF</a>
-            <a href="${fileUrl}" download class="fv-action-btn" style="text-decoration:none;">⬇ Download</a>
-          </div>
-          <iframe src="${fileUrl}" style="flex:1;width:100%;min-height:60vh;border:none;border-radius:6px;" title="${esc(node.name)}"></iframe>
-        </div>`;
+        body.innerHTML = `<div style="padding:8px 0 12px;display:flex;gap:8px;flex-shrink:0;">
+          <a href="${fileUrl}" target="_blank" class="fv-action-btn" style="text-decoration:none;">↗ Open</a>
+          <a href="${fileUrl}" download class="fv-action-btn" style="text-decoration:none;">⬇ Download</a>
+        </div>
+        <div id="mobPdfCanvas" class="pdf-canvas-wrap" style="flex:1;margin:0 -16px;padding:12px 12px 40px;"></div>`;
+      renderPdfJs(fileUrl, document.getElementById('mobPdfCanvas'), body.clientWidth);
       } else {
         body.innerHTML = `<div style="padding:40px 0;text-align:center;"><div style="font-size:48px;">📄</div><p style="margin-top:12px;">.${ext} file</p><a href="${fileUrl}" download class="fv-action-btn" style="margin-top:12px;text-decoration:none;display:inline-flex;">⬇ Download</a><a href="${fileUrl}" target="_blank" class="fv-action-btn" style="margin-top:8px;text-decoration:none;display:inline-flex;">↗ Open</a></div>`;
       }
@@ -2246,7 +2247,8 @@ function mobFovRender(node, tab) {
         const blob = new Blob([arr],{type:parts[1]});
         const url = URL.createObjectURL(blob);
         if (isPdf) {
-          body.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;"><div style="display:flex;gap:8px;padding:8px 0 12px;flex-shrink:0;"><a href="${url}" target="_blank" class="fv-action-btn" style="text-decoration:none;">↗ Open PDF</a><a href="${url}" download="${esc(node.name)}.pdf" class="fv-action-btn" style="text-decoration:none;">⬇ Download</a></div><iframe src="${url}" style="flex:1;width:100%;min-height:60vh;border:none;" title="${esc(node.name)}"></iframe></div>`;
+          body.innerHTML = `<div style="padding:8px 0 12px;display:flex;gap:8px;"><a href="${url}" target="_blank" class="fv-action-btn" style="text-decoration:none;">↗ Open</a><a href="${url}" download="${esc(node.name)}.pdf" class="fv-action-btn" style="text-decoration:none;">⬇ Download</a></div><div id="mobPdfCanvasLeg" class="pdf-canvas-wrap" style="flex:1;margin:0 -16px;padding:12px;"></div>`;
+          renderPdfJs(url, document.getElementById('mobPdfCanvasLeg'), body.clientWidth);
         } else {
           body.innerHTML = `<div style="padding:40px 0;text-align:center;"><div style="font-size:48px;">📄</div><a href="${url}" download class="fv-action-btn" style="margin-top:12px;text-decoration:none;display:inline-flex;">⬇ Download</a></div>`;
         }
@@ -2263,6 +2265,33 @@ function mobFovRender(node, tab) {
   ta.addEventListener('input', () => { node.content = ta.value; window.wz_save && wz_save(); });
   body.innerHTML = '';
   body.appendChild(ta);
+}
+
+/* Render PDF using PDF.js into a scrollable canvas container */
+function renderPdfJs(url, container, width) {
+  container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--txt3);">Loading PDF…</div>';
+  pdfjsLib.getDocument(url).promise.then(pdf => {
+    container.innerHTML = '';
+    const W = width || container.clientWidth || 360;
+    const renderPage = (num) => {
+      return pdf.getPage(num).then(page => {
+        const vp = page.getViewport({scale: 1});
+        const scale = (W - 24) / vp.width;
+        const viewport = page.getViewport({scale});
+        const canvas = document.createElement('canvas');
+        canvas.width  = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+        container.appendChild(canvas);
+        return page.render({canvasContext: ctx, viewport}).promise;
+      });
+    };
+    const pages = [];
+    for (let i = 1; i <= pdf.numPages; i++) pages.push(renderPage(i));
+    Promise.all(pages).catch(e => console.warn('PDF render error:', e));
+  }).catch(e => {
+    container.innerHTML = `<div style="padding:40px;text-align:center;">Could not load PDF.<br><a href="${url}" target="_blank" style="color:var(--acc);">↗ Open directly</a></div>`;
+  });
 }
 
 function renderFileView(node, panelId, tree) {
