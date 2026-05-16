@@ -440,15 +440,18 @@
         border-right: none !important;
         border-bottom: none !important;
         flex-shrink: 0;
-        display: flex;
-        flex-direction: column;
+        position: relative;
       }
       .tree-body {
+        position: fixed !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: 0 !important; /* overridden by JS */
+        bottom: 58px !important;
         max-height: none !important;
-        flex: 1;
-        min-height: 0;
         overflow-y: scroll !important;
         -webkit-overflow-scrolling: touch !important;
+        background: var(--surf);
       }
 
       /* Content panel fills remaining space below tree panel */
@@ -1199,20 +1202,16 @@ window.addEventListener('resize', () => buildNav());
 
 /* ── Mobile tree panel toggle ── */
 function _fixMobTreeBody(viewId) {
+  if (window.innerWidth > 768) return;
   const view = document.getElementById(viewId);
   if (!view) return;
-  const panel = view.querySelector('.tree-panel');
   const toolbar = view.querySelector('.tree-toolbar');
-  const body = view.querySelector('.tree-body');
-  const mobNav = document.getElementById('mobNav');
-  if (!panel || !body) return;
-  const navH  = mobNav ? mobNav.offsetHeight : 58;
-  const topY  = panel.getBoundingClientRect().top;
-  const tbH   = toolbar ? toolbar.offsetHeight : 0;
-  const avail = window.innerHeight - topY - tbH - navH - 2;
-  body.style.height    = Math.max(100, avail) + 'px';
-  body.style.overflowY = 'scroll';
-  body.style.webkitOverflowScrolling = 'touch';
+  const body    = view.querySelector('.tree-body');
+  if (!body) return;
+  // Measure where the toolbar bottom is — that's where tree-body top should start
+  const tbRect = toolbar ? toolbar.getBoundingClientRect() : null;
+  const top = tbRect ? Math.round(tbRect.bottom) : 96;
+  body.style.top = top + 'px';
 }
 
 function mobToggleTree(viewId) {
