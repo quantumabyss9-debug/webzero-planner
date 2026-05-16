@@ -568,6 +568,16 @@
     .fv-action-btn{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;border:1px solid var(--bdr);background:transparent;color:var(--txt2);font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;}
     .fv-action-btn:hover{border-color:var(--bdr2);color:var(--txt);background:var(--surf2);}
     @media(max-width:768px){.file-view-body{padding:12px 14px;}.file-view-header{padding:10px 14px;}}
+    /* ── Mobile file overlay ── */
+    #mobFileOverlay{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);flex-direction:column;padding-top:env(safe-area-inset-top);}
+    #mobFileOverlay.open{display:flex;}
+    #mobFileOverlay .mob-fov-header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:2px solid var(--bdr2);flex-shrink:0;background:var(--surf);min-height:54px;}
+    #mobFileOverlay .mob-fov-back{background:var(--acc-dim);border:1px solid var(--acc-glow);color:var(--acc);font-size:13px;font-weight:600;cursor:pointer;padding:6px 14px;border-radius:8px;font-family:'DM Sans',sans-serif;}
+    #mobFileOverlay .mob-fov-title{font-size:14px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    #mobFileOverlay .mob-fov-tabs{display:flex;gap:1px;padding:0 16px;background:var(--surf);border-bottom:1px solid var(--bdr);flex-shrink:0;}
+    #mobFileOverlay .mob-fov-tab{padding:7px 14px;font-size:12px;color:var(--txt3);cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;font-family:'DM Sans',sans-serif;}
+    #mobFileOverlay .mob-fov-tab.active{color:var(--acc);border-bottom-color:var(--acc);}
+    #mobFileOverlay .mob-fov-body{flex:1;overflow-y:scroll;-webkit-overflow-scrolling:touch;padding:16px 16px 80px;}
   </style>
 </head>
 <body>
