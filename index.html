@@ -1169,6 +1169,10 @@ function mobToggleTree(viewId) {
   btn.querySelector('span').textContent = collapsed ? '📁 Show folders' : `📁 ${
     {vProject:'Explorer',vResearch:'Research',vModules:'Modules',vLanguage:'Language'}[viewId]
   }`;
+  // Re-measure fvBody position after tree collapses/expands
+  const panelMap = {vProject:'pContentPanel', vResearch:'rContentPanel', vModules:'mContentPanel', vLanguage:'lContentPanel'};
+  const cpId = panelMap[viewId];
+  if (cpId && window._fixMobFileBody) setTimeout(() => window._fixMobFileBody(cpId), 50);
 }
 
 /* ── Mobile systems map properties drawer ── */
@@ -1462,6 +1466,9 @@ function buildRow(node, depth, tree, ancestors=[], isLast=false) {
             btn.classList.add('collapsed');
             btn.querySelector('span').textContent = '📁 Show folders';
           }
+          // Re-measure after collapse animation settles
+          const cpId = viewEl.querySelector('.content-panel')?.id;
+          if (cpId && window._fixMobFileBody) setTimeout(() => window._fixMobFileBody(cpId), 80);
         }
       }
     }
@@ -2113,7 +2120,7 @@ function renderLangOverview(node, tree) {
 /* ================================================================
    FILE VIEWER — Project + Research trees
 ================================================================ */
-function _fixMobFileBody(panelId) {
+window._fixMobFileBody = function _fixMobFileBody(panelId) {
   const body = document.getElementById('fvBody_' + panelId);
   if (!body) return;
   const rect = body.getBoundingClientRect();
