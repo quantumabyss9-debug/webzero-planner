@@ -429,7 +429,7 @@
       .feat-card p { font-size: 12px; }
 
       /* ── Split views (Project, Research, etc.) ── */
-      .split-view { flex-direction: column; position: relative; }
+      .split-view { flex-direction: column; position: relative; flex: 1; min-height: 0; height: 0; }
 
       /* Tree panel takes full width, collapses to a drawer */
       .tree-panel {
@@ -550,7 +550,7 @@
     .file-view-header{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--bdr);flex-shrink:0;background:var(--surf);}
     .file-view-name{font-size:14px;font-weight:600;letter-spacing:-.01em;}
     .file-view-ext{font-family:'Space Mono',monospace;font-size:10px;padding:2px 7px;border-radius:99px;background:var(--surf2);border:1px solid var(--bdr);color:var(--txt3);}
-    .file-view-body{flex:1;height:0;overflow-y:scroll;overflow-x:hidden;padding:20px 0 20px 24px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;display:block;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;}
+    .file-view-body{flex:1;height:0;overflow-y:scroll;overflow-x:hidden;padding:20px 24px 20px 24px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;display:block;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;box-sizing:border-box;}
     .file-editor{width:100%;flex:1;min-height:300px;background:transparent;border:none;outline:none;color:var(--txt);font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.7;resize:vertical;scrollbar-width:thin;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding-right:0;}
     .file-editor:focus{outline:none;}
     .file-rendered{font-size:14px;line-height:1.7;color:var(--txt);max-width:760px;width:100%;}
@@ -2176,11 +2176,16 @@ function renderFileView(node, panelId, tree) {
     const fv   = document.querySelector(`#${panelId} .file-view`);
     const body = document.getElementById('fvBody_' + panelId);
     if (!fv || !body) return;
-    const header = fv.querySelector('.file-view-header');
-    const tabs   = fv.querySelector('.file-view-tabs');
-    const used   = (header ? header.offsetHeight : 0) + (tabs ? tabs.offsetHeight : 0);
-    body.style.height = (fv.offsetHeight - used) + 'px';
-    body.style.maxHeight = (fv.offsetHeight - used) + 'px';
+    const header  = fv.querySelector('.file-view-header');
+    const tabs    = fv.querySelector('.file-view-tabs');
+    const mobNav  = document.getElementById('mobNav');
+    const used    = (header ? header.offsetHeight : 0) + (tabs ? tabs.offsetHeight : 0);
+    const navH    = (mobNav && window.innerWidth <= 768) ? mobNav.offsetHeight : 0;
+    // Available = viewport height minus everything above fvBody and the mobile nav
+    const fvTop   = fv.getBoundingClientRect().top;
+    const avail   = window.innerHeight - fvTop - used - navH - 2;
+    body.style.height    = Math.max(100, avail) + 'px';
+    body.style.maxHeight = Math.max(100, avail) + 'px';
   });
 
   // For binary files, load from Supabase and render
