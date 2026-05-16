@@ -122,7 +122,7 @@
     .t-act svg{width:10px;height:10px;}
     .t-children{overflow:hidden;}
     .t-hint{font-size:12px;color:var(--txt3);font-style:italic;padding:4px 12px;}
-    .content-panel{flex:1;min-width:0;height:0;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;}
+    .content-panel{flex:1;min-width:0;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;}
     .c-empty{text-align:center;opacity:.28;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:auto;width:100%;padding:60px 20px;box-sizing:border-box;}
     .c-empty .big{font-family:'Space Mono',monospace;font-size:44px;color:var(--acc);margin-bottom:10px;}
     .c-empty p{font-size:12px;color:var(--txt2);letter-spacing:.08em;text-transform:uppercase;}
@@ -429,7 +429,7 @@
       .feat-card p { font-size: 12px; }
 
       /* ── Split views (Project, Research, etc.) ── */
-      .split-view { flex-direction: column; position: relative; flex: 1; min-height: 0; height: 0; }
+      .split-view { flex-direction: column; position: relative; }
 
       /* Tree panel takes full width, collapses to a drawer */
       .tree-panel {
@@ -443,11 +443,7 @@
       .tree-body { max-height: calc(42vh - 44px); overflow-y: auto; }
 
       /* Content panel fills remaining space below tree panel */
-      .content-panel {
-        flex: 1; height: 0; min-width: 0;
-        overflow: hidden;
-        display: flex; flex-direction: column;
-      }
+
 
       /* Tree toolbar tighter */
       .tree-toolbar { padding: 7px 8px; }
@@ -546,11 +542,11 @@
     }
 
     /* ── File / Doc viewer ── */
-    .file-view{display:flex;flex-direction:column;width:100%;flex:1;height:0;overflow:hidden;}
+    .file-view{display:flex;flex-direction:column;width:100%;flex:1;min-height:0;overflow:hidden;}
     .file-view-header{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--bdr);flex-shrink:0;background:var(--surf);}
     .file-view-name{font-size:14px;font-weight:600;letter-spacing:-.01em;}
     .file-view-ext{font-family:'Space Mono',monospace;font-size:10px;padding:2px 7px;border-radius:99px;background:var(--surf2);border:1px solid var(--bdr);color:var(--txt3);}
-    .file-view-body{flex:1;height:0;overflow-y:scroll;overflow-x:hidden;padding:20px 24px 20px 24px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;display:block;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;box-sizing:border-box;}
+    .file-view-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:20px 24px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;display:block;}
     .file-editor{width:100%;flex:1;min-height:300px;background:transparent;border:none;outline:none;color:var(--txt);font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.7;resize:vertical;scrollbar-width:thin;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding-right:0;}
     .file-editor:focus{outline:none;}
     .file-rendered{font-size:14px;line-height:1.7;color:var(--txt);max-width:760px;width:100%;}
@@ -2172,21 +2168,20 @@ function renderFileView(node, panelId, tree) {
   if (panelEl) { panelEl._currentNode = node; }
 
   // Explicitly size fvBody so mobile browsers scroll correctly
-  requestAnimationFrame(() => {
-    const fv   = document.querySelector(`#${panelId} .file-view`);
-    const body = document.getElementById('fvBody_' + panelId);
-    if (!fv || !body) return;
-    const header  = fv.querySelector('.file-view-header');
-    const tabs    = fv.querySelector('.file-view-tabs');
-    const mobNav  = document.getElementById('mobNav');
-    const used    = (header ? header.offsetHeight : 0) + (tabs ? tabs.offsetHeight : 0);
-    const navH    = (mobNav && window.innerWidth <= 768) ? mobNav.offsetHeight : 0;
-    // Available = viewport height minus everything above fvBody and the mobile nav
-    const fvTop   = fv.getBoundingClientRect().top;
-    const avail   = window.innerHeight - fvTop - used - navH - 2;
-    body.style.height    = Math.max(100, avail) + 'px';
-    body.style.maxHeight = Math.max(100, avail) + 'px';
-  });
+  // On mobile, explicitly set fvBody height so touch scroll works
+  if (window.innerWidth <= 768) {
+    setTimeout(() => {
+      const body   = document.getElementById('fvBody_' + panelId);
+      const mobNav = document.getElementById('mobNav');
+      if (!body) return;
+      const rect = body.getBoundingClientRect();
+      const navH = mobNav ? mobNav.offsetHeight : 60;
+      const avail = window.innerHeight - rect.top - navH - 4;
+      body.style.height = Math.max(120, avail) + 'px';
+      body.style.overflowY = 'scroll';
+      body.style.webkitOverflowScrolling = 'touch';
+    }, 80);
+  }
 
   // For binary files, load from Supabase and render
   if (node.storageKey) {
