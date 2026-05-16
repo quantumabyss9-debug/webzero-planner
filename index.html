@@ -588,7 +588,7 @@
       .view.active.split-view{bottom:58px !important;}
     }
     /* ── Mobile file overlay ── */
-    #mobFileOverlay{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);flex-direction:column;padding-top:env(safe-area-inset-top);}
+    #mobFileOverlay{display:none;position:fixed;top:var(--hh);left:0;right:0;bottom:0;z-index:300;background:var(--bg);flex-direction:column;}
     #mobFileOverlay.open{display:flex;}
     #mobFileOverlay .mob-fov-header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:2px solid var(--bdr2);flex-shrink:0;background:var(--surf);min-height:54px;}
     #mobFileOverlay .mob-fov-back{background:var(--acc-dim);border:1px solid var(--acc-glow);color:var(--acc);font-size:13px;font-weight:600;cursor:pointer;padding:6px 14px;border-radius:8px;font-family:'DM Sans',sans-serif;}
