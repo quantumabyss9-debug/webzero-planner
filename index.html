@@ -567,7 +567,13 @@
     .file-view-tab.active{color:var(--acc);border-bottom-color:var(--acc);}
     .fv-action-btn{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;border:1px solid var(--bdr);background:transparent;color:var(--txt2);font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;}
     .fv-action-btn:hover{border-color:var(--bdr2);color:var(--txt);background:var(--surf2);}
-    @media(max-width:768px){.file-view-body{padding:12px 14px;}.file-view-header{padding:10px 14px;}}
+    @media(max-width:768px){
+      .file-view-body{padding:12px 14px 80px;}
+      .file-view-header{padding:10px 14px;}
+      .split-view .content-panel{display:none !important;}
+      .split-view .tree-panel{width:100% !important;max-height:none !important;height:100% !important;border-right:none !important;border-bottom:none !important;}
+      .split-view .mob-tree-toggle{display:none !important;}
+    }
     /* ── Mobile file overlay ── */
     #mobFileOverlay{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);flex-direction:column;padding-top:env(safe-area-inset-top);}
     #mobFileOverlay.open{display:flex;}
