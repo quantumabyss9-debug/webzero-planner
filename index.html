@@ -2217,14 +2217,41 @@ function mobFovRender(node, tab) {
     body.innerHTML = `<div class="file-rendered" style="padding-bottom:40px;">${simpleMarkdown(node.content||'')}</div>`;
     return;
   }
-  // Binary file
-  if (node.storageKey && node.storageUrl) {
-    const isPdf = ext === 'pdf';
-    if (isPdf) {
-      const gdUrl = 'https://docs.google.com/viewer?url=' + encodeURIComponent(node.storageUrl) + '&embedded=true';
-      body.innerHTML = `<iframe src="${gdUrl}" style="width:100%;height:100%;min-height:60vh;border:none;" title="${esc(node.name)}"></iframe>`;
+  // Binary file — new storage URL or legacy binaryKey
+  const fileUrl = node.storageUrl || null;
+  if (node.storageKey || node.binaryKey) {
+    if (fileUrl) {
+      const isPdf = ext === 'pdf' || (node.binaryType||'').includes('pdf');
+      if (isPdf) {
+        const gdUrl = 'https://docs.google.com/viewer?url=' + encodeURIComponent(fileUrl) + '&embedded=true';
+        body.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;">
+          <div style="display:flex;gap:8px;padding:8px 0 12px;flex-shrink:0;">
+            <a href="${fileUrl}" target="_blank" class="fv-action-btn" style="text-decoration:none;">↗ Open PDF</a>
+            <a href="${fileUrl}" download class="fv-action-btn" style="text-decoration:none;">⬇ Download</a>
+          </div>
+          <iframe src="${gdUrl}" style="flex:1;width:100%;min-height:60vh;border:none;border-radius:6px;" title="${esc(node.name)}"></iframe>
+        </div>`;
+      } else {
+        body.innerHTML = `<div style="padding:40px 0;text-align:center;"><div style="font-size:48px;">📄</div><p style="margin-top:12px;">.${ext} file</p><a href="${fileUrl}" download class="fv-action-btn" style="margin-top:12px;text-decoration:none;display:inline-flex;">⬇ Download</a><a href="${fileUrl}" target="_blank" class="fv-action-btn" style="margin-top:8px;text-decoration:none;display:inline-flex;">↗ Open</a></div>`;
+      }
     } else {
-      body.innerHTML = `<div style="padding:40px 0;text-align:center;"><div style="font-size:48px;">📄</div><p style="margin-top:12px;">.${ext} file</p><a href="${node.storageUrl}" download class="fv-action-btn" style="margin-top:12px;text-decoration:none;display:inline-flex;">⬇ Download</a></div>`;
+      // Legacy binaryKey — fetch from Supabase JSON row
+      body.innerHTML = `<div style="padding:40px 0;text-align:center;color:var(--txt3);">Loading…</div>`;
+      sbGet(node.binaryKey).then(data => {
+        if (!data?.base64) { body.innerHTML = `<div style="padding:40px 0;text-align:center;">Could not load — please re-upload this file.</div>`; return; }
+        const isPdf = ext === 'pdf' || data.type?.includes('pdf');
+        const parts = data.base64.match(/^data:([^;]+);base64,(.+)$/);
+        if (!parts) return;
+        const raw = atob(parts[2]); const arr = new Uint8Array(raw.length);
+        for (let i=0;i<raw.length;i++) arr[i]=raw.charCodeAt(i);
+        const blob = new Blob([arr],{type:parts[1]});
+        const url = URL.createObjectURL(blob);
+        if (isPdf) {
+          body.innerHTML = `<div style="display:flex;flex-direction:column;height:100%;"><div style="display:flex;gap:8px;padding:8px 0 12px;flex-shrink:0;"><a href="${url}" target="_blank" class="fv-action-btn" style="text-decoration:none;">↗ Open PDF</a><a href="${url}" download="${esc(node.name)}.pdf" class="fv-action-btn" style="text-decoration:none;">⬇ Download</a></div><iframe src="${url}" style="flex:1;width:100%;min-height:60vh;border:none;" title="${esc(node.name)}"></iframe></div>`;
+        } else {
+          body.innerHTML = `<div style="padding:40px 0;text-align:center;"><div style="font-size:48px;">📄</div><a href="${url}" download class="fv-action-btn" style="margin-top:12px;text-decoration:none;display:inline-flex;">⬇ Download</a></div>`;
+        }
+      }).catch(() => { body.innerHTML = `<div style="padding:40px 0;text-align:center;">Could not load file.</div>`; });
     }
     return;
   }
