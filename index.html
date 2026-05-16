@@ -572,6 +572,16 @@
 </head>
 <body>
 
+<div id="mobFileOverlay">
+  <div class="mob-fov-header">
+    <button class="mob-fov-back" onclick="mobFileOverlayClose()">← Back</button>
+    <span class="mob-fov-title" id="mobFovTitle"></span>
+    <a id="mobFovDownload" class="fv-action-btn" style="text-decoration:none;font-size:11px;" href="#">⬇</a>
+  </div>
+  <div class="mob-fov-tabs" id="mobFovTabs" style="display:none"></div>
+  <div class="mob-fov-body" id="mobFovBody"></div>
+</div>
+
 <header>
   <a class="logo" href="#">
     <svg class="logo-mark" viewBox="0 0 30 30" fill="none">
@@ -1451,6 +1461,10 @@ function buildRow(node, depth, tree, ancestors=[], isLast=false) {
     tree.sel = node.id;
     renderTree(tree);
     if (tree.onSelect) tree.onSelect(node, isDir, tree);
+    // On mobile, open full-screen overlay instead of inline viewer
+    if (!isDir && window.innerWidth <= 768) {
+      mobFileOverlayOpen(node, tree);
+    }
     // On mobile, auto-collapse tree when a FILE is selected
     if (!isDir && window.innerWidth <= 768) {
       const viewEl = row.closest('.split-view');
@@ -2126,6 +2140,87 @@ window._fixMobFileBody = function _fixMobFileBody(panelId) {
   body.style.background = 'var(--bg)';
   body.style.padding  = '12px 14px 20px';
   body.style.boxSizing = 'border-box';
+}
+
+/* ── Mobile file overlay ── */
+function mobFileOverlayOpen(node, tree) {
+  const ov    = document.getElementById('mobFileOverlay');
+  const title = document.getElementById('mobFovTitle');
+  const body  = document.getElementById('mobFovBody');
+  const tabs  = document.getElementById('mobFovTabs');
+  const dl    = document.getElementById('mobFovDownload');
+  if (!ov) return;
+
+  ov._node = node; ov._tree = tree;
+  title.textContent = node.name + (node.ext ? '.' + node.ext : '');
+
+  const ext = (node.ext || '').toLowerCase();
+  const isText = ['md','txt','json','yaml','yml','xml','html','htm','js','ts','jsx','tsx','css','scss','csv','toml','ini','sh','py','rb','go','rs','sql','env','log','conf','cfg'].includes(ext);
+  const isMd   = ext === 'md' || ext === 'html';
+
+  // Download button
+  if (node.storageUrl) {
+    dl.href = node.storageUrl; dl.download = title.textContent; dl.style.display='flex';
+  } else if (isText && node.content) {
+    const blob = new Blob([node.content||''], {type:'text/plain'});
+    dl.href = URL.createObjectURL(blob); dl.download = title.textContent; dl.style.display='flex';
+  } else { dl.style.display='none'; }
+
+  // Tabs for md/html
+  if (isMd) {
+    tabs.style.display = '';
+    tabs.innerHTML = `
+      <button class="mob-fov-tab active" onclick="mobFovTab('edit',this)">Edit</button>
+      <button class="mob-fov-tab" onclick="mobFovTab('preview',this)">Preview</button>`;
+  } else { tabs.style.display='none'; }
+
+  // Render content
+  mobFovRender(node, 'edit');
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function mobFileOverlayClose() {
+  const ov = document.getElementById('mobFileOverlay');
+  if (ov) { ov.classList.remove('open'); ov._node = null; }
+  document.body.style.overflow = '';
+}
+
+function mobFovTab(tab, btn) {
+  document.querySelectorAll('.mob-fov-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const ov = document.getElementById('mobFileOverlay');
+  mobFovRender(ov._node, tab);
+}
+
+function mobFovRender(node, tab) {
+  const body = document.getElementById('mobFovBody');
+  if (!body || !node) return;
+  const ext = (node.ext||'').toLowerCase();
+  if (tab === 'preview') {
+    body.innerHTML = `<div class="file-rendered" style="padding-bottom:40px;">${simpleMarkdown(node.content||'')}</div>`;
+    return;
+  }
+  // Binary file
+  if (node.storageKey && node.storageUrl) {
+    const isPdf = ext === 'pdf';
+    if (isPdf) {
+      const gdUrl = 'https://docs.google.com/viewer?url=' + encodeURIComponent(node.storageUrl) + '&embedded=true';
+      body.innerHTML = `<iframe src="${gdUrl}" style="width:100%;height:100%;min-height:60vh;border:none;" title="${esc(node.name)}"></iframe>`;
+    } else {
+      body.innerHTML = `<div style="padding:40px 0;text-align:center;"><div style="font-size:48px;">📄</div><p style="margin-top:12px;">.${ext} file</p><a href="${node.storageUrl}" download class="fv-action-btn" style="margin-top:12px;text-decoration:none;display:inline-flex;">⬇ Download</a></div>`;
+    }
+    return;
+  }
+  // Text editor
+  const ta = document.createElement('textarea');
+  ta.className = 'file-editor';
+  ta.style.cssText = 'width:100%;min-height:60vh;height:auto;background:transparent;border:none;outline:none;resize:none;font-family:Space Mono,monospace;font-size:13px;line-height:1.7;color:var(--txt);';
+  ta.value = node.content || '';
+  ta.spellcheck = false;
+  ta.addEventListener('input', () => { node.content = ta.value; window.wz_save && wz_save(); });
+  body.innerHTML = '';
+  body.appendChild(ta);
 }
 
 function renderFileView(node, panelId, tree) {
