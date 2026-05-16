@@ -2201,7 +2201,15 @@ function mobFileOverlayOpen(node, tree) {
 }
 
 function mobFileOverlayClose() {
-  const ov = document.getElementById('mobFileOverlay');
+  const ov   = document.getElementById('mobFileOverlay');
+  const body = document.getElementById('mobFovBody');
+  if (body) {
+    // Release canvas memory before closing so multiple PDFs don't accumulate
+    body.querySelectorAll('canvas').forEach(c => {
+      c.width = 0; c.height = 0;
+    });
+    body.innerHTML = '';
+  }
   if (ov) { ov.classList.remove('open'); ov._node = null; }
   document.body.style.overflow = '';
 }
