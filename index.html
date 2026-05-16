@@ -435,13 +435,13 @@
       /* Tree panel takes full width, collapses to a drawer */
       .tree-panel {
         width: 100% !important;
-        height: auto !important;
+        height: 100% !important;
+        max-height: none !important;
         border-right: none !important;
-        border-bottom: 1px solid var(--bdr);
+        border-bottom: none !important;
         flex-shrink: 0;
-        max-height: 42vh;
       }
-      .tree-body { max-height: calc(42vh - 44px); overflow-y: auto; }
+      .tree-body { max-height: none !important; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
       /* Content panel fills remaining space below tree panel */
 
