@@ -1198,6 +1198,23 @@ function buildNav() {
 window.addEventListener('resize', () => buildNav());
 
 /* ── Mobile tree panel toggle ── */
+function _fixMobTreeBody(viewId) {
+  const view = document.getElementById(viewId);
+  if (!view) return;
+  const panel = view.querySelector('.tree-panel');
+  const toolbar = view.querySelector('.tree-toolbar');
+  const body = view.querySelector('.tree-body');
+  const mobNav = document.getElementById('mobNav');
+  if (!panel || !body) return;
+  const navH  = mobNav ? mobNav.offsetHeight : 58;
+  const topY  = panel.getBoundingClientRect().top;
+  const tbH   = toolbar ? toolbar.offsetHeight : 0;
+  const avail = window.innerHeight - topY - tbH - navH - 2;
+  body.style.height    = Math.max(100, avail) + 'px';
+  body.style.overflowY = 'scroll';
+  body.style.webkitOverflowScrolling = 'touch';
+}
+
 function mobToggleTree(viewId) {
   const panel = document.querySelector(`#${viewId} .tree-panel`);
   const btn   = document.getElementById(`toggle_${viewId}`);
@@ -1248,6 +1265,10 @@ function gotoView(id) {
   if (id !== 'systems') mobSmapDrawerClose(); // hide drawer when leaving smap
   if (id === 'archive')   { syncFromCloud().then(renderArchive); }
   if (id === 'changelog') { syncFromCloud().then(renderChangelog); }
+  // On mobile, fix tree-body height so it scrolls properly
+  if (window.innerWidth <= 768) {
+    setTimeout(() => _fixMobTreeBody(id), 80);
+  }
 }
 
 /* ================================================================
