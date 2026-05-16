@@ -543,7 +543,7 @@
     }
 
     /* ── File / Doc viewer ── */
-    .file-view{display:flex;flex-direction:column;width:100%;flex:1;min-height:0;overflow:hidden;}
+    .file-view{display:flex;flex-direction:column;width:100%;flex:1;min-height:0;overflow:hidden;position:relative;}
     .file-view-header{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--bdr);flex-shrink:0;background:var(--surf);}
     .file-view-name{font-size:14px;font-weight:600;letter-spacing:-.01em;}
     .file-view-ext{font-family:'Space Mono',monospace;font-size:10px;padding:2px 7px;border-radius:99px;background:var(--surf2);border:1px solid var(--bdr);color:var(--txt3);}
@@ -2169,19 +2169,16 @@ function renderFileView(node, panelId, tree) {
   if (panelEl) { panelEl._currentNode = node; }
 
   // Explicitly size fvBody so mobile browsers scroll correctly
-  // On mobile, explicitly set fvBody height so touch scroll works
   if (window.innerWidth <= 768) {
-    setTimeout(() => {
+    requestAnimationFrame(() => {
+      const fv     = document.getElementById(panelId)?.querySelector('.file-view');
       const body   = document.getElementById('fvBody_' + panelId);
-      const mobNav = document.getElementById('mobNav');
-      if (!body) return;
-      const rect = body.getBoundingClientRect();
-      const navH = mobNav ? mobNav.offsetHeight : 60;
-      const avail = window.innerHeight - rect.top - navH - 4;
-      body.style.height = Math.max(120, avail) + 'px';
-      body.style.overflowY = 'scroll';
-      body.style.webkitOverflowScrolling = 'touch';
-    }, 80);
+      if (!fv || !body) return;
+      const header = fv.querySelector('.file-view-header');
+      const tabs   = fv.querySelector('.file-view-tabs');
+      const top    = (header ? header.offsetHeight : 0) + (tabs ? tabs.offsetHeight : 0);
+      fv.style.setProperty('--fvb-top', top + 'px');
+    });
   }
 
   // For binary files, load from Supabase and render
@@ -2243,7 +2240,18 @@ function fileViewTab(tab, panelId, btn) {
   const ed = body.querySelector('.file-editor');
   if (tab === 'preview') {
     const rawContent = ed ? ed.value : '';
-    body.innerHTML = `<div class="file-rendered" style="width:100%;padding:0 24px 80px 0;">${simpleMarkdown(rawContent)}</div>`;
+    body.innerHTML = `<div class="file-rendered" style="width:100%;padding:0 0 40px 0;">${simpleMarkdown(rawContent)}</div>`;
+    // Re-apply mobile top offset after preview renders
+    if (window.innerWidth <= 768) {
+      requestAnimationFrame(() => {
+        const fv = document.getElementById(panelId)?.querySelector('.file-view');
+        if (!fv) return;
+        const header = fv.querySelector('.file-view-header');
+        const tabs   = fv.querySelector('.file-view-tabs');
+        const top    = (header ? header.offsetHeight : 0) + (tabs ? tabs.offsetHeight : 0);
+        fv.style.setProperty('--fvb-top', top + 'px');
+      });
+    }
   } else {
     // Restore editor
     const node = body._node;
