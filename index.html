@@ -543,11 +543,11 @@
     }
 
     /* ── File / Doc viewer ── */
-    .file-view{display:flex;flex-direction:column;width:100%;flex:1;min-height:0;overflow:hidden;position:relative;}
+    .file-view{display:grid;grid-template-rows:auto auto 1fr;width:100%;flex:1;min-height:0;overflow:hidden;}
     .file-view-header{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--bdr);flex-shrink:0;background:var(--surf);}
     .file-view-name{font-size:14px;font-weight:600;letter-spacing:-.01em;}
     .file-view-ext{font-family:'Space Mono',monospace;font-size:10px;padding:2px 7px;border-radius:99px;background:var(--surf2);border:1px solid var(--bdr);color:var(--txt3);}
-    .file-view-body{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;padding:20px 24px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;display:block;}
+    .file-view-body{overflow-y:scroll;overflow-x:hidden;padding:20px 24px;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;-webkit-overflow-scrolling:touch;}
     .file-editor{width:100%;flex:1;min-height:300px;background:transparent;border:none;outline:none;color:var(--txt);font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.7;resize:vertical;scrollbar-width:thin;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding-right:0;}
     .file-editor:focus{outline:none;}
     .file-rendered{font-size:14px;line-height:1.7;color:var(--txt);max-width:760px;width:100%;}
@@ -1169,10 +1169,7 @@ function mobToggleTree(viewId) {
   btn.querySelector('span').textContent = collapsed ? '📁 Show folders' : `📁 ${
     {vProject:'Explorer',vResearch:'Research',vModules:'Modules',vLanguage:'Language'}[viewId]
   }`;
-  // Re-measure fvBody position after tree collapses/expands
-  const panelMap = {vProject:'pContentPanel', vResearch:'rContentPanel', vModules:'mContentPanel', vLanguage:'lContentPanel'};
-  const cpId = panelMap[viewId];
-  if (cpId && window._fixMobFileBody) setTimeout(() => window._fixMobFileBody(cpId), 50);
+
 }
 
 /* ── Mobile systems map properties drawer ── */
@@ -1454,22 +1451,12 @@ function buildRow(node, depth, tree, ancestors=[], isLast=false) {
     tree.sel = node.id;
     renderTree(tree);
     if (tree.onSelect) tree.onSelect(node, isDir, tree);
-    // On mobile, auto-collapse tree when a FILE is selected so content is visible
+    // On mobile, auto-collapse tree when a FILE is selected
     if (!isDir && window.innerWidth <= 768) {
       const viewEl = row.closest('.split-view');
-      if (viewEl) {
-        const panel = viewEl.querySelector('.tree-panel');
-        const btn   = viewEl.querySelector('.mob-tree-toggle');
-        if (panel && !panel.classList.contains('mob-collapsed')) {
-          panel.classList.add('mob-collapsed');
-          if (btn) {
-            btn.classList.add('collapsed');
-            btn.querySelector('span').textContent = '📁 Show folders';
-          }
-          // Re-measure after collapse animation settles
-          const cpId = viewEl.querySelector('.content-panel')?.id;
-          if (cpId && window._fixMobFileBody) setTimeout(() => window._fixMobFileBody(cpId), 80);
-        }
+      if (viewEl && !viewEl.querySelector('.tree-panel')?.classList.contains('mob-collapsed')) {
+        const viewId = viewEl.id;
+        if (viewId) mobToggleTree(viewId);
       }
     }
   });
@@ -2197,9 +2184,7 @@ function renderFileView(node, panelId, tree) {
   if (panelEl) { panelEl._currentNode = node; }
 
   // Explicitly size fvBody so mobile browsers scroll correctly
-  if (window.innerWidth <= 768) {
-    setTimeout(() => { _fixMobFileBody(panelId); }, 50);
-  }
+
 
   // For binary files, load from Supabase and render
   if (node.storageKey) {
@@ -2261,9 +2246,7 @@ function fileViewTab(tab, panelId, btn) {
   if (tab === 'preview') {
     const rawContent = ed ? ed.value : '';
     body.innerHTML = `<div class="file-rendered" style="width:100%;padding:0 0 40px 0;">${simpleMarkdown(rawContent)}</div>`;
-    if (window.innerWidth <= 768) {
-      setTimeout(() => { _fixMobFileBody(panelId); }, 50);
-    }
+
   } else {
     // Restore editor
     const node = body._node;
