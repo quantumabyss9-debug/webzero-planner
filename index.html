@@ -573,6 +573,8 @@
       .split-view .content-panel{display:none !important;}
       .split-view .tree-panel{width:100% !important;max-height:none !important;height:100% !important;border-right:none !important;border-bottom:none !important;}
       .split-view .mob-tree-toggle{display:none !important;}
+      /* Tree fills all the way down — no gap above bottom nav */
+      .view.active.split-view{bottom:58px !important;}
     }
     /* ── Mobile file overlay ── */
     #mobFileOverlay{display:none;position:fixed;inset:0;z-index:300;background:var(--bg);flex-direction:column;padding-top:env(safe-area-inset-top);}
