@@ -2229,7 +2229,15 @@ function mobFileOverlayOpen(node, tree) {
   } else { tabs.style.display='none'; }
 
   // Render content
-  mobFovRender(node, 'edit');
+  // Open md files in preview mode by default
+  mobFovRender(node, isMarkdown ? 'preview' : 'edit');
+  // Set correct active tab
+  if (isMd) {
+    const tabs = document.querySelectorAll('.mob-fov-tab');
+    tabs.forEach(t => t.classList.remove('active'));
+    if (isMarkdown) tabs[1]?.classList.add('active');
+    else tabs[0]?.classList.add('active');
+  }
   ov.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -2362,10 +2370,12 @@ function renderFileView(node, panelId, tree) {
 
   // Tabs: Edit + Preview (for md/html) or just Edit
   const hasPrev = isMarkdown || dispExt === 'html';
+  // For markdown: default to Preview; for html: default to Edit
+  const defaultTab = isMarkdown ? 'preview' : 'edit';
   const tabsHtml = hasPrev ? `
     <div class="file-view-tabs">
-      <button class="file-view-tab active" id="ftab-edit" onclick="fileViewTab('edit','${panelId}',this)">Edit</button>
-      <button class="file-view-tab" id="ftab-preview" onclick="fileViewTab('preview','${panelId}',this)">Preview</button>
+      <button class="file-view-tab ${defaultTab === 'edit' ? 'active' : ''}" id="ftab-edit" onclick="fileViewTab('edit','${panelId}',this)">Edit</button>
+      <button class="file-view-tab ${defaultTab === 'preview' ? 'active' : ''}" id="ftab-preview" onclick="fileViewTab('preview','${panelId}',this)">Preview</button>
     </div>` : '';
 
   // Store node ref on panel for tab switching
@@ -2436,6 +2446,19 @@ function renderFileView(node, panelId, tree) {
     const binDiv = document.getElementById('fvBinView_' + panelId);
     if (binDiv) binDiv.innerHTML = `<div class="c-empty" style="margin:auto;"><div class="big">📄</div><p>Re-upload this file to view it.</p></div>`;
     return;
+  }
+
+  // For markdown, switch to preview tab by default
+  if (isMarkdown) {
+    const prevBtn = document.getElementById('ftab-preview');
+    if (prevBtn) {
+      const body = document.getElementById('fvBody_' + panelId);
+      if (body) {
+        const ed = body.querySelector('.file-editor');
+        const raw = ed ? ed.value : (node.content || '');
+        body.innerHTML = `<div class="file-rendered" style="width:100%;padding:0 0 40px 0;">${simpleMarkdown(raw)}</div>`;
+      }
+    }
   }
 
   // Wire editor to save on change
