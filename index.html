@@ -2267,47 +2267,29 @@ function mobFovRender(node, tab) {
   body.appendChild(ta);
 }
 
-/* Render PDF using PDF.js — single page at a time to avoid crashing mobile */
+/* Render PDF using PDF.js — all pages rendered sequentially to avoid memory spike */
 function renderPdfJs(url, container, width) {
   container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--txt3);">Loading PDF…</div>';
-  let _pdf, _page = 1;
-
-  const draw = (num) => {
-    _pdf.getPage(num).then(page => {
-      const W = width || container.clientWidth || 340;
-      const vp = page.getViewport({scale:1});
-      const scale = (W - 16) / vp.width;
-      const viewport = page.getViewport({scale});
-      const canvas = document.createElement('canvas');
-      canvas.width  = viewport.width;
-      canvas.height = viewport.height;
-      canvas.style.cssText = 'display:block;margin:0 auto;border-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.35);max-width:100%;';
-      const ctx = canvas.getContext('2d');
-      const nav = container.querySelector('.pdf-nav');
-      container.innerHTML = '';
-      if (nav) container.appendChild(nav);
-      container.appendChild(canvas);
-      buildNav();
-      page.render({canvasContext:ctx, viewport});
-    });
-  };
-
-  const buildNav = () => {
-    let nav = container.querySelector('.pdf-nav');
-    if (!nav) { nav = document.createElement('div'); nav.className = 'pdf-nav'; container.prepend(nav); }
-    nav.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:12px;padding:8px 0 12px;flex-shrink:0;';
-    nav.innerHTML = `
-      <button onclick="this.closest('.pdf-nav')._prev()" style="padding:5px 12px;border:1px solid var(--bdr);border-radius:6px;background:var(--surf);color:var(--txt);cursor:pointer;font-size:13px;">‹ Prev</button>
-      <span style="font-size:12px;color:var(--txt3);">Page ${_page} of ${_pdf.numPages}</span>
-      <button onclick="this.closest('.pdf-nav')._next()" style="padding:5px 12px;border:1px solid var(--bdr);border-radius:6px;background:var(--surf);color:var(--txt);cursor:pointer;font-size:13px;">Next ›</button>`;
-    nav._prev = () => { if (_page > 1) { _page--; draw(_page); } };
-    nav._next = () => { if (_page < _pdf.numPages) { _page++; draw(_page); } };
-  };
-
   pdfjsLib.getDocument(url).promise.then(pdf => {
-    _pdf = pdf; _page = 1;
     container.innerHTML = '';
-    draw(1);
+    const W = Math.min(width || container.clientWidth || 360, window.innerWidth - 8);
+    // Render pages one at a time sequentially — avoids memory spike from parallel rendering
+    let chain = Promise.resolve();
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const pageNum = i;
+      chain = chain.then(() => pdf.getPage(pageNum).then(page => {
+        const vp = page.getViewport({scale:1});
+        const scale = (W - 8) / vp.width;
+        const viewport = page.getViewport({scale});
+        const canvas = document.createElement('canvas');
+        canvas.width  = viewport.width;
+        canvas.height = viewport.height;
+        canvas.style.cssText = 'display:block;margin:0 auto 8px;border-radius:3px;box-shadow:0 1px 6px rgba(0,0,0,.3);max-width:100%;';
+        container.appendChild(canvas);
+        return page.render({canvasContext:canvas.getContext('2d'), viewport}).promise;
+      }));
+    }
+    chain.catch(e => console.warn('PDF render error:', e));
   }).catch(() => {
     container.innerHTML = `<div style="padding:40px;text-align:center;">Could not load PDF.<br><a href="${url}" target="_blank" style="color:var(--acc);">↗ Open directly</a></div>`;
   });
