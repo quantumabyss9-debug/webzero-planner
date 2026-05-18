@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>WebZero Planner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg:#0c0d10; --surf:#13151a; --surf2:#1c1f27; --surf3:#22252f;
-      --bdr:#252830; --bdr2:#2e3240;
-      --acc:#00e5a0; --acc-dim:#00e5a018; --acc-glow:#00e5a040;
+      --bg:#080806; --surf:#0e0c08; --surf2:#14120a; --surf3:#1c1910;
+      --bdr:#221e10; --bdr2:#2a2514;
+      --acc:#E8B84B; --acc-dim:#E8B84B18; --acc-glow:#E8B84B40;
       --txt:#e8eaf0; --txt2:#7a7f90; --txt3:#4a4f60;
       --danger:#ff5a5a; --danger-dim:#ff5a5a18;
       --hh:64px; --lw:220px; --tw:268px;
@@ -25,7 +25,7 @@
     .logo::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:3px;background:var(--acc);border-radius:0 2px 2px 0;box-shadow:0 0 10px var(--acc),0 0 24px var(--acc-glow);}
     .logo-mark{width:30px;height:30px;flex-shrink:0;}
     .logo-text{display:flex;flex-direction:column;line-height:1;}
-    .logo-text .w1{font-family:'Space Mono',monospace;font-weight:700;font-size:15px;letter-spacing:.04em;color:var(--acc);}
+    .logo-text .w1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:18px;letter-spacing:.06em;color:var(--acc);}
     .logo-text .w2{font-family:'Space Mono',monospace;font-weight:400;font-size:10px;letter-spacing:.18em;color:var(--txt2);text-transform:uppercase;}
     .nav-wrap{flex:1;min-width:0;position:relative;display:flex;align-items:center;}
     .nav-wrap::after{content:'';position:absolute;top:0;right:0;bottom:0;width:36px;background:linear-gradient(90deg,transparent,var(--surf));pointer-events:none;z-index:2;}
@@ -90,7 +90,7 @@
     .t-chev.open{transform:rotate(90deg);}
     .t-chev svg{width:9px;height:9px;}
     .t-chev-sp{width:14px;flex-shrink:0;}
-    /* Tree guide lines — extend beyond row padding/margins to connect across gaps */
+    /* Tree guide lines â extend beyond row padding/margins to connect across gaps */
     .t-guide{flex-shrink:0;align-self:stretch;width:14px;position:relative;overflow:visible;}
     .t-guide-line{position:absolute;left:6px;top:-4px;bottom:-4px;width:1px;background:var(--bdr2);opacity:.5;}
     .t-guide-branch{position:absolute;left:6px;top:-4px;bottom:50%;width:1px;background:var(--bdr2);opacity:.5;}
@@ -105,12 +105,12 @@
     .t-row:hover .t-acts{display:flex;}
     .t-row[draggable]{cursor:grab;}
     .t-row.drag-over-folder{background:var(--acc-dim)!important;border-color:var(--acc)!important;outline:1px solid var(--acc);outline-offset:-1px;}
-    /* Drop lines — always in layout so they receive drag events, invisible by default */
+    /* Drop lines â always in layout so they receive drag events, invisible by default */
     .t-drop-line{height:6px;margin:0 6px;border-radius:3px;background:transparent;position:relative;pointer-events:auto;}
     .t-drop-line::after{content:'';position:absolute;left:0;right:0;top:2px;height:2px;background:var(--acc);border-radius:2px;opacity:0;transition:opacity .1s;}
     .drag-active .t-drop-line::after{opacity:.15;}
     .t-drop-line.active::after{opacity:1;}
-    /* Escape-hatch zone — invisible until drag starts */
+    /* Escape-hatch zone â invisible until drag starts */
     .t-drop-out{height:0;overflow:hidden;pointer-events:auto;position:relative;transition:height .1s;}
     .drag-active .t-drop-out{height:8px;}
     .t-drop-out::after{content:'';position:absolute;left:8px;right:8px;top:3px;height:2px;background:var(--acc);border-radius:2px;opacity:0;transition:opacity .1s;}
@@ -159,7 +159,7 @@
     .btn-danger{background:var(--danger-dim);border-color:var(--danger);color:var(--danger);}
     .btn-danger:hover{background:#ff5a5a30;}
 
-    /* ── USER SYSTEM ──────────────────────────────────────────── */
+    /* ââ USER SYSTEM ââââââââââââââââââââââââââââââââââââââââââââ */
     .login-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;}
     .login-screen.hidden{display:none;}
     .login-box{background:var(--surf);border:1px solid var(--bdr2);border-radius:16px;padding:40px;width:480px;display:flex;flex-direction:column;gap:22px;box-shadow:0 24px 64px rgba(0,0,0,.7);animation:mIn .3s cubic-bezier(.16,1,.3,1) both;}
@@ -200,7 +200,7 @@
     .users-icon-btn{width:32px;height:32px;border-radius:50%;background:var(--surf2);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .18s;color:var(--txt2);}
     .users-icon-btn:hover{border-color:var(--acc);color:var(--acc);}
 
-    /* ── LANGUAGE BUILDER DETAIL PANELS ─────────────────────── */
+    /* ââ LANGUAGE BUILDER DETAIL PANELS âââââââââââââââââââââââ */
     #lContentPanel{flex-direction:column;align-items:stretch;justify-content:flex-start;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;}
     #lContentPanel::-webkit-scrollbar{width:3px;}
     #lContentPanel::-webkit-scrollbar-track{background:transparent;}
@@ -266,7 +266,7 @@
     .vocab-def{font-size:12px;color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     .vocab-link{background:var(--acc-dim);border:1px solid var(--acc-glow);color:var(--acc);border-radius:5px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:background .15s;flex-shrink:0;}
     .vocab-link:hover{background:var(--acc-glow);}
-    /* ── SYSTEMS MAP ──────────────────────────────────────────── */
+    /* ââ SYSTEMS MAP ââââââââââââââââââââââââââââââââââââââââââââ */
     .smap-wrap{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden;}
     .smap-toolbar{display:flex;flex-direction:column;background:var(--surf);border-bottom:1px solid var(--bdr);flex-shrink:0;}
     .smap-toolbar-row{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;gap:8px;}
@@ -316,14 +316,14 @@
     .smap-layer-btn:hover{background:var(--surf3);color:var(--txt);}
     .smap-layer-btn.del:hover{color:var(--danger);}
     .smap-props-section{flex:1;overflow-y:auto;min-height:0;scrollbar-width:thin;scrollbar-color:var(--bdr2) transparent;}
-    /* ── Confirm modal ── */
+    /* ââ Confirm modal ââ */
     .confirm-ov{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:9000;}
     .confirm-ov.hidden{display:none;}
     .confirm-box{background:var(--surf);border:1px solid var(--danger);border-radius:14px;padding:32px 28px;width:380px;display:flex;flex-direction:column;gap:20px;box-shadow:0 20px 60px rgba(0,0,0,.7);animation:mIn .18s cubic-bezier(.16,1,.3,1) both;}
     .confirm-msg{font-size:14px;color:var(--txt);line-height:1.6;text-align:center;}
     .confirm-actions{display:flex;gap:10px;justify-content:center;}
 
-    /* ── ARCHIVE & LOGS ─────────────────────────────────── */
+    /* ââ ARCHIVE & LOGS âââââââââââââââââââââââââââââââââââ */
     .arch-wrap,.clog-wrap{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden;}
     .arch-header,.clog-header{padding:24px 32px 16px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
     .arch-title,.clog-title{font-size:18px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px;}
@@ -360,7 +360,7 @@
     .arch-pending-tag{font-size:10px;padding:2px 8px;border-radius:99px;background:#ff5a5a20;border:1px solid var(--danger);color:var(--danger);margin-left:6px;}
 
     /* ============================================================
-       MOBILE — phones up to 768px
+       MOBILE â phones up to 768px
     ============================================================ */
     @media (max-width: 768px) {
 
@@ -368,7 +368,7 @@
       :root { --hh: 54px; --tw: 100%; }
       html, body { overflow: hidden; }
 
-      /* ── Header ── */
+      /* ââ Header ââ */
       header { height: var(--hh); padding: 0; }
       .logo { flex: 0 0 auto; padding: 0 14px; border-right: none; }
       .logo-text .w1 { font-size: 13px; }
@@ -409,7 +409,7 @@
         overflow-y: auto; overflow-x: hidden;
       }
 
-      /* ── Dashboard ── */
+      /* ââ Dashboard ââ */
       #vDash { padding: 0 !important; gap: 0 !important; }
       #vDash > div {
         padding: 16px 12px !important;
@@ -429,7 +429,7 @@
       .feat-card h3 { font-size: 13.5px; }
       .feat-card p { font-size: 12px; }
 
-      /* ── Split views (Project, Research, etc.) ── */
+      /* ââ Split views (Project, Research, etc.) ââ */
       .split-view { flex-direction: column; position: relative; }
 
       /* Tree panel takes full width, collapses to a drawer */
@@ -446,7 +446,7 @@
         position: fixed !important;
         left: 0 !important;
         right: 0 !important;
-        top: 110px !important; /* ~header(54) + toolbar(44) + gap — refined by JS */
+        top: 110px !important; /* ~header(54) + toolbar(44) + gap â refined by JS */
         bottom: 58px !important;
         max-height: none !important;
         overflow-y: scroll !important;
@@ -462,19 +462,19 @@
       .tree-toolbar { padding: 7px 8px; }
       .tree-tlbl { font-size: 10px; }
 
-      /* ── Module/Word detail panels ── */
+      /* ââ Module/Word detail panels ââ */
       .wd-two-col, .wd-three-col { grid-template-columns: 1fr !important; }
       .word-detail { padding: 16px 14px 40px !important; }
       .c-empty { padding: 40px 20px; }
 
-      /* ── Archive & Logs ── */
+      /* ââ Archive & Logs ââ */
       .arch-header, .clog-header { padding: 16px 16px 12px; }
       .arch-body, .clog-body { padding: 12px 16px; }
       .arch-item { flex-wrap: wrap; gap: 8px; }
       .arch-item-info { min-width: 0; flex: 1 1 100%; }
       .arch-restore-btn, .arch-del-btn { font-size: 11px; padding: 4px 10px; }
 
-      /* ── Systems Map ── */
+      /* ââ Systems Map ââ */
       .smap-toolbar { flex-wrap: wrap; }
       .smap-toolbar-row { flex-wrap: wrap; padding: 6px 8px; gap: 6px; }
       .smap-tbtn { padding: 5px 10px; font-size: 11px; }
@@ -485,7 +485,7 @@
       .smap-sidebar { display: none; } /* hide on mobile */
       .smap-main { flex: 1; }
 
-      /* ── Modals ── */
+      /* ââ Modals ââ */
       .modal-box {
         width: calc(100vw - 32px) !important;
         max-width: 100% !important;
@@ -496,18 +496,18 @@
         max-height: 90vh !important;
       }
 
-      /* ── Login screen ── */
+      /* ââ Login screen ââ */
       .login-box {
         width: calc(100vw - 32px) !important;
         padding: 24px 20px !important;
       }
 
-      /* ── Misc ── */
+      /* ââ Misc ââ */
       .t-acts { display: flex !important; } /* always show tree actions on mobile */
       .ico-btn { min-width: 36px; min-height: 36px; } /* bigger touch targets */
       .tree-tlbl { font-size: 10px; }
 
-      /* ── Tree panel toggle button ── */
+      /* ââ Tree panel toggle button ââ */
       .mob-tree-toggle {
         display: flex; position: sticky; top: 0; z-index: 10;
         width: 100%; padding: 6px 12px;
@@ -528,7 +528,7 @@
       .tree-panel.mob-collapsed .tree-toolbar,
       .tree-panel.mob-collapsed .tree-body { display: none; }
 
-      /* ── Systems map: slide-up properties drawer ── */
+      /* ââ Systems map: slide-up properties drawer ââ */
       .smap-panel {
         display: none !important; /* hidden normally on mobile */
       }
@@ -554,7 +554,7 @@
       .mob-smap-drawer-content { flex: 1; overflow-y: auto; }
     }
 
-    /* ── File / Doc viewer ── */
+    /* ââ File / Doc viewer ââ */
     .file-view{display:grid;grid-template-rows:auto auto 1fr;width:100%;flex:1;min-height:0;overflow:hidden;}
     .file-view-header{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--bdr);flex-shrink:0;background:var(--surf);}
     .file-view-name{font-size:14px;font-weight:600;letter-spacing:-.01em;}
@@ -585,10 +585,10 @@
       .split-view .content-panel{display:none !important;}
       .split-view .tree-panel{width:100% !important;max-height:none !important;height:100% !important;border-right:none !important;border-bottom:none !important;}
       .split-view .mob-tree-toggle{display:none !important;}
-      /* Tree fills all the way down — no gap above bottom nav */
+      /* Tree fills all the way down â no gap above bottom nav */
       .view.active.split-view{bottom:58px !important;}
     }
-    /* ── Mobile file overlay ── */
+    /* ââ Mobile file overlay ââ */
     #mobFileOverlay{display:none;position:fixed;top:var(--hh);left:0;right:0;bottom:0;z-index:300;background:var(--bg);flex-direction:column;}
     #mobFileOverlay.open{display:flex;}
     #mobFileOverlay .mob-fov-header{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:2px solid var(--bdr2);flex-shrink:0;background:var(--surf);min-height:54px;}
@@ -606,9 +606,9 @@
 
 <div id="mobFileOverlay">
   <div class="mob-fov-header">
-    <button class="mob-fov-back" onclick="mobFileOverlayClose()">← Back</button>
+    <button class="mob-fov-back" onclick="mobFileOverlayClose()">â Back</button>
     <span class="mob-fov-title" id="mobFovTitle"></span>
-    <a id="mobFovDownload" class="fv-action-btn" style="text-decoration:none;font-size:11px;" href="#">⬇</a>
+    <a id="mobFovDownload" class="fv-action-btn" style="text-decoration:none;font-size:11px;" href="#">â¬</a>
   </div>
   <div class="mob-fov-tabs" id="mobFovTabs" style="display:none"></div>
   <div class="mob-fov-body" id="mobFovBody"></div>
@@ -651,9 +651,9 @@
       <p>Your WebZero planning workspace at a glance.</p>
     </div>
     <div class="stats-row">
-      <div class="stat"><div class="stat-lbl">Features</div><div class="stat-val" id="statFeatures">—</div></div>
-      <div class="stat"><div class="stat-lbl">Project Files</div><div class="stat-val" id="statProjFiles">—</div></div>
-      <div class="stat"><div class="stat-lbl">Research Docs</div><div class="stat-val" id="statResFiles">—</div></div>
+      <div class="stat"><div class="stat-lbl">Features</div><div class="stat-val" id="statFeatures">â</div></div>
+      <div class="stat"><div class="stat-lbl">Project Files</div><div class="stat-val" id="statProjFiles">â</div></div>
+      <div class="stat"><div class="stat-lbl">Research Docs</div><div class="stat-val" id="statResFiles">â</div></div>
     </div>
     <div>
       <div class="sec-lbl">Features</div>
@@ -666,7 +666,7 @@
 <div class="view split-view" id="vProject">
   <div class="tree-panel">
     <button class="mob-tree-toggle" id="toggle_vProject" onclick="mobToggleTree('vProject')">
-      <span>📁 Explorer</span>
+      <span>ð Explorer</span>
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4l4 4 4-4"/></svg>
     </button>
     <div class="tree-toolbar">
@@ -700,7 +700,7 @@
 <div class="view split-view" id="vResearch">
   <div class="tree-panel">
     <button class="mob-tree-toggle" id="toggle_vResearch" onclick="mobToggleTree('vResearch')">
-      <span>📁 Research</span>
+      <span>ð Research</span>
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4l4 4 4-4"/></svg>
     </button>
     <div class="tree-toolbar">
@@ -734,7 +734,7 @@
 <div class="view split-view" id="vModules">
   <div class="tree-panel">
     <button class="mob-tree-toggle" id="toggle_vModules" onclick="mobToggleTree('vModules')">
-      <span>📁 Modules</span>
+      <span>ð Modules</span>
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4l4 4 4-4"/></svg>
     </button>
     <div class="tree-toolbar">
@@ -764,7 +764,7 @@
 <div class="view split-view" id="vLanguage">
   <div class="tree-panel">
     <button class="mob-tree-toggle" id="toggle_vLanguage" onclick="mobToggleTree('vLanguage')">
-      <span>📁 Language</span>
+      <span>ð Language</span>
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 4l4 4 4-4"/></svg>
     </button>
     <div class="tree-toolbar">
@@ -817,7 +817,7 @@
       <div style="display:flex;align-items:center;">
         <div style="flex:1">
           <div class="clog-title">Logs</div>
-          <div class="clog-sub">All activity — changes, deletions, restores, and blocked logins.</div>
+          <div class="clog-sub">All activity â changes, deletions, restores, and blocked logins.</div>
         </div>
         <button class="clog-clear-btn" onclick="clearChangelog()">Clear log</button>
       </div>
@@ -834,8 +834,8 @@
         <div class="smap-toolbar-left">
           <select class="smap-map-sel" id="smapMapSel" onchange="smapSwitchMap(this.value)" title="Switch map"></select>
           <button class="smap-tbtn" onclick="smapNewMap()">+ Map</button>
-          <button class="smap-tbtn" onclick="smapRenameMap()" title="Rename current map">✎</button>
-          <button class="smap-tbtn" onclick="smapDeleteMap()" title="Delete current map" style="color:var(--danger);border-color:var(--danger-dim);">✕ Map</button>
+          <button class="smap-tbtn" onclick="smapRenameMap()" title="Rename current map">â</button>
+          <button class="smap-tbtn" onclick="smapDeleteMap()" title="Delete current map" style="color:var(--danger);border-color:var(--danger-dim);">â Map</button>
           <div class="smap-divider"></div>
           <button class="smap-tbtn" onclick="smapAddNode()">
             <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="12" height="12"><circle cx="7" cy="7" r="5"/><line x1="7" y1="4" x2="7" y2="10"/><line x1="4" y1="7" x2="10" y2="7"/></svg>
@@ -863,15 +863,15 @@
             Layers
           </button>
           <div class="smap-divider"></div>
-          <button class="smap-tbtn" onclick="smapReset()">⟲ Reset</button>
-          <button class="smap-tbtn" onclick="smapTopView()">⊙ Top View</button>
+          <button class="smap-tbtn" onclick="smapReset()">â² Reset</button>
+          <button class="smap-tbtn" onclick="smapTopView()">â Top View</button>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span class="smap-hint" id="smapHint">Drag — orbit &nbsp;·&nbsp; Pinch — zoom &nbsp;·&nbsp; Tap node — properties</span>
-          <button class="smap-tbtn mob-smap-collapse" id="smapCollapseBtn" onclick="smapToggleToolbar()" title="Collapse toolbar" style="padding:4px 8px;">▲</button>
+          <span class="smap-hint" id="smapHint">Drag â orbit &nbsp;Â·&nbsp; Pinch â zoom &nbsp;Â·&nbsp; Tap node â properties</span>
+          <button class="smap-tbtn mob-smap-collapse" id="smapCollapseBtn" onclick="smapToggleToolbar()" title="Collapse toolbar" style="padding:4px 8px;">â²</button>
         </div>
       </div>
-      <!-- Layers bar — shown when Layers button is clicked -->
+      <!-- Layers bar â shown when Layers button is clicked -->
       <div class="smap-layers-bar" id="smapLayersBar"></div>
     </div>
     <div class="smap-main">
@@ -898,7 +898,7 @@
 <div class="mob-smap-drawer" id="mobSmapDrawer">
   <div class="mob-smap-drawer-handle" id="mobSmapHandle">
     <div class="mob-smap-drawer-grip"></div>
-    <button onclick="mobSmapDrawerClose()" style="position:absolute;right:14px;top:10px;background:none;border:none;color:var(--txt3);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px;">✕</button>
+    <button onclick="mobSmapDrawerClose()" style="position:absolute;right:14px;top:10px;background:none;border:none;color:var(--txt3);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:6px;">â</button>
   </div>
   <div class="mob-smap-drawer-content" id="mobSmapContent">
     <div style="padding:16px;font-size:13px;color:var(--txt3);">Click a node to see its properties.</div>
@@ -932,7 +932,7 @@
     <div class="modal-title" id="mTitle"></div>
     <div class="m-field" id="mfName">
       <label class="m-label">Name</label>
-      <input class="m-input" id="mInput" type="text" autocomplete="off" spellcheck="false" placeholder="Enter name…"/>
+      <input class="m-input" id="mInput" type="text" autocomplete="off" spellcheck="false" placeholder="Enter nameâ¦"/>
     </div>
     <div class="m-field" id="mfType" style="display:none">
       <label class="m-label" id="mTypeLabel">File Type</label>
@@ -969,14 +969,14 @@
     <div class="users-list" id="usersList"></div>
     <div class="new-user-form" id="newUserForm">
       <label class="m-label">Display Name</label>
-      <input class="m-input" id="newUserName" type="text" placeholder="e.g. Alex, Design Team…" autocomplete="off"/>
+      <input class="m-input" id="newUserName" type="text" placeholder="e.g. Alex, Design Teamâ¦" autocomplete="off"/>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-acc" style="flex:1;" onclick="createNewUser()">Generate Phrase &amp; Create</button>
         <button class="btn btn-ghost" onclick="document.getElementById('newUserForm').style.display='none'">Cancel</button>
       </div>
     </div>
     <div class="gen-phrase-box" id="generatedPhrase">
-      <div class="gen-phrase-lbl">New User Phrase — copy and share privately</div>
+      <div class="gen-phrase-lbl">New User Phrase â copy and share privately</div>
       <div class="gen-phrase-txt" id="generatedPhraseText"></div>
       <button class="copy-phrase-btn" id="copyGenBtn" onclick="copyGeneratedPhrase()" style="width:100%;justify-content:center;">
         <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><rect x="4" y="4" width="8" height="8" rx="1.5"/><path d="M2 10V3a1 1 0 011-1h7"/></svg>
@@ -991,7 +991,7 @@
 
 <script>
 /* ================================================================
-   FEATURE REGISTRY — add new features here, everything auto-updates
+   FEATURE REGISTRY â add new features here, everything auto-updates
 ================================================================ */
 const FEATURES = [
   {
@@ -1010,7 +1010,7 @@ const FEATURES = [
   },
   {
     id:'language', label:'Language Builder', showCard:true, viewId:'vLanguage',
-    desc:'Build and organise a custom language library — vocabulary, grammar rules, phonetics, scripts, and more. Structure entries with nested folders.',
+    desc:'Build and organise a custom language library â vocabulary, grammar rules, phonetics, scripts, and more. Structure entries with nested folders.',
     icon:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M2 4h8M2 8h6M2 12h4"/>
             <path d="M10 8l2-4 2 4M10.6 6.5h2.8"/>
@@ -1037,7 +1037,7 @@ const FEATURES = [
             <line x1="11.5" y1="8.8" x2="9.5" y2="11.8"/><line x1="6.5" y1="11.8" x2="4.5" y2="8.8"/>
           </svg>`,
   },
-  // ── ADD NEW FEATURES BELOW ──
+  // ââ ADD NEW FEATURES BELOW ââ
   {
     id:'archive', label:'Archive', showCard:true, viewId:'vArchive',
     desc:'Deleted items are stored here so nothing is ever truly gone. Restore anything with one click.',
@@ -1045,7 +1045,7 @@ const FEATURES = [
   },
   {
     id:'changelog', label:'Logs', showCard:true, viewId:'vChangelog',
-    desc:'A full activity log — changes, deletions, restores, and blocked login attempts.',
+    desc:'A full activity log â changes, deletions, restores, and blocked login attempts.',
     icon:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h10M3 7h7M3 11h5"/><circle cx="13" cy="11" r="2"/><path d="M13 9.5V11l.7.7"/></svg>`,
   },
 ];
@@ -1112,7 +1112,7 @@ const svgFolder = c => `<svg viewBox="0 0 16 16" fill="none" stroke="${c}" strok
 const svgFile   = c => `<svg viewBox="0 0 16 16" fill="none" stroke="${c}" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V5l-3-3z"/><path d="M10 2v3h3"/></svg>`;
 
 /* ================================================================
-   TREE STATE — two independent datasets
+   TREE STATE â two independent datasets
 ================================================================ */
 let globalUid = 1;
 let activeTree = null; // which tree triggered the current modal/ctx
@@ -1201,7 +1201,7 @@ function buildNav() {
 // Rebuild nav on resize so it switches between mobile/desktop
 window.addEventListener('resize', () => buildNav());
 
-/* ── Mobile tree panel toggle ── */
+/* ââ Mobile tree panel toggle ââ */
 function _fixMobTreeBody(viewId) {
   if (window.innerWidth > 768) return;
   const view = document.getElementById(viewId);
@@ -1209,7 +1209,7 @@ function _fixMobTreeBody(viewId) {
   const toolbar = view.querySelector('.tree-toolbar');
   const body    = view.querySelector('.tree-body');
   if (!body) return;
-  // Measure where the toolbar bottom is — that's where tree-body top should start
+  // Measure where the toolbar bottom is â that's where tree-body top should start
   const tbRect = toolbar ? toolbar.getBoundingClientRect() : null;
   const top = tbRect ? Math.round(tbRect.bottom) : 96;
   body.style.top = top + 'px';
@@ -1221,13 +1221,13 @@ function mobToggleTree(viewId) {
   if (!panel) return;
   const collapsed = panel.classList.toggle('mob-collapsed');
   if (btn) btn.classList.toggle('collapsed', collapsed);
-  btn.querySelector('span').textContent = collapsed ? '📁 Show folders' : `📁 ${
+  btn.querySelector('span').textContent = collapsed ? 'ð Show folders' : `ð ${
     {vProject:'Explorer',vResearch:'Research',vModules:'Modules',vLanguage:'Language'}[viewId]
   }`;
 
 }
 
-/* ── Mobile systems map properties drawer ── */
+/* ââ Mobile systems map properties drawer ââ */
 function mobSmapDrawerOpen(html) {
   const drawer  = document.getElementById('mobSmapDrawer');
   const content = document.getElementById('mobSmapContent');
@@ -1285,7 +1285,7 @@ function refreshDash() {
       <div class="feat-ico">${f.icon}</div>
       <h3>${f.label}</h3>
       <p>${f.desc}</p>
-      <button class="open-btn" onclick="event.stopPropagation();gotoView('${f.id}')">Open →</button>
+      <button class="open-btn" onclick="event.stopPropagation();gotoView('${f.id}')">Open â</button>
     </div>
   `).join('');
 }
@@ -1300,10 +1300,10 @@ function countNodes(nodes) {
 }
 
 /* ================================================================
-   TREE RENDER  (generic — pass in any tree state object)
+   TREE RENDER  (generic â pass in any tree state object)
 ================================================================ */
 /* ================================================================
-   DRAG AND DROP — move files/folders between folders
+   DRAG AND DROP â move files/folders between folders
 ================================================================ */
 let _dragNode = null;   // {node, parentArr, tree}
 
@@ -1334,7 +1334,7 @@ function moveNode(tree, dragId, targetId, position) {
     target.node.children.push(drag.node);
     target.node.open = true;
   } else {
-    // Drop before/after target — target is the FOLDER we're escaping from or a sibling
+    // Drop before/after target â target is the FOLDER we're escaping from or a sibling
     const target = findParentArrAndNode(tree.data, targetId);
     if (!target) { tree.data.push(drag.node); return; }
     // target.parentArr is the array containing the target node
@@ -1437,7 +1437,7 @@ function buildRow(node, depth, tree, ancestors=[], isLast=false) {
   const row   = document.createElement('div');
   row.className = 't-row' + (tree.sel === node.id ? ' sel' : '');
 
-  // Tree guide lines — one segment per ancestor level
+  // Tree guide lines â one segment per ancestor level
   for (let i = 0; i < depth; i++) {
     const guide = document.createElement('div');
     guide.className = 't-guide';
@@ -1455,7 +1455,7 @@ function buildRow(node, depth, tree, ancestors=[], isLast=false) {
     } else {
       // Pass-through vertical line (ancestor has more siblings)
       if (!ancestors[i]) {
-        // ancestor was last — no vertical line needed
+        // ancestor was last â no vertical line needed
       } else {
         const line = document.createElement('div');
         line.className = 't-guide-line';
@@ -1563,7 +1563,7 @@ function buildRow(node, depth, tree, ancestors=[], isLast=false) {
     wireDropLine(dropEnd, node, tree, 'inside');
     wrap.appendChild(kids);
 
-    // Drop zone: AFTER the folder (at folder's own indent level) — escape hatch to drag out
+    // Drop zone: AFTER the folder (at folder's own indent level) â escape hatch to drag out
     const dropOut = document.createElement('div');
     dropOut.className = 't-drop-out';
     dropOut.style.paddingLeft = (depth*14+8)+'px';
@@ -1670,17 +1670,17 @@ function openModal(mode, targetId, tree) {
   $('mTypeLabel').textContent = tree.fileLabel+' Type';
 
   if (mode==='folder') {
-    $('mTitle').textContent=$('mInput').value=''; $('mInput').placeholder='Folder name…';
+    $('mTitle').textContent=$('mInput').value=''; $('mInput').placeholder='Folder nameâ¦';
     $('mTitle').textContent = targetId?'New Folder Inside':'New Folder';
     $('mConfirm').textContent='Create';
   } else if (mode==='file') {
     $('mTitle').textContent='New '+tree.fileLabel;
-    $('mInput').value=''; $('mInput').placeholder='Name (no extension)…';
+    $('mInput').value=''; $('mInput').placeholder='Name (no extension)â¦';
     $('mfType').style.display='flex'; $('mConfirm').textContent='Create';
   } else if (mode==='rename') {
     const node=findNode(tree.data,targetId);
     $('mTitle').textContent='Rename'; $('mInput').value=node?node.name:'';
-    $('mInput').placeholder='New name…'; $('mConfirm').textContent='Rename';
+    $('mInput').placeholder='New nameâ¦'; $('mConfirm').textContent='Rename';
   } else if (mode==='delete') {
     const node=findNode(tree.data,targetId);
     $('mTitle').textContent='Delete'; $('mfName').style.display='none'; $('mfConfirm').style.display='flex';
@@ -1724,7 +1724,7 @@ document.getElementById('mConfirm').addEventListener('click', () => {
     const n=findNode(tree.data,mTargetId);
     const oldName = n?.name || '';
     if(n) n.name=name;
-    logChange('edit','Renamed',`${oldName} → ${name}`,tree.label); // logChange calls saveAll
+    logChange('edit','Renamed',`${oldName} â ${name}`,tree.label); // logChange calls saveAll
   }
   else if (mMode==='delete') {
     const delNode=findNode(tree.data,mTargetId);
@@ -1763,7 +1763,7 @@ Object.values(TREES).forEach(tree => {
    INIT
 ================================================================ */
 /* ================================================================
-   LANGUAGE BUILDER — data stores
+   LANGUAGE BUILDER â data stores
 ================================================================ */
 const wordData = {}; // keyed by node id
 const langData = {}; // keyed by node id
@@ -1831,7 +1831,7 @@ function collectByExt(nodes, ext) {
   return out;
 }
 
-/* ── Command Type Picker ── */
+/* ââ Command Type Picker ââ */
 function initTypePicker(containerId, selected, onChange) {
   const el = document.getElementById(containerId);
   if (!el) return;
@@ -1850,7 +1850,7 @@ function initTypePicker(containerId, selected, onChange) {
   });
 }
 
-/* ── Tag Input ── */
+/* ââ Tag Input ââ */
 function initTagInput(containerId, tagsArr, onChange) {
   const container = document.getElementById(containerId);
   if (!container) return;
@@ -1859,7 +1859,7 @@ function initTagInput(containerId, tagsArr, onChange) {
     tagsArr.forEach((tag, i) => {
       const chip = document.createElement('div');
       chip.className = 'tag-chip';
-      chip.innerHTML = `<span>${esc(tag)}</span><button class="tag-x">×</button>`;
+      chip.innerHTML = `<span>${esc(tag)}</span><button class="tag-x">Ã</button>`;
       chip.querySelector('.tag-x').addEventListener('click', e => {
         e.stopPropagation();
         tagsArr.splice(i, 1);
@@ -1869,7 +1869,7 @@ function initTagInput(containerId, tagsArr, onChange) {
     });
     const inp = document.createElement('input');
     inp.className = 'tag-input';
-    inp.placeholder = tagsArr.length === 0 ? 'Type and press Enter…' : '+';
+    inp.placeholder = tagsArr.length === 0 ? 'Type and press Enterâ¦' : '+';
     inp.addEventListener('keydown', e => {
       if ((e.key==='Enter'||e.key===',') && inp.value.trim()) {
         e.preventDefault();
@@ -1886,7 +1886,7 @@ function initTagInput(containerId, tagsArr, onChange) {
   render();
 }
 
-/* ── Field builder helpers ── */
+/* ââ Field builder helpers ââ */
 function wdField(label, id, value, type, placeholder) {
   if (type==='textarea')
     return `<div class="wd-field"><div class="wd-label">${label}</div><textarea class="wd-textarea" id="${id}" placeholder="${esc(placeholder)}">${esc(value)}</textarea></div>`;
@@ -1900,7 +1900,7 @@ function bindField(id, obj, key) {
   if (el) el.addEventListener('input', () => { obj[key] = el.value; });
 }
 
-/* ── Word Detail Panel ── */
+/* ââ Word Detail Panel ââ */
 function renderWordDetail(node, tree) {
   const panel = document.getElementById('lContentPanel');
   if (!panel) return;
@@ -1911,7 +1911,7 @@ function renderWordDetail(node, tree) {
   panel.innerHTML = `<div class="word-detail">
 
     <div class="wd-header">
-      <input class="wd-word-input" id="wdWord" value="${esc(d.word||node.name)}" placeholder="Enter word…"/>
+      <input class="wd-word-input" id="wdWord" value="${esc(d.word||node.name)}" placeholder="Enter wordâ¦"/>
       <div class="wd-lang-badge">${esc(d.language || parentFolder?.name || 'Unknown Language')}</div>
     </div>
 
@@ -1923,12 +1923,12 @@ function renderWordDetail(node, tree) {
     <div class="wd-section">
       <div class="wd-section-title">Kernel Layer Analysis</div>
       <div class="wd-fields">
-        ${wdField('Etymology / Root',       'wdEtym', d.etymology,  'textarea', 'Where does this word originate? Root language, original form…')}
-        ${wdField('Morphological Structure','wdMorph', d.morphology, 'textarea', 'Prefixes, root, suffixes — how the word is physically formed…')}
-        ${wdField('Phonetics / IPA',        'wdPhon', d.phonetics,  'input',    'e.g. /wɜːd/')}
-        ${wdField('Semantic Core',          'wdSem',  d.semantics,  'textarea', 'Deep meaning — what concept or idea does this word encode?')}
+        ${wdField('Etymology / Root',       'wdEtym', d.etymology,  'textarea', 'Where does this word originate? Root language, original formâ¦')}
+        ${wdField('Morphological Structure','wdMorph', d.morphology, 'textarea', 'Prefixes, root, suffixes â how the word is physically formedâ¦')}
+        ${wdField('Phonetics / IPA',        'wdPhon', d.phonetics,  'input',    'e.g. /wÉËd/')}
+        ${wdField('Semantic Core',          'wdSem',  d.semantics,  'textarea', 'Deep meaning â what concept or idea does this word encode?')}
         ${wdField('Syntactic Behaviour',    'wdSyn',  d.syntax,     'textarea', 'How does this word function grammatically in a sentence?')}
-        ${wdField('Pragmatic Use',          'wdPrag', d.pragmatics, 'textarea', 'How is it actually used? Register, tone, social context…')}
+        ${wdField('Pragmatic Use',          'wdPrag', d.pragmatics, 'textarea', 'How is it actually used? Register, tone, social contextâ¦')}
       </div>
     </div>
 
@@ -1954,18 +1954,18 @@ function renderWordDetail(node, tree) {
 
     <div class="wd-two-col">
       <div class="wd-section">
-        <div class="wd-section-title wd-strong">▲ Strong Points</div>
-        <textarea class="wd-textarea wd-textarea-lg" id="wdStrong" placeholder="Expressiveness, precision, flexibility, elegance…">${esc(d.strongPoints)}</textarea>
+        <div class="wd-section-title wd-strong">â² Strong Points</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="wdStrong" placeholder="Expressiveness, precision, flexibility, eleganceâ¦">${esc(d.strongPoints)}</textarea>
       </div>
       <div class="wd-section">
-        <div class="wd-section-title wd-weak">▼ Weak Points</div>
-        <textarea class="wd-textarea wd-textarea-lg" id="wdWeak" placeholder="Ambiguities, irregularities, limitations, difficulty…">${esc(d.weakPoints)}</textarea>
+        <div class="wd-section-title wd-weak">â¼ Weak Points</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="wdWeak" placeholder="Ambiguities, irregularities, limitations, difficultyâ¦">${esc(d.weakPoints)}</textarea>
       </div>
     </div>
 
     <div class="wd-section">
       <div class="wd-section-title">Notes</div>
-      <textarea class="wd-textarea wd-textarea-lg" id="wdNotes" placeholder="Examples, observations, usage patterns, references…">${esc(d.notes)}</textarea>
+      <textarea class="wd-textarea wd-textarea-lg" id="wdNotes" placeholder="Examples, observations, usage patterns, referencesâ¦">${esc(d.notes)}</textarea>
     </div>
 
     <div class="wd-section">
@@ -1988,7 +1988,7 @@ function renderWordDetail(node, tree) {
   ].forEach(([id, key]) => bindField(id, d, key));
 }
 
-/* ── Language Overview Panel ── */
+/* ââ Language Overview Panel ââ */
 function renderLangOverview(node, tree) {
   const panel = document.getElementById('lContentPanel');
   if (!panel) return;
@@ -2000,20 +2000,20 @@ function renderLangOverview(node, tree) {
     : collectByExt(tree.data, 'cmdmd').filter(n => n.id !== node.id);
   const vocabRows = cmdFiles.map(w => {
     const wd = wordData[w.id] || {};
-    const types = (wd.types||[]).join(', ') || '—';
-    const def   = wd.definition ? wd.definition.slice(0,55)+(wd.definition.length>55?'…':'') : '—';
+    const types = (wd.types||[]).join(', ') || 'â';
+    const def   = wd.definition ? wd.definition.slice(0,55)+(wd.definition.length>55?'â¦':'') : 'â';
     return `<div class="vocab-row">
       <span class="vocab-word">${esc(wd.word||w.name)}</span>
       <span class="vocab-type">${esc(types)}</span>
       <span class="vocab-def">${esc(def)}</span>
-      <button class="vocab-link" data-wid="${w.id}">→</button>
+      <button class="vocab-link" data-wid="${w.id}">â</button>
     </div>`;
   }).join('');
 
   panel.innerHTML = `<div class="word-detail">
 
     <div class="wd-header">
-      <input class="wd-word-input" id="loName" value="${esc(d.name||node.name)}" placeholder="Language name…"/>
+      <input class="wd-word-input" id="loName" value="${esc(d.name||node.name)}" placeholder="Language nameâ¦"/>
       <div class="wd-lang-badge lang-badge-lg">Language Overview</div>
     </div>
 
@@ -2021,13 +2021,13 @@ function renderLangOverview(node, tree) {
     <div class="wd-section">
       <div class="wd-section-title">Identity</div>
       <div class="wd-meta-grid">
-        ${loField('Paradigm',        'loParadigm',  d.paradigm,       'e.g. Object-Oriented, Functional, Procedural, Declarative…')}
-        ${loField('Type System',     'loTypeSystem',d.typeSystem,     'e.g. Static, Dynamic, Strong, Weak, Duck typed…')}
-        ${loField('Execution Model', 'loExecModel', d.executionModel, 'e.g. Compiled, Interpreted, JIT, Transpiled, AOT…')}
-        ${loField('File Extension',  'loFileExt',   d.fileExtension,  'e.g. .py, .js, .rs, .go, .custom…')}
-        ${loField('Primary Use Case','loPrimary',   d.primaryUseCase, 'e.g. Systems, Web, Data Science, Scripting, AI/ML, Embedded…')}
-        ${loField('Author / Origin', 'loAuthor',    d.author,         'e.g. Guido van Rossum, personal project, team name…')}
-        ${loField('Version',         'loVersion',   d.version,        'e.g. 1.0.0, alpha, draft…')}
+        ${loField('Paradigm',        'loParadigm',  d.paradigm,       'e.g. Object-Oriented, Functional, Procedural, Declarativeâ¦')}
+        ${loField('Type System',     'loTypeSystem',d.typeSystem,     'e.g. Static, Dynamic, Strong, Weak, Duck typedâ¦')}
+        ${loField('Execution Model', 'loExecModel', d.executionModel, 'e.g. Compiled, Interpreted, JIT, Transpiled, AOTâ¦')}
+        ${loField('File Extension',  'loFileExt',   d.fileExtension,  'e.g. .py, .js, .rs, .go, .customâ¦')}
+        ${loField('Primary Use Case','loPrimary',   d.primaryUseCase, 'e.g. Systems, Web, Data Science, Scripting, AI/ML, Embeddedâ¦')}
+        ${loField('Author / Origin', 'loAuthor',    d.author,         'e.g. Guido van Rossum, personal project, team nameâ¦')}
+        ${loField('Version',         'loVersion',   d.version,        'e.g. 1.0.0, alpha, draftâ¦')}
         <div class="wd-field">
           <div class="wd-label">Status</div>
           <select class="wd-input" id="loStatus">
@@ -2041,7 +2041,7 @@ function renderLangOverview(node, tree) {
     <div class="wd-two-col">
       <div class="wd-section">
         <div class="wd-section-title">Overview</div>
-        <textarea class="wd-textarea wd-textarea-lg" id="loDesc" placeholder="Describe this language — its purpose, history, and context…">${esc(d.description)}</textarea>
+        <textarea class="wd-textarea wd-textarea-lg" id="loDesc" placeholder="Describe this language â its purpose, history, and contextâ¦">${esc(d.description)}</textarea>
       </div>
       <div class="wd-section">
         <div class="wd-section-title">Design Goals</div>
@@ -2058,10 +2058,10 @@ function renderLangOverview(node, tree) {
     <div class="wd-section">
       <div class="wd-section-title">Runtime &amp; Environment</div>
       <div class="wd-fields">
-        ${wdField('Runtime / VM',         'loRuntime',     d.runtime,           'textarea', 'e.g. JVM, Node.js, V8, bare metal, WASM, custom runtime…')}
-        ${wdField('Memory Management',    'loMemory',      d.memoryModel,       'textarea', 'e.g. Garbage collected, manual, ownership/borrow checker, reference counting…')}
-        ${wdField('Concurrency Model',    'loConcurrency', d.concurrencyModel,  'textarea', 'e.g. async/await, threads, coroutines, actors, event loop…')}
-        ${wdField('Performance Profile',  'loPerf',        d.performanceProfile,'textarea', 'e.g. high performance compiled, scripting speed, interpreted overhead, real-time…')}
+        ${wdField('Runtime / VM',         'loRuntime',     d.runtime,           'textarea', 'e.g. JVM, Node.js, V8, bare metal, WASM, custom runtimeâ¦')}
+        ${wdField('Memory Management',    'loMemory',      d.memoryModel,       'textarea', 'e.g. Garbage collected, manual, ownership/borrow checker, reference countingâ¦')}
+        ${wdField('Concurrency Model',    'loConcurrency', d.concurrencyModel,  'textarea', 'e.g. async/await, threads, coroutines, actors, event loopâ¦')}
+        ${wdField('Performance Profile',  'loPerf',        d.performanceProfile,'textarea', 'e.g. high performance compiled, scripting speed, interpreted overhead, real-timeâ¦')}
       </div>
     </div>
 
@@ -2069,11 +2069,11 @@ function renderLangOverview(node, tree) {
     <div class="wd-section">
       <div class="wd-section-title">Syntax &amp; Type System</div>
       <div class="wd-fields">
-        ${wdField('Statement Structure', 'loStmtStruct',  d.statementStructure,'textarea', 'How are statements formed? Semicolons, newlines, indentation-sensitive…')}
-        ${wdField('Scoping Rules',       'loScoping',     d.scopingRules,      'textarea', 'e.g. Lexical, dynamic, block-scoped, function-scoped, closures…')}
-        ${wdField('Type System Detail',  'loTypeDetail',  d.typeSystemDetail,  'textarea', 'How does the type system work? Inference, generics, union types, interfaces…')}
-        ${wdField('Control Flow',        'loControl',     d.controlFlow,       'textarea', 'Loops, conditionals, pattern matching, guards, short-circuit evaluation…')}
-        ${wdField('Compilation Model',   'loCompile',     d.compilationModel,  'textarea', 'How does the code get from source to execution? Build steps, linking, modules…')}
+        ${wdField('Statement Structure', 'loStmtStruct',  d.statementStructure,'textarea', 'How are statements formed? Semicolons, newlines, indentation-sensitiveâ¦')}
+        ${wdField('Scoping Rules',       'loScoping',     d.scopingRules,      'textarea', 'e.g. Lexical, dynamic, block-scoped, function-scoped, closuresâ¦')}
+        ${wdField('Type System Detail',  'loTypeDetail',  d.typeSystemDetail,  'textarea', 'How does the type system work? Inference, generics, union types, interfacesâ¦')}
+        ${wdField('Control Flow',        'loControl',     d.controlFlow,       'textarea', 'Loops, conditionals, pattern matching, guards, short-circuit evaluationâ¦')}
+        ${wdField('Compilation Model',   'loCompile',     d.compilationModel,  'textarea', 'How does the code get from source to execution? Build steps, linking, modulesâ¦')}
       </div>
     </div>
 
@@ -2081,9 +2081,9 @@ function renderLangOverview(node, tree) {
     <div class="wd-section">
       <div class="wd-section-title">Command Structure</div>
       <div class="wd-fields">
-        ${wdField('Command Structure',   'loCmdStruct',  d.commandStructure,  'textarea', 'How are commands structured in this language? Overall pattern…')}
+        ${wdField('Command Structure',   'loCmdStruct',  d.commandStructure,  'textarea', 'How are commands structured in this language? Overall patternâ¦')}
         ${wdField('Syntax Pattern',      'loSynPat',     d.syntaxPattern,     'textarea', 'What does a typical command or expression look like?')}
-        ${wdField('Command Hierarchy',   'loCmdHier',    d.commandHierarchy,  'textarea', 'How are commands prioritised or nested? Precedence rules…')}
+        ${wdField('Command Hierarchy',   'loCmdHier',    d.commandHierarchy,  'textarea', 'How are commands prioritised or nested? Precedence rulesâ¦')}
         ${wdField('Error Handling',      'loErrors',     d.errorHandling,     'textarea', 'How does the language handle errors, exceptions, or invalid input?')}
       </div>
     </div>
@@ -2092,30 +2092,30 @@ function renderLangOverview(node, tree) {
     <div class="wd-two-col">
       <div class="wd-section">
         <div class="wd-section-title">Key Features</div>
-        <textarea class="wd-textarea wd-textarea-lg" id="loFeatures" placeholder="What makes this language distinctive? Standout capabilities…">${esc(d.keyFeatures)}</textarea>
+        <textarea class="wd-textarea wd-textarea-lg" id="loFeatures" placeholder="What makes this language distinctive? Standout capabilitiesâ¦">${esc(d.keyFeatures)}</textarea>
       </div>
       <div class="wd-section">
         <div class="wd-section-title">Examples</div>
-        <textarea class="wd-textarea wd-textarea-lg" id="loExamples" placeholder="Example commands, expressions, or sentences in this language…">${esc(d.examples)}</textarea>
+        <textarea class="wd-textarea wd-textarea-lg" id="loExamples" placeholder="Example commands, expressions, or sentences in this languageâ¦">${esc(d.examples)}</textarea>
       </div>
     </div>
 
     <!-- Strong / Weak Points -->
     <div class="wd-two-col">
       <div class="wd-section">
-        <div class="wd-section-title wd-strong">▲ Strong Points</div>
+        <div class="wd-section-title wd-strong">â² Strong Points</div>
         <textarea class="wd-textarea wd-textarea-lg" id="loStrong" placeholder="What does this language do particularly well?">${esc(d.strongPoints)}</textarea>
       </div>
       <div class="wd-section">
-        <div class="wd-section-title wd-weak">▼ Weak Points</div>
-        <textarea class="wd-textarea wd-textarea-lg" id="loWeak" placeholder="Current limitations, rough edges, or areas needing work…">${esc(d.weakPoints)}</textarea>
+        <div class="wd-section-title wd-weak">â¼ Weak Points</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="loWeak" placeholder="Current limitations, rough edges, or areas needing workâ¦">${esc(d.weakPoints)}</textarea>
       </div>
     </div>
 
     <!-- Notes & Tags -->
     <div class="wd-section">
       <div class="wd-section-title">Notes</div>
-      <textarea class="wd-textarea wd-textarea-lg" id="loNotes" placeholder="Anything else — references, ideas, open questions…">${esc(d.notes)}</textarea>
+      <textarea class="wd-textarea wd-textarea-lg" id="loNotes" placeholder="Anything else â references, ideas, open questionsâ¦">${esc(d.notes)}</textarea>
     </div>
 
     <div class="wd-section">
@@ -2130,7 +2130,7 @@ function renderLangOverview(node, tree) {
         <span class="vocab-count">${cmdFiles.length} command${cmdFiles.length!==1?'s':''}</span>
       </div>
       ${cmdFiles.length===0
-        ? `<div class="t-hint" style="padding:12px 4px;font-size:13px;">No command entries yet — add Command Entry (.md) files inside this language folder.</div>`
+        ? `<div class="t-hint" style="padding:12px 4px;font-size:13px;">No command entries yet â add Command Entry (.md) files inside this language folder.</div>`
         : `<div class="vocab-table">
             <div class="vocab-header"><span>Word</span><span>Command(s)</span><span>Definition</span><span></span></div>
             ${vocabRows}
@@ -2166,9 +2166,9 @@ function renderLangOverview(node, tree) {
   });
 }
 
-/* ── Wire up the language tree's onSelect ── */
+/* ââ Wire up the language tree's onSelect ââ */
 /* ================================================================
-   FILE VIEWER — Project + Research trees
+   FILE VIEWER â Project + Research trees
 ================================================================ */
 window._fixMobFileBody = function _fixMobFileBody(panelId) {
   const body = document.getElementById('fvBody_' + panelId);
@@ -2191,9 +2191,9 @@ window._fixMobFileBody = function _fixMobFileBody(panelId) {
   body.style.boxSizing = 'border-box';
 }
 
-/* ── Mobile file overlay ── */
+/* ââ Mobile file overlay ââ */
 function mobFileOverlayOpen(node, tree) {
-  // PDFs open directly in new tab — no overlay needed
+  // PDFs open directly in new tab â no overlay needed
   if (node.storageUrl && (node.ext === 'pdf' || (node.binaryType||'').includes('pdf'))) {
     window.open(node.storageUrl, '_blank');
     return;
@@ -2271,23 +2271,23 @@ function mobFovRender(node, tab) {
     body.innerHTML = `<div class="file-rendered" style="padding-bottom:40px;">${simpleMarkdown(node.content||'')}</div>`;
     return;
   }
-  // Binary file — new storage URL or legacy binaryKey
+  // Binary file â new storage URL or legacy binaryKey
   const fileUrl = node.storageUrl || null;
   if (node.storageKey || node.binaryKey) {
     if (fileUrl) {
       const isPdf = ext === 'pdf' || (node.binaryType||'').includes('pdf');
       if (isPdf) {
-        // On mobile open in new tab — native PDF viewer handles it best
+        // On mobile open in new tab â native PDF viewer handles it best
         window.open(fileUrl, '_blank');
         return; // Don't open overlay at all
       } else {
-        body.innerHTML = `<div style="padding:40px 0;text-align:center;"><div style="font-size:48px;">📄</div><p style="margin-top:12px;">.${ext} file</p><a href="${fileUrl}" download class="fv-action-btn" style="margin-top:12px;text-decoration:none;display:inline-flex;">⬇ Download</a><a href="${fileUrl}" target="_blank" class="fv-action-btn" style="margin-top:8px;text-decoration:none;display:inline-flex;">↗ Open</a></div>`;
+        body.innerHTML = `<div style="padding:40px 0;text-align:center;"><div style="font-size:48px;">ð</div><p style="margin-top:12px;">.${ext} file</p><a href="${fileUrl}" download class="fv-action-btn" style="margin-top:12px;text-decoration:none;display:inline-flex;">â¬ Download</a><a href="${fileUrl}" target="_blank" class="fv-action-btn" style="margin-top:8px;text-decoration:none;display:inline-flex;">â Open</a></div>`;
       }
     } else {
-      // Legacy binaryKey — fetch from Supabase JSON row
-      body.innerHTML = `<div style="padding:40px 0;text-align:center;color:var(--txt3);">Loading…</div>`;
+      // Legacy binaryKey â fetch from Supabase JSON row
+      body.innerHTML = `<div style="padding:40px 0;text-align:center;color:var(--txt3);">Loadingâ¦</div>`;
       sbGet(node.binaryKey).then(data => {
-        if (!data?.base64) { body.innerHTML = `<div style="padding:40px 0;text-align:center;">Could not load — please re-upload this file.</div>`; return; }
+        if (!data?.base64) { body.innerHTML = `<div style="padding:40px 0;text-align:center;">Could not load â please re-upload this file.</div>`; return; }
         const isPdf = ext === 'pdf' || data.type?.includes('pdf');
         const parts = data.base64.match(/^data:([^;]+);base64,(.+)$/);
         if (!parts) return;
@@ -2296,10 +2296,10 @@ function mobFovRender(node, tab) {
         const blob = new Blob([arr],{type:parts[1]});
         const url = URL.createObjectURL(blob);
         if (isPdf) {
-          body.innerHTML = `<div style="padding:8px 0 12px;display:flex;gap:8px;"><a href="${url}" target="_blank" class="fv-action-btn" style="text-decoration:none;">↗ Open</a><a href="${url}" download="${esc(node.name)}.pdf" class="fv-action-btn" style="text-decoration:none;">⬇ Download</a></div><div id="mobPdfCanvasLeg" class="pdf-canvas-wrap" style="flex:1;margin:0 -16px;padding:12px;"></div>`;
+          body.innerHTML = `<div style="padding:8px 0 12px;display:flex;gap:8px;"><a href="${url}" target="_blank" class="fv-action-btn" style="text-decoration:none;">â Open</a><a href="${url}" download="${esc(node.name)}.pdf" class="fv-action-btn" style="text-decoration:none;">â¬ Download</a></div><div id="mobPdfCanvasLeg" class="pdf-canvas-wrap" style="flex:1;margin:0 -16px;padding:12px;"></div>`;
           renderPdfJs(url, document.getElementById('mobPdfCanvasLeg'), body.clientWidth);
         } else {
-          body.innerHTML = `<div style="padding:40px 0;text-align:center;"><div style="font-size:48px;">📄</div><a href="${url}" download class="fv-action-btn" style="margin-top:12px;text-decoration:none;display:inline-flex;">⬇ Download</a></div>`;
+          body.innerHTML = `<div style="padding:40px 0;text-align:center;"><div style="font-size:48px;">ð</div><a href="${url}" download class="fv-action-btn" style="margin-top:12px;text-decoration:none;display:inline-flex;">â¬ Download</a></div>`;
         }
       }).catch(() => { body.innerHTML = `<div style="padding:40px 0;text-align:center;">Could not load file.</div>`; });
     }
@@ -2316,13 +2316,13 @@ function mobFovRender(node, tab) {
   body.appendChild(ta);
 }
 
-/* Render PDF using PDF.js — all pages rendered sequentially to avoid memory spike */
+/* Render PDF using PDF.js â all pages rendered sequentially to avoid memory spike */
 function renderPdfJs(url, container, width) {
-  container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--txt3);">Loading PDF…</div>';
+  container.innerHTML = '<div style="padding:40px;text-align:center;color:var(--txt3);">Loading PDFâ¦</div>';
   pdfjsLib.getDocument(url).promise.then(pdf => {
     container.innerHTML = '';
     const W = Math.min(width || container.clientWidth || 360, window.innerWidth - 8);
-    // Render pages one at a time sequentially — avoids memory spike from parallel rendering
+    // Render pages one at a time sequentially â avoids memory spike from parallel rendering
     let chain = Promise.resolve();
     for (let i = 1; i <= pdf.numPages; i++) {
       const pageNum = i;
@@ -2347,7 +2347,7 @@ function renderPdfJs(url, container, width) {
     }
     chain.catch(e => console.warn('PDF render error:', e));
   }).catch(() => {
-    container.innerHTML = `<div style="padding:40px;text-align:center;">Could not load PDF.<br><a href="${url}" target="_blank" style="color:var(--acc);">↗ Open directly</a></div>`;
+    container.innerHTML = `<div style="padding:40px;text-align:center;">Could not load PDF.<br><a href="${url}" target="_blank" style="color:var(--acc);">â Open directly</a></div>`;
   });
 }
 
@@ -2396,10 +2396,10 @@ function renderFileView(node, panelId, tree) {
       ${tabsHtml}
       <div class="file-view-body" id="fvBody_${panelId}">
         ${isText
-          ? `<textarea class="file-editor" id="fvEditor_${panelId}" placeholder="Start typing…" spellcheck="false">${esc(node.content)}</textarea>`
+          ? `<textarea class="file-editor" id="fvEditor_${panelId}" placeholder="Start typingâ¦" spellcheck="false">${esc(node.content)}</textarea>`
           : (node.storageKey || node.binaryKey)
-            ? `<div id="fvBinView_${panelId}" style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:13px;">${node.storageUrl ? 'Loading…' : 'Uploading…'}</div>`
-            : `<div class="c-empty" style="margin:60px auto;"><div class="big">📄</div><p>.${dispExt} file</p><textarea class="file-editor" style="height:200px;margin-top:20px;" id="fvEditor_${panelId}" placeholder="Notes…">${esc(node.content)}</textarea></div>`
+            ? `<div id="fvBinView_${panelId}" style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--txt3);font-size:13px;">${node.storageUrl ? 'Loadingâ¦' : 'Uploadingâ¦'}</div>`
+            : `<div class="c-empty" style="margin:60px auto;"><div class="big">ð</div><p>.${dispExt} file</p><textarea class="file-editor" style="height:200px;margin-top:20px;" id="fvEditor_${panelId}" placeholder="Notesâ¦">${esc(node.content)}</textarea></div>`
         }
       </div>
     </div>`;
@@ -2423,28 +2423,28 @@ function renderFileView(node, panelId, tree) {
         binDiv.innerHTML = `
           <div style="display:flex;flex-direction:column;width:100%;height:100%;min-height:0;">
             <div style="display:flex;gap:8px;padding:8px 12px;border-bottom:1px solid var(--bdr);flex-shrink:0;">
-              <a href="${node.storageUrl}" target="_blank" class="fv-action-btn" style="text-decoration:none;">↗ Open PDF</a>
-              <a href="${node.storageUrl}" download="${esc(node.name)}.pdf" class="fv-action-btn" style="text-decoration:none;">⬇ Download</a>
+              <a href="${node.storageUrl}" target="_blank" class="fv-action-btn" style="text-decoration:none;">â Open PDF</a>
+              <a href="${node.storageUrl}" download="${esc(node.name)}.pdf" class="fv-action-btn" style="text-decoration:none;">â¬ Download</a>
             </div>
             <iframe src="${gdocsUrl}" style="flex:1;width:100%;border:none;min-height:400px;" title="${esc(node.name)}.pdf"></iframe>
           </div>`;
       } else {
         binDiv.innerHTML = `<div class="c-empty" style="margin:auto;">
-          <div class="big">📄</div>
+          <div class="big">ð</div>
           <p style="margin-top:12px;">.${dispExt} file</p>
-          <a href="${node.storageUrl}" download="${esc(node.name)}.${dispExt}" class="fv-action-btn" style="margin-top:12px;text-decoration:none;">⬇ Download</a>
-          <a href="${node.storageUrl}" target="_blank" class="fv-action-btn" style="margin-top:8px;text-decoration:none;">↗ Open</a>
+          <a href="${node.storageUrl}" download="${esc(node.name)}.${dispExt}" class="fv-action-btn" style="margin-top:12px;text-decoration:none;">â¬ Download</a>
+          <a href="${node.storageUrl}" target="_blank" class="fv-action-btn" style="margin-top:8px;text-decoration:none;">â Open</a>
         </div>`;
       }
     } else {
-      binDiv.innerHTML = `<div class="c-empty" style="margin:auto;"><div class="big">📄</div><p>Uploading… please wait</p></div>`;
+      binDiv.innerHTML = `<div class="c-empty" style="margin:auto;"><div class="big">ð</div><p>Uploadingâ¦ please wait</p></div>`;
     }
     return;
   }
   // Legacy: old base64 binaryKey nodes
   if (node.binaryKey) {
     const binDiv = document.getElementById('fvBinView_' + panelId);
-    if (binDiv) binDiv.innerHTML = `<div class="c-empty" style="margin:auto;"><div class="big">📄</div><p>Re-upload this file to view it.</p></div>`;
+    if (binDiv) binDiv.innerHTML = `<div class="c-empty" style="margin:auto;"><div class="big">ð</div><p>Re-upload this file to view it.</p></div>`;
     return;
   }
 
@@ -2511,7 +2511,7 @@ function simpleMarkdown(md) {
     .replace(/^(?!<[hubolp])/gm,'<p>') + '';
 }
 
-/* Upload a file from the toolbar — creates a new node in the tree */
+/* Upload a file from the toolbar â creates a new node in the tree */
 const TEXT_EXTS = new Set(['txt','md','json','yaml','yml','xml','html','htm','js','ts','jsx','tsx','css','scss','csv','toml','ini','sh','py','rb','go','rs','sql','env','log','conf','cfg']);
 const MAX_TEXT_SIZE = 512 * 1024;   // 512 KB for text files
 const MAX_BIN_SIZE  = 30 * 1024 * 1024; // 30 MB for binary files
@@ -2530,11 +2530,11 @@ function fvHandleUploadToTree(event, panelId, treeKey) {
 
     // Size guards
     if (isText && file.size > MAX_TEXT_SIZE) {
-      alert(`"${file.name}" is ${(file.size/1024).toFixed(0)} KB — text files over 512 KB can't be stored. Try splitting it up.`);
+      alert(`"${file.name}" is ${(file.size/1024).toFixed(0)} KB â text files over 512 KB can't be stored. Try splitting it up.`);
       return;
     }
     if (!isText && file.size > MAX_BIN_SIZE) {
-      alert(`"${file.name}" is ${(file.size/1024/1024).toFixed(1)} MB — files over 30 MB aren't supported.`);
+      alert(`"${file.name}" is ${(file.size/1024/1024).toFixed(1)} MB â files over 30 MB aren't supported.`);
       return;
     }
 
@@ -2554,7 +2554,7 @@ function fvHandleUploadToTree(event, panelId, treeKey) {
       };
       reader.readAsText(file);
     } else {
-      // Binary — upload directly to Supabase Storage (no base64, no JSON bloat)
+      // Binary â upload directly to Supabase Storage (no base64, no JSON bloat)
       node.content = '';
       node.storageKey = 'uploads/' + nodeId + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
       node.binaryType = file.type;
@@ -2570,7 +2570,7 @@ function fvHandleUploadToTree(event, panelId, treeKey) {
         })
         .catch(err => {
           console.error('Storage upload failed:', err);
-          alert('Upload failed — check your connection.');
+          alert('Upload failed â check your connection.');
           tree.data = tree.data.filter(n => n.id !== node.id);
           renderTree(tree);
         });
@@ -2589,7 +2589,7 @@ async function fvDownload(panelId) {
   const name = node.name + ext;
 
   if (node.binaryKey) {
-    // Binary file — fetch base64 from Supabase, trigger download
+    // Binary file â fetch base64 from Supabase, trigger download
     const data = await sbGet(node.binaryKey).catch(() => null);
     if (!data?.base64) { alert('File content not found.'); return; }
     // Use Blob URL for reliable download
@@ -2622,7 +2622,7 @@ TREES.research.onSelect = (node, isDir, tree) => renderFileView(node, 'rContentP
 
 TREES.language.onSelect = (node, isDir, tree) => {
   if (isDir) {
-    // Folders just expand/collapse — reset right panel to empty state
+    // Folders just expand/collapse â reset right panel to empty state
     document.getElementById('lContentPanel').innerHTML =
       '<div class="c-empty" style="margin:auto;align-self:center;"><div class="big">{ }</div><p>Select a file to view</p></div>';
     return;
@@ -2632,7 +2632,7 @@ TREES.language.onSelect = (node, isDir, tree) => {
 };
 
 /* ================================================================
-   MODULES — data store + render
+   MODULES â data store + render
 ================================================================ */
 const modData = {};
 
@@ -2660,7 +2660,7 @@ function renderModuleDetail(node, tree) {
   panel.innerHTML = `<div class="word-detail">
 
     <div class="wd-header">
-      <input class="wd-word-input" id="mdName" value="${esc(d.name||node.name)}" placeholder="Module name…"/>
+      <input class="wd-word-input" id="mdName" value="${esc(d.name||node.name)}" placeholder="Module nameâ¦"/>
       <div class="wd-lang-badge lang-badge-lg">Module Overview</div>
     </div>
 
@@ -2668,16 +2668,16 @@ function renderModuleDetail(node, tree) {
     <div class="wd-section">
       <div class="wd-section-title">Identity</div>
       <div class="wd-meta-grid">
-        ${loField('Version',      'mdVersion', d.version, 'e.g. 1.0.0, alpha…')}
+        ${loField('Version',      'mdVersion', d.version, 'e.g. 1.0.0, alphaâ¦')}
         <div class="wd-field">
           <div class="wd-label">Creator</div>
           <select class="wd-input" id="mdCreator">
-            <option value="">— Select creator —</option>
+            <option value="">â Select creator â</option>
             ${users.map(u=>`<option value="${u.id}" ${d.creatorId===u.id?'selected':''}>${esc(u.displayName)}</option>`).join('')}
           </select>
         </div>
-        ${loField('Owner / Team','mdOwnerTeam',d.ownerTeam,'Team, department, or group responsible for this module…')}
-        ${loField('Repository',   'mdRepo',    d.repo,    'e.g. /src/modules/messaging, github.com/…')}
+        ${loField('Owner / Team','mdOwnerTeam',d.ownerTeam,'Team, department, or group responsible for this moduleâ¦')}
+        ${loField('Repository',   'mdRepo',    d.repo,    'e.g. /src/modules/messaging, github.com/â¦')}
         <div class="wd-field">
           <div class="wd-label">Status</div>
           <select class="wd-input" id="mdStatus">
@@ -2691,7 +2691,7 @@ function renderModuleDetail(node, tree) {
     <div class="wd-two-col">
       <div class="wd-section">
         <div class="wd-section-title">Description</div>
-        <textarea class="wd-textarea wd-textarea-lg" id="mdDesc" placeholder="What does this module do? Give a clear overview…">${esc(d.description)}</textarea>
+        <textarea class="wd-textarea wd-textarea-lg" id="mdDesc" placeholder="What does this module do? Give a clear overviewâ¦">${esc(d.description)}</textarea>
       </div>
       <div class="wd-section">
         <div class="wd-section-title">Use Case</div>
@@ -2703,9 +2703,9 @@ function renderModuleDetail(node, tree) {
     <div class="wd-section">
       <div class="wd-section-title">Architecture</div>
       <div class="wd-fields">
-        ${wdField('How It Works',     'mdHowItWorks',    d.howItWorks,    'textarea', 'Explain the high-level flow — what happens from input to output?')}
+        ${wdField('How It Works',     'mdHowItWorks',    d.howItWorks,    'textarea', 'Explain the high-level flow â what happens from input to output?')}
         ${wdField('Core Components',  'mdCoreComponents',d.coreComponents,'textarea', 'What are the key parts that make up this module? List and describe each.')}
-        ${wdField('Data Flow',        'mdDataFlow',      d.dataFlow,      'textarea', 'How does data move through this module? Entry points, transformations, outputs…')}
+        ${wdField('Data Flow',        'mdDataFlow',      d.dataFlow,      'textarea', 'How does data move through this module? Entry points, transformations, outputsâ¦')}
       </div>
     </div>
 
@@ -2713,10 +2713,10 @@ function renderModuleDetail(node, tree) {
     <div class="wd-section">
       <div class="wd-section-title">API &amp; Interface</div>
       <div class="wd-fields">
-        ${wdField('Exposed Functions / Endpoints','mdEndpoints',   d.endpoints,    'textarea', 'List all functions, routes, or endpoints this module exposes…')}
-        ${wdField('Input Parameters',             'mdInputParams', d.inputParams,  'textarea', 'What inputs does this module accept? Types, formats, validation…')}
-        ${wdField('Output / Return Values',        'mdOutputValues',d.outputValues, 'textarea', 'What does this module return or emit? Shape, type, format…')}
-        ${wdField('Events Emitted',               'mdEvents',      d.eventsEmitted,'textarea', 'What events does this module fire? Names, payloads, when they trigger…')}
+        ${wdField('Exposed Functions / Endpoints','mdEndpoints',   d.endpoints,    'textarea', 'List all functions, routes, or endpoints this module exposesâ¦')}
+        ${wdField('Input Parameters',             'mdInputParams', d.inputParams,  'textarea', 'What inputs does this module accept? Types, formats, validationâ¦')}
+        ${wdField('Output / Return Values',        'mdOutputValues',d.outputValues, 'textarea', 'What does this module return or emit? Shape, type, formatâ¦')}
+        ${wdField('Events Emitted',               'mdEvents',      d.eventsEmitted,'textarea', 'What events does this module fire? Names, payloads, when they triggerâ¦')}
       </div>
     </div>
 
@@ -2734,11 +2734,11 @@ function renderModuleDetail(node, tree) {
     <div class="wd-section">
       <div class="wd-section-title">Technical Details</div>
       <div class="wd-fields">
-        ${wdField('Tech Stack',              'mdTechStack',  d.techStack,  'textarea', 'Languages, frameworks, libraries used within this module…')}
-        ${wdField('Storage / Database',      'mdStorage',    d.storage,    'textarea', 'What storage does this module use? Schema, collections, tables…')}
+        ${wdField('Tech Stack',              'mdTechStack',  d.techStack,  'textarea', 'Languages, frameworks, libraries used within this moduleâ¦')}
+        ${wdField('Storage / Database',      'mdStorage',    d.storage,    'textarea', 'What storage does this module use? Schema, collections, tablesâ¦')}
         ${wdField('Caching Strategy',        'mdCaching',    d.caching,    'textarea', 'Is anything cached? What, where, and for how long?')}
-        ${wdField('Performance Notes',       'mdPerformance',d.performance,'textarea', 'Throughput, latency targets, bottlenecks, optimisations…')}
-        ${wdField('Security Considerations', 'mdSecurity',   d.security,   'textarea', 'Auth, permissions, input sanitisation, rate limiting, encryption…')}
+        ${wdField('Performance Notes',       'mdPerformance',d.performance,'textarea', 'Throughput, latency targets, bottlenecks, optimisationsâ¦')}
+        ${wdField('Security Considerations', 'mdSecurity',   d.security,   'textarea', 'Auth, permissions, input sanitisation, rate limiting, encryptionâ¦')}
       </div>
     </div>
 
@@ -2746,28 +2746,28 @@ function renderModuleDetail(node, tree) {
     <div class="wd-section">
       <div class="wd-section-title">Integration</div>
       <div class="wd-fields">
-        ${wdField('How to Integrate',     'mdIntegration', d.integration, 'textarea', 'Step-by-step on how to plug this module into a project…')}
-        ${wdField('Configuration',        'mdConfig',      d.config,      'textarea', 'Required env vars, config keys, setup options…')}
-        ${wdField('Example Usage',        'mdExample',     d.example,     'textarea', 'Show a working code example of this module in use…')}
+        ${wdField('How to Integrate',     'mdIntegration', d.integration, 'textarea', 'Step-by-step on how to plug this module into a projectâ¦')}
+        ${wdField('Configuration',        'mdConfig',      d.config,      'textarea', 'Required env vars, config keys, setup optionsâ¦')}
+        ${wdField('Example Usage',        'mdExample',     d.example,     'textarea', 'Show a working code example of this module in useâ¦')}
       </div>
     </div>
 
     <!-- Strong / Weak -->
     <div class="wd-two-col">
       <div class="wd-section">
-        <div class="wd-section-title wd-strong">▲ Strong Points</div>
+        <div class="wd-section-title wd-strong">â² Strong Points</div>
         <textarea class="wd-textarea wd-textarea-lg" id="mdStrong" placeholder="What does this module do particularly well?">${esc(d.strongPoints)}</textarea>
       </div>
       <div class="wd-section">
-        <div class="wd-section-title wd-weak">▼ Weak Points</div>
-        <textarea class="wd-textarea wd-textarea-lg" id="mdWeak" placeholder="Current limitations, known issues, areas needing work…">${esc(d.weakPoints)}</textarea>
+        <div class="wd-section-title wd-weak">â¼ Weak Points</div>
+        <textarea class="wd-textarea wd-textarea-lg" id="mdWeak" placeholder="Current limitations, known issues, areas needing workâ¦">${esc(d.weakPoints)}</textarea>
       </div>
     </div>
 
     <!-- Notes & Tags -->
     <div class="wd-section">
       <div class="wd-section-title">Notes</div>
-      <textarea class="wd-textarea wd-textarea-lg" id="mdNotes" placeholder="Anything else — open questions, future plans, references…">${esc(d.notes)}</textarea>
+      <textarea class="wd-textarea wd-textarea-lg" id="mdNotes" placeholder="Anything else â open questions, future plans, referencesâ¦">${esc(d.notes)}</textarea>
     </div>
     <div class="wd-section">
       <div class="wd-section-title">Tags</div>
@@ -2795,7 +2795,7 @@ function renderModuleDetail(node, tree) {
   ].forEach(([id, key]) => bindField(id, d, key));
 }
 
-/* ── Wire up the modules tree's onSelect ── */
+/* ââ Wire up the modules tree's onSelect ââ */
 TREES.modules.onSelect = (node, isDir, tree) => {
   if (isDir) {
     document.getElementById('mContentPanel').innerHTML =
@@ -2815,7 +2815,7 @@ TREES.modules.onSelect = (node, isDir, tree) => {
 const WZ_USERS_KEY = 'wz_users';
 const WZ_SESSION_KEY = 'wz_session';
 
-/* ── Supabase shared backend ── */
+/* ââ Supabase shared backend ââ */
 const SB_URL = 'https://stmfocpvzjvcloinoezc.supabase.co';
 const SB_KEY = 'sb_publishable_ffGcxNZprO70SQqLQuLHxw_ZuA2e2iX';
 async function sbGet(key) {
@@ -2827,7 +2827,7 @@ async function sbGet(key) {
     return data?.[0]?.value ?? null;
   } catch(e) { return null; }
 }
-/* ── Supabase Storage — for binary files (PDFs, DOCX etc.) ── */
+/* ââ Supabase Storage â for binary files (PDFs, DOCX etc.) ââ */
 const SB_STORAGE_URL = 'https://stmfocpvzjvcloinoezc.supabase.co/storage/v1/object/wzp-files';
 const SB_STORAGE_PUBLIC = 'https://stmfocpvzjvcloinoezc.supabase.co/storage/v1/object/public/wzp-files';
 
@@ -2957,7 +2957,7 @@ let currentUser = null;
 
 function isMaster() { return currentUser?.role === 'master'; }
 
-/* ── Login screen ── */
+/* ââ Login screen ââ */
 document.getElementById('phraseInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); attemptLogin(); }
 });
@@ -2969,13 +2969,13 @@ async function attemptLogin() {
   const phrase = el.value.trim().toLowerCase().replace(/\s+/g,' ');
   if (!phrase) { if (errEl) errEl.textContent = 'Please enter your phrase.'; return; }
 
-  // Always fetch latest user list from cloud before checking — ensures frozen/deleted states are current
+  // Always fetch latest user list from cloud before checking â ensures frozen/deleted states are current
   if (errEl) errEl.textContent = '';
   try { await syncUsersFromCloud(); } catch(e) {}
 
   const user = getUserByPhrase(phrase);
   if (!user) {
-    if (errEl) errEl.textContent = 'Phrase not recognised — check your words and try again.';
+    if (errEl) errEl.textContent = 'Phrase not recognised â check your words and try again.';
     return;
   }
   if (user.frozen) {
@@ -3006,7 +3006,7 @@ function onLogin() {
   refreshDash();
 }
 
-/* ── Users modal ── */
+/* ââ Users modal ââ */
 function openUsersModal() {
   renderUsersList();
   document.getElementById('generatedPhrase').style.display = 'none';
@@ -3107,7 +3107,7 @@ function copyGeneratedPhrase() {
   });
 }
 
-/* ── Auto-login from session ── */
+/* ââ Auto-login from session ââ */
 (function initSession() {
   const sid = localStorage.getItem(WZ_SESSION_KEY);
   if (sid) {
@@ -3118,7 +3118,7 @@ function copyGeneratedPhrase() {
 })();
 
 /* ================================================================
-   SYSTEMS MAP — 3D ENGINE
+   SYSTEMS MAP â 3D ENGINE
 ================================================================ */
 (function initSmapEngine() {
   const NODE_TYPES = {
@@ -3135,7 +3135,7 @@ function copyGeneratedPhrase() {
 
   let smapUid = 1;
 
-  // ── Multi-map state ──────────────────────────────────────
+  // ââ Multi-map state ââââââââââââââââââââââââââââââââââââââ
   const smapMaps = [];
   let smap = null; // always points to current map
 
@@ -3222,7 +3222,7 @@ function copyGeneratedPhrase() {
   function nodeProj(n) { return proj(n.x, layerY(n.layerId), n.z); }
   function nSize(s) { return { w: Math.max(60, 100*s), h: Math.max(26, 42*s) }; }
 
-  /* ── Incremental drag: project unit vectors to get screen→world mapping ── */
+  /* ââ Incremental drag: project unit vectors to get screenâworld mapping ââ */
   function screenToWorldDelta(node, sdx, sdy) {
     const ly = layerY(node.layerId);
     const p0 = proj(node.x,     ly, node.z);
@@ -3238,7 +3238,7 @@ function copyGeneratedPhrase() {
     };
   }
 
-  /* ── Drawing ── */
+  /* ââ Drawing ââ */
   function draw() {
     const canvas = document.getElementById('smapCanvas');
     if (!canvas) return;
@@ -3302,7 +3302,7 @@ function copyGeneratedPhrase() {
     let name = node.name;
     const maxW = w - 14*p.s;
     while (ctx.measureText(name).width > maxW && name.length > 3) name = name.slice(0,-1);
-    if (name !== node.name) name += '…';
+    if (name !== node.name) name += 'â¦';
     ctx.fillText(name, x+8*p.s, y+h-5*p.s);
   }
 
@@ -3338,7 +3338,7 @@ function copyGeneratedPhrase() {
     return null;
   }
 
-  /* ── Canvas resize ── */
+  /* ââ Canvas resize ââ */
   function resize() {
     const canvas=document.getElementById('smapCanvas');
     const wrap=document.getElementById('smapCanvasWrap');
@@ -3348,7 +3348,7 @@ function copyGeneratedPhrase() {
     draw();
   }
 
-  /* ── Interaction ── */
+  /* ââ Interaction ââ */
   let dragging=false, dragMode=null, dragNode=null, prevMouse=null;
 
   function onMouseDown(e) {
@@ -3426,7 +3426,7 @@ function copyGeneratedPhrase() {
     window.addEventListener('mouseup',   onMouseUp);
     canvas.addEventListener('wheel', onWheel, {passive:false});
 
-    // ── Touch events for mobile ──
+    // ââ Touch events for mobile ââ
     let lastTouchDist = 0;
     canvas.addEventListener('touchstart', e => {
       if (e.touches.length === 1) {
@@ -3472,7 +3472,7 @@ function copyGeneratedPhrase() {
     resize();
   }
 
-  /* ── Properties panel ── */
+  /* ââ Properties panel ââ */
   function renderSmapPanel() {
     const panel=document.getElementById('smapPropsSection');
     if (!panel) return;
@@ -3497,7 +3497,7 @@ function copyGeneratedPhrase() {
       panel.innerHTML=`<div class="smap-panel-content">
         <div class="smap-panel-title">Connection</div>
         <div class="m-field"><label class="m-label">Label</label>
-          <input class="m-input" id="spConnLabel" value="${esc(conn.label)}" placeholder="e.g. HTTP, gRPC, Event…"/></div>
+          <input class="m-input" id="spConnLabel" value="${esc(conn.label)}" placeholder="e.g. HTTP, gRPC, Eventâ¦"/></div>
         <button class="btn btn-danger" style="margin-top:auto;" onclick="smapDeleteSelected()">Delete Connection</button>
       </div>`;
       document.getElementById('spConnLabel')?.addEventListener('input',e=>{conn.label=e.target.value;draw();});
@@ -3528,7 +3528,7 @@ function copyGeneratedPhrase() {
       <div class="m-field"><label class="m-label">Description</label>
         <textarea class="m-input" id="spDesc" style="height:68px;resize:vertical;">${esc(node.info.description||'')}</textarea></div>
       <div class="m-field"><label class="m-label">Tech / Stack</label>
-        <input class="m-input" id="spTech" value="${esc(node.info.tech||'')}" placeholder="e.g. Node.js, Redis…"/></div>
+        <input class="m-input" id="spTech" value="${esc(node.info.tech||'')}" placeholder="e.g. Node.js, Redisâ¦"/></div>
       <div class="m-field"><label class="m-label">Notes</label>
         <textarea class="m-input" id="spNotes" style="height:68px;resize:vertical;">${esc(node.info.notes||'')}</textarea></div>
       <button class="btn btn-danger" onclick="smapDeleteSelected()">Delete Node</button>
@@ -3545,7 +3545,7 @@ function copyGeneratedPhrase() {
     }
   }
 
-  /* ── Global toolbar API ── */
+  /* ââ Global toolbar API ââ */
   window.smapAddNode = function() {
     const sel=document.getElementById('smapNodeTypeSel');
     const type=sel?sel.value:'service';
@@ -3584,7 +3584,7 @@ function copyGeneratedPhrase() {
     const hint = document.getElementById('smapHint');
     if (!tb) return;
     const collapsed = tb.classList.toggle('smap-tb-collapsed');
-    if (btn) btn.textContent = collapsed ? '▼' : '▲';
+    if (btn) btn.textContent = collapsed ? 'â¼' : 'â²';
     if (hint) hint.style.display = collapsed ? 'none' : '';
     // Trigger canvas resize
     setTimeout(() => { if (window._smapOnShow) window._smapOnShow(); }, 50);
@@ -3600,7 +3600,7 @@ function copyGeneratedPhrase() {
       chip.innerHTML =
         '<button class="smap-layer-chip-move" title="Move left"' + (i===0?' disabled':'') + '>&#8249;</button>' +
         '<input type="color" class="smap-layer-chip-color" value="' + layer.color + '" title="Change colour" style="background:' + layer.color + ';"/>' +
-        '<input class="smap-layer-chip-name" value="' + esc(layer.name) + '" placeholder="Layer name…"/>' +
+        '<input class="smap-layer-chip-name" value="' + esc(layer.name) + '" placeholder="Layer nameâ¦"/>' +
         '<button class="smap-layer-chip-move" title="Move right"' + (i===smap.layers.length-1?' disabled':'') + '>&#8250;</button>' +
         '<button class="smap-layer-chip-del" title="Delete layer">&times;</button>';
       const colorInp = chip.querySelector('[type=color]');
@@ -3680,7 +3680,7 @@ function copyGeneratedPhrase() {
     });
   };
 
-  /* ── Layers panel ── */
+  /* ââ Layers panel ââ */
   function renderLayersPanel() {
     const list = document.getElementById('smapLayerList');
     if (!list) return;
@@ -3694,11 +3694,11 @@ function copyGeneratedPhrase() {
       row.className = 'smap-layer-row';
       row.innerHTML = `
         <input type="color" class="smap-layer-color" value="${layer.color}" title="Pick colour"/>
-        <input class="smap-layer-name" value="${esc(layer.name)}" placeholder="Layer name…"/>
+        <input class="smap-layer-name" value="${esc(layer.name)}" placeholder="Layer nameâ¦"/>
         <div class="smap-layer-btns">
-          <button class="smap-layer-btn" title="Move up" ${i===0?'disabled':''}>↑</button>
-          <button class="smap-layer-btn" title="Move down" ${i===smap.layers.length-1?'disabled':''}>↓</button>
-          <button class="smap-layer-btn del" title="Delete layer">×</button>
+          <button class="smap-layer-btn" title="Move up" ${i===0?'disabled':''}>â</button>
+          <button class="smap-layer-btn" title="Move down" ${i===smap.layers.length-1?'disabled':''}>â</button>
+          <button class="smap-layer-btn del" title="Delete layer">Ã</button>
         </div>`;
       const [colorInp, nameInp] = row.querySelectorAll('input');
       const [upBtn, downBtn, delBtn] = row.querySelectorAll('button');
@@ -3721,7 +3721,7 @@ function copyGeneratedPhrase() {
     });
   }
 
-  /* ── Confirm helper — shows centred modal, calls cb on confirm ── */
+  /* ââ Confirm helper â shows centred modal, calls cb on confirm ââ */
   function smapConfirm(msg, cb) {
     const ov  = document.getElementById('confirmOv');
     const msgEl = document.getElementById('confirmMsg');
@@ -3736,7 +3736,7 @@ function copyGeneratedPhrase() {
     ov.onclick = e => { if (e.target === ov) close(); };
   }
 
-  /* ── Expose show hook called by gotoView ── */
+  /* ââ Expose show hook called by gotoView ââ */
   window._smapOnShow = function() { setupEvents(); updateMapSel(); renderLayersPanel(); resize(); };
 
   window._smapGetState = function() {
@@ -3755,11 +3755,11 @@ function copyGeneratedPhrase() {
 })();
 
 /* ================================================================
-   PERSISTENCE — shared state via Supabase, cached in localStorage
+   PERSISTENCE â shared state via Supabase, cached in localStorage
 ================================================================ */
 const WZ_DATA_KEY = 'wz_appdata_v1';
 
-/* ── Archive & Logs stores ── */
+/* ââ Archive & Logs stores ââ */
 let WZ_ARCHIVE   = [];   // [{archId, node, treeName, treeLabel, deletedBy, deletedAt}]
 let WZ_CHANGELOG = [];   // [{id, type, action, itemName, treeName, user, ts}]
 
@@ -3775,7 +3775,7 @@ function logChange(type, action, itemName, treeName) {
   };
   WZ_CHANGELOG.unshift(entry);
   if (WZ_CHANGELOG.length > 200) WZ_CHANGELOG.length = 200; // cap at 200
-  saveAll(); // immediate — don't debounce changelog/archive writes
+  saveAll(); // immediate â don't debounce changelog/archive writes
   if (activeFId === 'changelog') renderChangelog();
 }
 
@@ -3841,25 +3841,25 @@ function renderArchive() {
   list.innerHTML = items.map(a => {
     const when = new Date(a.deletedAt).toLocaleString();
     const ico  = a.node.type === 'folder' ? folderIco : fileIco;
-    const childCount = a.node.type === 'folder' ? ` · ${countNodes([a.node]).files + countNodes([a.node]).folders} items inside` : '';
-    const softTag = a.softDeleted ? `<span class="arch-pending-tag">⚠ Deletion requested by ${a.softDeletedBy}</span>` : '';
+    const childCount = a.node.type === 'folder' ? ` Â· ${countNodes([a.node]).files + countNodes([a.node]).folders} items inside` : '';
+    const softTag = a.softDeleted ? `<span class="arch-pending-tag">â  Deletion requested by ${a.softDeletedBy}</span>` : '';
     // Action buttons differ by role and soft-delete state
     let actions = '';
     if (master) {
       actions = `<button class="arch-restore-btn" onclick="restoreFromArchive(${a.archId})">Restore</button>
-        <button class="arch-del-btn" onclick="if(confirm('Permanently delete? Cannot be undone.')) permDeleteFromArchive(${a.archId})" title="Permanently delete">✕</button>`;
+        <button class="arch-del-btn" onclick="if(confirm('Permanently delete? Cannot be undone.')) permDeleteFromArchive(${a.archId})" title="Permanently delete">â</button>`;
     } else {
       // Non-master: can only request deletion (soft-delete) if not already requested
       actions = a.softDeleted
         ? `<span style="font-size:11px;color:var(--txt3);padding:0 8px;">Pending deletion</span>`
         : `<button class="arch-restore-btn" onclick="restoreFromArchive(${a.archId})">Restore</button>
-           <button class="arch-del-btn" onclick="if(confirm('Request permanent deletion? Fathom will need to approve.')) softDeleteFromArchive(${a.archId})" title="Request deletion">✕</button>`;
+           <button class="arch-del-btn" onclick="if(confirm('Request permanent deletion? Fathom will need to approve.')) softDeleteFromArchive(${a.archId})" title="Request deletion">â</button>`;
     }
     return `<div class="arch-item${a.softDeleted ? ' soft-deleted' : ''}">
       <div class="arch-item-ico">${ico}</div>
       <div class="arch-item-info">
         <div class="arch-item-name">${a.node.name}${a.node.ext ? '.' + a.node.ext : ''}${softTag}</div>
-        <div class="arch-item-meta">${a.treeLabel}${childCount} · Deleted by ${a.deletedBy} · ${when}</div>
+        <div class="arch-item-meta">${a.treeLabel}${childCount} Â· Deleted by ${a.deletedBy} Â· ${when}</div>
       </div>
       ${actions}
     </div>`;
@@ -3881,7 +3881,7 @@ function renderChangelog() {
     const when = new Date(e.ts).toLocaleString();
     const context = e.treeName ? ` in ${e.treeName}` : '';
     const itemPart = e.itemName ? ` <em>${e.itemName}</em>` : '';
-    const delBtn = master ? `<button class="clog-del" onclick="deleteLogEntry(${e.id})" title="Delete this entry">✕</button>` : '';
+    const delBtn = master ? `<button class="clog-del" onclick="deleteLogEntry(${e.id})" title="Delete this entry">â</button>` : '';
     return `<div class="clog-item">
       <div class="clog-dot ${e.type}"></div>
       <div style="flex:1">
@@ -3932,7 +3932,7 @@ function _fixDuplicateIds() {
   function fixNodes(nodes) {
     for (const n of nodes) {
       if (seen.has(n.id)) {
-        // Duplicate — give it a fresh unique ID
+        // Duplicate â give it a fresh unique ID
         n.id = globalUid++;
         fixed = true;
       } else {
@@ -3948,7 +3948,7 @@ function _fixDuplicateIds() {
   });
 
   if (fixed) {
-    console.log('[WZP] Fixed duplicate node IDs — saving corrected data');
+    console.log('[WZP] Fixed duplicate node IDs â saving corrected data');
     setTimeout(saveAll, 500); // push corrected data back to Supabase
   }
 }
@@ -4024,7 +4024,7 @@ setInterval(syncUsersFromCloud, 30000);
 
 // Patch all mutation points to trigger auto-save
 (function patchSave() {
-  // Tree mutations — wrap mConfirm click and toolbar buttons
+  // Tree mutations â wrap mConfirm click and toolbar buttons
   const origConfirm = document.getElementById('mConfirm');
   if (origConfirm) {
     origConfirm.addEventListener('click', () => setTimeout(window.wz_save, 50));
